@@ -35,6 +35,28 @@ body {
     margin: 0 auto;
 }
 
+.preview-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.code-panel, .preview-panel {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+    .preview-container {
+        flex-direction: column;
+    }
+    .code-panel, .preview-panel {
+        height: 50vh;
+    }
+}
+
 textarea {
     width: 100%;
     height: 200px;
