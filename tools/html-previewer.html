@@ -1,27 +1,115 @@
-<html>
-    <title>HTML 代码在线预览工具</title>
-    <link rel="shortcut icon" href="https://avatars2.githubusercontent.com/u/62926183?s=460&u=e560f6297c81982fc2b554f3c997ec878421fa80&v=4" type="image/x-icon">
-    <h1 style="font-family: Arial, Helvetica, sans-serif;">HTML Editor and Previewer</h1>
-    <h3 style="font-family: Arial, Helvetica, sans-serif;">Created by <a href="https://vismodo.github.io/Website/Homepage/index.html">Vismaya Atreya</a></h3>
-    <h3 style="font-family: Arial, Helvetica, sans-serif;">GitHub Repository: <a href="https://github.com/vismodo/htmlpreviewer/">Click Here</a></h3>
-    <h3 style="font-family: Arial, Helvetica, sans-serif;">Text Editor</h3>
-    <textarea style="border: 3px solid red; border-radius: 5px; width: 600; height: 400" name="name" id="field">Your Code Goes Here</textarea><br><br><br>
-    <script>var count = 0;</script>
-    <script>
-        function preview(){
-            count = count+1
-            var html_code = document.getElementById("field").value;
-            var editor = '<title>HTML 代码在线预览工具</title><link rel="shortcut icon" href="https://avatars2.githubusercontent.com/u/62926183?s=460&u=e560f6297c81982fc2b554f3c997ec878421fa80&v=4" type="image/x-icon"><h1 style="font-family: Arial, Helvetica, sans-serif;">HTML Editor and Previewer</h1><h3 style="font-family: Arial, Helvetica, sans-serif;">Created by <a href="https://vismodo.github.io/Website/Homepage/index.html">Vismaya Atreya</a></h3><h3 style="font-family: Arial, Helvetica, sans-serif;">GitHub Repository: <a href="https://github.com/vismodo/htmlpreviewer/">Click Here</a></h3><h3 style="font-family: Arial, Helvetica, sans-serif;">Text Editor</h3><textarea style="border: 3px solid red; border-radius: 5px; width: 600; height: 400" name="name" id="field" value="<!DOCTYPE html>">'+html_code+'</textarea><br><br><br><input style="border: 2px solid blue; border-radius: 5px; width: 200; height: 30" type="button" value="Preview Webpage" onclick="preview()"><hr style="height:2px;border-width:0;color:gray;background-color:gray">'
-            var resizable = '<div id="unnec2" style="resize: both;overflow: scroll;border: 1px solid black; width: 600"; height: 400;>'+html_code+'</div>'
-            if (count < 2){
-                var resizable = editor+'<h3 style="font-family: Arial, Helvetica, sans-serif;">Preview</h3><br><div id="unnec2" style="resize: both;overflow: scroll;border: 1px solid black; width: 600"; height: 400;>'+html_code+'</div>'
-            } else{
-                var var2 = document.getElementById("unnec2")
-                var2.remove()
-            }
-            document.write(resizable)
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML实时预览工具</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* 页面特有样式 */
+        .preview-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
         }
+        .code-panel, .preview-panel {
+            flex: 1;
+            height: 70vh;
+        }
+        #html-code {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            border: 2px solid #0366d6;
+            border-radius: 4px;
+        }
+        #preview-frame {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #28a745;
+            border-radius: 4px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../index.html" class="home-link">← 返回首页</a>
+        <h1>HTML实时预览工具</h1>
+    </header>
+
+    <main>
+        <div class="tool-container">
+            <div class="preview-container">
+                <div class="code-panel">
+                    <textarea 
+                        id="html-code"
+                        placeholder="输入HTML代码..."
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+                <div class="preview-panel">
+                    <iframe id="preview-frame"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 实时预览功能
+        const codeInput = document.getElementById('html-code');
+        const previewFrame = document.getElementById('preview-frame');
+        
+        function updatePreview() {
+            const code = codeInput.value;
+            const doc = previewFrame.contentWindow.document;
+            
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { padding: 20px }
+                        ${code.includes('<style>') ? '' : '/* 自动添加的基础样式 */'}
+                    </style>
+                </head>
+                <body>
+                    ${code}
+                </body>
+                </html>
+            `);
+            doc.close();
+        }
+
+        // 添加事件监听
+        codeInput.addEventListener('input', updatePreview);
+        
+        // 初始化示例代码
+        codeInput.value = `<!DOCTYPE html>
+<html>
+<head>
+    <title>示例</title>
+    <style>
+        body { padding: 20px; }
+        .box {
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>欢迎使用</h1>
+        <p>输入HTML代码实时预览效果</p>
+        <button onclick="alert('预览功能正常!')">测试按钮</button>
+    </div>
+</body>
+</html>`;
+        
+        // 初始渲染
+        updatePreview();
     </script>
-    <input style="border: 2px solid blue; border-radius: 5px; width: 200; height: 30" type="button" value="Preview Webpage" onclick="preview()">
-    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+</body>
 </html>
