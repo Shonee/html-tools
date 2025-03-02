@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI大模型聚合平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            background: #f0f2f5;
+        }
+
+        /* 左侧菜单栏 */
+        #sidebar {
+            width: 280px;
+            background: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s;
+            position: relative;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        #sidebar.collapsed {
+            width: 60px;
+        }
+
+        /* 折叠按钮 */
+        .collapse-btn {
+            position: absolute;
+            /* right: -40px; */
+            right: 10px;
+            top: 5px;
+            width: 30px;
+            height: 20px;
+            background: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #666;
+        }
+
+        .menu-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            margin: 4px 12px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: #f5f5f5;
+        }
+
+        .menu-item.active {
+            background: #e6f4ff;
+            color: #1677ff;
+        }
+
+        .menu-item-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-type-tag {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+
+        .menu-actions {
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .menu-item:hover .menu-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            padding: 4px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            background: transparent;
+        }
+
+        .action-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* 添加按钮 */
+        .add-btn-container {
+            padding: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            width: 480px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: #1677ff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(22,119,255,0.1);
+        }
+
+        .form-radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .form-radio {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1677ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 16px;
+        }
+
+        /* 右侧内容区 */
+        #main-content {
+            flex: 1;
+            position: relative;
+            transition: 0.3s;
+        }
+         /* iframe容器 */
+        #model-frame {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧菜单 -->
+    <div id="sidebar">
+        <button class="collapse-btn" onclick="toggleMenu()">☰</button>
+        <div class="menu-container" id="menuContainer"></div>
+        <div class="add-btn-container">
+            <button class="submit-btn" onclick="showModal('add')">+ 添加模型</button>
+        </div>
+    </div>
+
+    <!-- 右侧内容 -->
+    <div id="main-content">
+        <iframe id="model-frame"></iframe>
+    </div>
+
+    <!-- 模型操作模态框 -->
+    <div id="modelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">添加新模型</h3>
+                <span class="close-btn" onclick="hideModal()">&times;</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">模型名称</label>
+                <input type="text" id="modelName" class="form-input" placeholder="请输入模型名称">
+            </div>
+            <div class="form-group">
+                <label class="form-label">访问地址</label>
+                <input type="url" id="modelUrl" class="form-input" placeholder="https://example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">打开方式</label>
+                <div class="form-radio-group">
+                    <label class="form-radio">
+                        <input type="radio" name="openType" value="iframe" checked>
+                        iframe嵌入
+                    </label>
+                    <label class="form-radio">
+                        <input type="radio" name="openType" value="newtab">
+                        新标签页打开
+                    </label>
+                </div>
+            </div>
+            <button class="submit-btn" onclick="handleModelAction()">确认保存</button>
+        </div>
+    </div>
+
+    <script>
+        let models = [];
+        let currentModelIndex = 0;
+        let isCollapsed = false;
+        let editIndex = -1;
+
+        // 初始化加载
+        document.addEventListener('DOMContentLoaded', () => {
+            loadModels();
+            if(models.length > 0) showModel(0);
+            renderMenu();
+        });
+
+        // 显示模态框
+        function showModal(action, index = -1) {
+            editIndex = index;
+            const modal = document.getElementById('modelModal');
+            const title = document.querySelector('.modal-title');
+            const nameInput = document.getElementById('modelName');
+            const urlInput = document.getElementById('modelUrl');
+            const radioIframe = document.querySelector('input[value="iframe"]');
+            const radioNewtab = document.querySelector('input[value="newtab"]');
+
+            if(action === 'edit' && index >= 0) {
+                title.textContent = '编辑模型配置';
+                const model = models[index];
+                nameInput.value = model.name;
+                urlInput.value = model.url;
+                if(model.openType === 'newtab') {
+                    radioNewtab.checked = true;
+                } else {
+                    radioIframe.checked = true;
+                }
+            } else {
+                title.textContent = '添加新模型';
+                nameInput.value = '';
+                urlInput.value = '';
+                radioIframe.checked = true;
+            }
+            
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+        }
+
+        // 处理模型操作
+        function handleModelAction() {
+            const name = document.getElementById('modelName').value;
+            const url = document.getElementById('modelUrl').value;
+            const openType = document.querySelector('input[name="openType"]:checked').value;
+
+            if (!name || !url) {
+                alert('请填写完整信息');
+                return;
+            }
+
+            const modelData = { name, url, openType };
+
+            if(editIndex >= 0) {
+                models[editIndex] = modelData;
+            } else {
+                models.push(modelData);
+                currentModelIndex = models.length - 1;
+            }
+            
+            saveModels();
+            renderMenu();
+            showModel(currentModelIndex);
+            hideModal();
+        }
+
+        // 删除模型
+        function removeModel(index) {
+            if(confirm('确定要删除这个模型吗？')) {
+                models.splice(index, 1);
+                if(currentModelIndex >= models.length) currentModelIndex = 0;
+                saveModels();
+                renderMenu();
+                if(models.length > 0) showModel(currentModelIndex);
+            }
+        }
+
+        // 切换菜单折叠
+        function toggleMenu() {
+            isCollapsed = !isCollapsed;
+            const sidebar = document.getElementById('sidebar');
+            const collapseBtn = document.querySelector('.collapse-btn');
+            sidebar.classList.toggle('collapsed', isCollapsed);
+            collapseBtn.textContent = isCollapsed ? '»' : '☰';
+        }
+
+        // 显示指定模型
+        function showModel(index) {
+            if(index >= 0 && index < models.length) {
+                currentModelIndex = index;
+                const model = models[index];
+                const frame = document.getElementById('model-frame');
+                
+                if(model.openType === 'newtab') {
+                    window.open(model.url, '_blank');
+                } else {
+                    frame.src = model.url;
+                }
+                renderMenu();
+            }
+        }
+
+        // 渲染菜单
+        function renderMenu() {
+            const container = document.getElementById('menuContainer');
+            container.innerHTML = models.map((model, index) => `
+                <div class="menu-item ${index === currentModelIndex ? 'active' : ''}" 
+                     onclick="showModel(${index})">
+                    <div class="menu-item-content">
+                        <span>${model.name}</span>
+                        <span class="menu-type-tag">${model.openType === 'newtab' ? '跳转' : '嵌入'}</span>
+                    </div>
+                    <div class="menu-actions">
+                        <button class="action-btn" 
+                                onclick="event.stopPropagation();showModal('edit', ${index})">
+                            ✏️
+                        </button>
+                        <button class="action-btn" 
+                                onclick="event.stopPropagation();removeModel(${index})">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 本地存储操作
+        function saveModels() {
+            localStorage.setItem('aiModels', JSON.stringify(models));
+        }
+
+        function loadModels() {
+            const saved = localStorage.getItem('aiModels');
+            models = saved ? JSON.parse(saved) : [
+                { 
+                    name: '文心一言', 
+                    url: 'https://yiyan.baidu.com/',
+                    openType: 'iframe'
+                },
+                { 
+                    name: '通义千问', 
+                    url: 'https://tongyi.aliyun.com/qianwen/',
+                    openType: 'iframe'
+                }
+            ];
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('modelModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+            editIndex = -1;
+        }
+    </script>
+</body>
+</html>
