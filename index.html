@@ -11,29 +11,11 @@
     </header>
     
     <main>
-        <section class="tool-grid">
+        <section id="tool-container" class="tool-grid">
             <div class="tool-card">
                 <h2>JSON 格式化</h2>
                 <p>在线JSON数据格式化工具</p>
                 <a href="tools/json-formatter.html">立即使用</a>
-            </div>
-            
-            <div class="tool-card">
-                <h2>Base64 编解码</h2>
-                <p>Base64编码/解码工具</p>
-                <a href="tools/base64.html">立即使用</a>
-            </div>
-            
-            <div class="tool-card">
-                <h2>MD5 生成器</h2>
-                <p>字符串MD5加密工具</p>
-                <a href="tools/md5-generator.html">立即使用</a>
-            </div>
-
-            <div class="tool-card">
-                <h2>HTML 预览</h2>
-                <p>在线编写并预览HTML代码</p>
-                <a href="tools/html-previewer.html">立即使用</a>
             </div>
         </section>
     </main>
@@ -41,5 +23,14 @@
     <footer>
         <p>© 2025 工具导航站</p>
     </footer>
+
+    <!-- 加载脚本 -->
+    <script src="js/index.js"></script>
+    <script>
+        // DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTools('tools-config.json');
+        });
+    </script>
 </body>
 </html>
