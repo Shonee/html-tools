@@ -1,0 +1,22 @@
+{
+    "tools": [
+        {
+            "title": "JSON 格式化",
+            "description": "在线JSON数据格式化工具",
+            "url": "tools/json-formatter.html",
+            "icon": "📝"
+        },
+        {
+            "title": "字符串编解码",
+            "description": "字符串编码/解码工具，url、base64、md5",
+            "url": "tools/base64.html",
+            "icon": "🔐"
+        },
+        {
+            "title": "HTML 实时预览",
+            "description": "在线编写并预览HTML代码",
+            "url": "tools/html-preview.html",
+            "icon": "🖥️"
+        }
+    ]
+}
