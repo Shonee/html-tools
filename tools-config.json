@@ -15,7 +15,7 @@
         {
             "title": "HTML 实时预览",
             "description": "在线编写并预览HTML代码",
-            "url": "tools/html-preview.html",
+            "url": "tools/html-previewer.html",
             "icon": "🖥️"
         }
     ]
