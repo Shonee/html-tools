@@ -32,7 +32,7 @@
         {
             "title": "AI模型导航",
             "description": "主流大模型聚合中心",
-            "url": "html_ai_group.html",
+            "url": "tools/html_ai_group.html",
             "icon": "🤖"
         }
     ]
