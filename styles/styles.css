@@ -79,3 +79,24 @@ pre {
     border-radius: 4px;
     white-space: pre-wrap;
 }
+
+/* 卡片图标样式 */
+.tool-icon {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+/* 错误提示样式 */
+.error-alert {
+    text-align: center;
+    padding: 30px;
+    background: #ffe3e3;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    color: #c92a2a;
+    grid-column: 1 / -1;
+}
+
+.error-alert h3 {
+    margin: 0 0 10px 0;
+}
