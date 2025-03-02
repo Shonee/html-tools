@@ -17,6 +17,12 @@
             "description": "在线编写并预览HTML代码",
             "url": "tools/html-previewer.html",
             "icon": "🖥️"
+        },
+        {
+            "title": "HTML 拆分合并",
+            "description": "在线拆分合并 HTML 源代码文件，html、css、js",
+            "url": "tools/html-split-merge.html",
+            "icon": "📝"
         }
     ]
 }
