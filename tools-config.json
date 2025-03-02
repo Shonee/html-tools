@@ -28,6 +28,12 @@
                 "多文件合并",
                 "自动闭合标签检测"
             ]
+        },
+        {
+            "title": "AI模型导航",
+            "description": "主流大模型聚合中心",
+            "url": "html_ai_group.html",
+            "icon": "🤖"
         }
     ]
 }
