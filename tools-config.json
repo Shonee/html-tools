@@ -13,6 +13,12 @@
             "icon": "📝"
         },
         {
+            "title": "字符串工具",
+            "description": "字符串工具",
+            "url": "tools/string-tool.html",
+            "icon": "🔐"
+        },
+        {
             "title": "字符串编解码",
             "description": "字符串编码/解码工具，url、base64、md5",
             "url": "tools/base64.html",
