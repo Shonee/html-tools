@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>字符串工具</title>
+  <!-- 引入 Font Awesome 图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4a6cf7;
+      --primary-hover: #3a5bd9;
+      --secondary-color: #f5f5f5;
+      --text-color: #333;
+      --light-text: #666;
+      --error-color: #e53935;
+      --success-color: #43a047;
+      --border-color: #ddd;
+      --bg-color: #fff;
+      --dark-bg: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f9fafb;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--light-text);
+      font-size: 1rem;
+    }
+
+    .string-tools {
+      background-color: var(--bg-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .tool-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+      gap: 0.5rem;
+    }
+
+    .tab-button {
+      padding: 0.75rem 1.25rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #666;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-button:hover {
+      color: var(--primary-color);
+    }
+
+    .tab-button.active {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      font-weight: 600;
+    }
+
+    .tool-container {
+      display: none;
+    }
+
+    .tool-container.active {
+      display: block;
+    }
+
+    .tool-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .option-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .option-group label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .option-group input {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: 120px;
+    }
+
+    .text-areas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .input-area, .output-area {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .text-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .text-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .text-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .text-stats span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 300px;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+      font-family: monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .text-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
+      gap: 0.5rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .primary-button {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .primary-button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .secondary-button {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+    }
+
+    .secondary-button:hover {
+      background-color: #e8e8e8;
+    }
+
+    .status-bar {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .status-bar.error {
+      background-color: rgba(229, 57, 53, 0.1);
+      color: var(--error-color);
+      display: block;
+    }
+
+    .status-bar.success {
+      background-color: rgba(67, 160, 71, 0.1);
+      color: var(--success-color);
+      display: block;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .feature-card {
+      background-color: var(--bg-color);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .feature-desc {
+      color: var(--light-text);
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--light-text);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .text-areas {
+        grid-template-columns: 1fr;
+      }
+      
+      .tool-options {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .tool-tabs {
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+    }
+
+    /* 暗色模式支持 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text-color: #e0e0e0;
+        --light-text: #aaa;
+        --border-color: #444;
+        --bg-color: #1e293b;
+        --secondary-color: #334155;
+      }
+      
+      body {
+        background-color: #0f172a;
+      }
+      
+      textarea {
+        background-color: #1e293b;
+        color: #e0e0e0;
+        border-color: #444;
+      }
+      
+      .secondary-button {
+        background-color: #334155;
+        color: #e0e0e0;
+      }
+      
+      .secondary-button:hover {
+        background-color: #475569;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>字符串工具</h1>
+      <p class="subtitle">高效处理文本的多功能工具</p>
+    </header>
+
+    <div class="string-tools">
+      <div class="tool-tabs">
+        <button class="tab-button active" data-tool="add-prefix-suffix">
+          <i class="fas fa-quote-right"></i> 添加前缀后缀
+        </button>
+        <button class="tab-button" data-tool="case-converter">
+          <i class="fas fa-font"></i> 大小写转换
+        </button>
+        <button class="tab-button" data-tool="text-counter">
+          <i class="fas fa-calculator"></i> 文本统计
+        </button>
+        <button class="tab-button" data-tool="find-replace">
+          <i class="fas fa-search"></i> 查找替换
+        </button>
+        <button class="tab-button" data-tool="text-formatter">
+          <i class="fas fa-align-left"></i> 文本格式化
+        </button>
+      </div>
+
+      <!-- 添加前缀后缀工具 -->
+      <div class="tool-container active" id="add-prefix-suffix">
+        <div class="tool-options">
+          <div class="option-group">
+            <label for="prefix-input">前缀:</label>
+            <input type="text" id="prefix-input" value='"' placeholder="输入前缀">
+          </div>
+          <div class="option-group">
+            <label for="suffix-input">后缀:</label>
+            <input type="text" id="suffix-input" value='"' placeholder="输入后缀">
+          </div>
+          <div class="option-group">
+            <label for="separator-input">分隔符:</label>
+            <input type="text" id="separator-input" value="," placeholder="输入分隔符">
+          </div>
+          <div class="option-group">
+            <label for="skip-empty-lines">
+              <input type="checkbox" id="skip-empty-lines" checked>
+              跳过空行
+            </label>
+          </div>
+        </div>
+
+        <div class="text-areas">
+          <div class="input-area">
+            <div class="text-header">
+              <h3>输入文本</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="input-text" placeholder="请输入要处理的文本，每行一个项目..."></textarea>
+            <div class="text-actions">
+              <button id="clear-btn" class="secondary-button">
+                <i class="fas fa-trash"></i> 清空
+              </button>
+              <button id="example-btn" class="secondary-button">
+                <i class="fas fa-lightbulb"></i> 示例
+              </button>
+            </div>
+          </div>
+
+          <div class="output-area">
+            <div class="text-header">
+              <h3>处理结果</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="output-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="output-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="output-text" readonly placeholder="处理后的结果将显示在这里..."></textarea>
+            <div class="text-actions">
+              <button id="copy-btn" class="secondary-button">
+                <i class="fas fa-copy"></i> 复制
+              </button>
+              <button id="process-btn" class="primary-button">
+                <i class="fas fa-magic"></i> 处理
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="status-bar" class="status-bar"></div>
+      </div>
+
+      <!-- 大小写转换工具 -->
+      <div class="tool-container" id="case-converter">
+        <div class="tool-options">
+          <div class="option-group">
+            <button class="secondary-button" data-case="upper">
+              <i class="fas fa-arrow-up"></i> 转大写
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-case="lower">
+              <i class="fas fa-arrow-down"></i> 转小写
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-case="capitalize">
+              <i class="fas fa-font"></i> 首字母大写
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-case="camel">
+              <i class="fas fa-code"></i> 驼峰命名
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-case="snake">
+              <i class="fas fa-code"></i> 下划线命名
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-case="kebab">
+              <i class="fas fa-code"></i> 短横线命名
+            </button>
+          </div>
+        </div>
+
+        <div class="text-areas">
+          <div class="input-area">
+            <div class="text-header">
+              <h3>输入文本</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="cc-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="cc-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="cc-input-text" placeholder="请输入要转换大小写的文本..."></textarea>
+            <div class="text-actions">
+              <button id="cc-clear-btn" class="secondary-button">
+                <i class="fas fa-trash"></i> 清空
+              </button>
+              <button id="cc-example-btn" class="secondary-button">
+                <i class="fas fa-lightbulb"></i> 示例
+              </button>
+            </div>
+          </div>
+
+          <div class="output-area">
+            <div class="text-header">
+              <h3>处理结果</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="cc-output-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="cc-output-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="cc-output-text" readonly placeholder="转换后的结果将显示在这里..."></textarea>
+            <div class="text-actions">
+              <button id="cc-copy-btn" class="secondary-button">
+                <i class="fas fa-copy"></i> 复制
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="cc-status-bar" class="status-bar"></div>
+      </div>
+
+      <!-- 文本统计工具 -->
+      <div class="tool-container" id="text-counter">
+        <div class="tool-options">
+          <div class="option-group">
+            <label for="tc-count-spaces">
+              <input type="checkbox" id="tc-count-spaces" checked>
+              包含空格
+            </label>
+          </div>
+          <div class="option-group">
+            <label for="tc-count-punctuation">
+              <input type="checkbox" id="tc-count-punctuation" checked>
+              包含标点符号
+            </label>
+          </div>
+        </div>
+
+        <div class="text-areas">
+          <div class="input-area">
+            <div class="text-header">
+              <h3>输入文本</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="tc-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="tc-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="tc-input-text" placeholder="请输入要统计的文本..."></textarea>
+            <div class="text-actions">
+              <button id="tc-clear-btn" class="secondary-button">
+                <i class="fas fa-trash"></i> 清空
+              </button>
+              <button id="tc-example-btn" class="secondary-button">
+                <i class="fas fa-lightbulb"></i> 示例
+              </button>
+            </div>
+          </div>
+
+          <div class="output-area">
+            <div class="text-header">
+              <h3>统计结果</h3>
+            </div>
+            <div id="tc-output" style="height: 300px; overflow: auto; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 0.9rem; line-height: 1.5;">
+              <p>请输入文本以查看统计信息...</p>
+            </div>
+            <div class="text-actions">
+              <button id="tc-copy-btn" class="secondary-button">
+                <i class="fas fa-copy"></i> 复制统计
+              </button>
+              <button id="tc-count-btn" class="primary-button">
+                <i class="fas fa-calculator"></i> 统计
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tc-status-bar" class="status-bar"></div>
+      </div>
+
+      <!-- 查找替换工具 -->
+      <div class="tool-container" id="find-replace">
+        <div class="tool-options">
+          <div class="option-group">
+            <label for="fr-find-text">查找:</label>
+            <input type="text" id="fr-find-text" placeholder="输入要查找的文本">
+          </div>
+          <div class="option-group">
+            <label for="fr-replace-text">替换为:</label>
+            <input type="text" id="fr-replace-text" placeholder="输入替换的文本">
+          </div>
+          <div class="option-group">
+            <label for="fr-case-sensitive">
+              <input type="checkbox" id="fr-case-sensitive">
+              区分大小写
+            </label>
+          </div>
+          <div class="option-group">
+            <label for="fr-whole-word">
+              <input type="checkbox" id="fr-whole-word">
+              全词匹配
+            </label>
+          </div>
+          <div class="option-group">
+            <label for="fr-use-regex">
+              <input type="checkbox" id="fr-use-regex">
+              使用正则表达式
+            </label>
+          </div>
+        </div>
+
+        <div class="text-areas">
+          <div class="input-area">
+            <div class="text-header">
+              <h3>输入文本</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="fr-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="fr-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="fr-input-text" placeholder="请输入要查找替换的文本..."></textarea>
+            <div class="text-actions">
+              <button id="fr-clear-btn" class="secondary-button">
+                <i class="fas fa-trash"></i> 清空
+              </button>
+              <button id="fr-example-btn" class="secondary-button">
+                <i class="fas fa-lightbulb"></i> 示例
+              </button>
+            </div>
+          </div>
+
+          <div class="output-area">
+            <div class="text-header">
+              <h3>处理结果</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="fr-output-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="fr-output-char-count">0</span> 字符</span>
+                <span><i class="fas fa-exchange-alt"></i> <span id="fr-replace-count">0</span> 处替换</span>
+              </div>
+            </div>
+            <textarea id="fr-output-text" readonly placeholder="替换后的结果将显示在这里..."></textarea>
+            <div class="text-actions">
+              <button id="fr-copy-btn" class="secondary-button">
+                <i class="fas fa-copy"></i> 复制
+              </button>
+              <button id="fr-replace-btn" class="primary-button">
+                <i class="fas fa-exchange-alt"></i> 替换
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="fr-status-bar" class="status-bar"></div>
+      </div>
+
+      <!-- 文本格式化工具 -->
+      <div class="tool-container" id="text-formatter">
+        <div class="tool-options">
+          <div class="option-group">
+            <button class="secondary-button" data-format="trim-lines">
+              <i class="fas fa-scissors"></i> 去除行首尾空格
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-format="remove-empty">
+              <i class="fas fa-trash-alt"></i> 删除空行
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-format="normalize-spaces">
+              <i class="fas fa-compress-alt"></i> 合并连续空格
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-format="sort-lines">
+              <i class="fas fa-sort-alpha-down"></i> 行排序
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-format="reverse-lines">
+              <i class="fas fa-sort-alpha-up"></i> 行反序
+            </button>
+          </div>
+          <div class="option-group">
+            <button class="secondary-button" data-format="shuffle-lines">
+              <i class="fas fa-random"></i> 行随机排序
+            </button>
+          </div>
+        </div>
+
+        <div class="text-areas">
+          <div class="input-area">
+            <div class="text-header">
+              <h3>输入文本</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="tf-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="tf-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="tf-input-text" placeholder="请输入要格式化的文本..."></textarea>
+            <div class="text-actions">
+              <button id="tf-clear-btn" class="secondary-button">
+                <i class="fas fa-trash"></i> 清空
+              </button>
+              <button id="tf-example-btn" class="secondary-button">
+                <i class="fas fa-lightbulb"></i> 示例
+              </button>
+            </div>
+          </div>
+
+          <div class="output-area">
+            <div class="text-header">
+              <h3>处理结果</h3>
+              <div class="text-stats">
+                <span><i class="fas fa-align-left"></i> <span id="tf-output-line-count">0</span> 行</span>
+                <span><i class="fas fa-font"></i> <span id="tf-output-char-count">0</span> 字符</span>
+              </div>
+            </div>
+            <textarea id="tf-output-text" readonly placeholder="格式化后的结果将显示在这里..."></textarea>
+            <div class="text-actions">
+              <button id="tf-copy-btn" class="secondary-button">
+                <i class="fas fa-copy"></i> 复制
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tf-status-bar" class="status-bar"></div>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-quote-right"></i>
+        </div>
+        <h3 class="feature-title">添加前缀后缀</h3>
+        <p class="feature-desc">为每行文本添加自定义前缀和后缀，支持设置分隔符，方便生成代码、列表等格式。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-font"></i>
+        </div>
+        <h3 class="feature-title">大小写转换</h3>
+        <p class="feature-desc">支持多种大小写转换，包括全大写、全小写、首字母大写、驼峰命名、下划线命名等。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-calculator"></i>
+        </div>
+        <h3 class="feature-title">文本统计</h3>
+        <p class="feature-desc">统计字符数、单词数、行数，以及详细的字符分布，帮助分析文本结构和内容。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-search"></i>
+        </div>
+        <h3 class="feature-title">查找替换</h3>
+        <p class="feature-desc">强大的查找替换功能，支持正则表达式、大小写敏感和全词匹配选项，快速修改文本内容。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-align-left"></i>
+        </div>
+        <h3 class="feature-title">文本格式化</h3>
+        <p class="feature-desc">多种文本格式化选项，包括去除空格、删除空行、行排序和行反序等，使文本更加整洁有序。</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; <span id="current-year"></span> 字符串工具 | 所有权利保留</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置当前年份
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+      
+      // 标签切换
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const toolContainers = document.querySelectorAll('.tool-container');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const toolId = this.getAttribute('data-tool');
+          
+          // 更新活动标签
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          
+          // 显示对应工具
+          toolContainers.forEach(container => {
+            container.classList.remove('active');
+            if (container.id === toolId) {
+              container.classList.add('active');
+            }
+          });
+        });
+      });
+      
+      // =============== 添加前缀后缀工具 ===============
+      const inputText = document.getElementById('input-text');
+      const outputText = document.getElementById('output-text');
+      const prefixInput = document.getElementById('prefix-input');
+      const suffixInput = document.getElementById('suffix-input');
+      const separatorInput = document.getElementById('separator-input');
+      const skipEmptyLines = document.getElementById('skip-empty-lines');
+      const processBtn = document.getElementById('process-btn');
+      const copyBtn = document.getElementById('copy-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const exampleBtn = document.getElementById('example-btn');
+      const statusBar = document.getElementById('status-bar');
+      const lineCount = document.getElementById('line-count');
+      const charCount = document.getElementById('char-count');
+      const outputLineCount = document.getElementById('output-line-count');
+      const outputCharCount = document.getElementById('output-char-count');
+      
+      // 更新输入文本统计
+      function updateInputStats() {
+        const text = inputText.value;
+        const lines = text.split('\n');
+        lineCount.textContent = lines.length;
+        charCount.textContent = text.length;
+      }
+      
+      // 更新输出文本统计
+      function updateOutputStats() {
+        const text = outputText.value;
+        const lines = text.split('\n');
+        outputLineCount.textContent = lines.length;
+        outputCharCount.textContent = text.length;
+      }
+      
+      // 处理添加前缀后缀
+      function processAddPrefixSuffix() {
+        const text = inputText.value;
+        if (!text.trim()) {
+          setStatus('请输入要处理的文本', 'error');
+          return;
+        }
+        
+        const prefix = prefixInput.value;
+        const suffix = suffixInput.value;
+        const separator = separatorInput.value;
+        const skip = skipEmptyLines.checked;
+        
+        const lines = text.split('\n');
+        const processedLines = lines
+          .filter(line => !skip || line.trim() !== '')
+          .map(line => `${prefix}${line}${suffix}`);
+        
+        outputText.value = processedLines.join(separator + '\n');
+        updateOutputStats();
+        setStatus('处理成功！', 'success');
+      }
+      
+      // 设置状态栏信息
+      function setStatus(message, type) {
+        statusBar.textContent = message;
+        statusBar.className = 'status-bar';
+        
+        if (type) {
+          statusBar.classList.add(type);
+        }
+      }
+      
+      // 复制输出结果
+      function copyOutput() {
+        const output = outputText.value;
+        
+        if (!output) {
+          setStatus('没有内容可复制', 'error');
+          return;
+        }
+        
+        navigator.clipboard.writeText(output)
+          .then(() => {
+            setStatus('已复制到剪贴板！', 'success');
+          })
+          .catch(err => {
+            setStatus('复制失败: ' + err, 'error');
+          });
+      }
+      
+      // 清空输入和输出
+      function clearAll() {
+        inputText.value = '';
+        outputText.value = '';
+        statusBar.style.display = 'none';
+        updateInputStats();
+        updateOutputStats();
+      }
+      
+      // 加载示例数据
+      function loadExample() {
+        inputText.value = 'apple\nbanana\ncherry\ndate\nelderberry';
+        updateInputStats();
+        processAddPrefixSuffix();
+      }
+      
+      // 事件监听
+      processBtn.addEventListener('click', processAddPrefixSuffix);
+      copyBtn.addEventListener('click', copyOutput);
+      clearBtn.addEventListener('click', clearAll);
+      exampleBtn.addEventListener('click', loadExample);
+      
+      inputText.addEventListener('input', updateInputStats);
+      prefixInput.addEventListener('input', processAddPrefixSuffix);
+      suffixInput.addEventListener('input', processAddPrefixSuffix);
+      separatorInput.addEventListener('input', processAddPrefixSuffix);
+      skipEmptyLines.addEventListener('change', processAddPrefixSuffix);
+      
+      // 初始化统计
+      updateInputStats();
+      updateOutputStats();
+      
+      // =============== 大小写转换工具 ===============
+      const ccInputText = document.getElementById('cc-input-text');
+      const ccOutputText = document.getElementById('cc-output-text');
+      const ccCopyBtn = document.getElementById('cc-copy-btn');
+      const ccClearBtn = document.getElementById('cc-clear-btn');
+      const ccExampleBtn = document.getElementById('cc-example-btn');
+      const ccStatusBar = document.getElementById('cc-status-bar');
+      const ccLineCount = document.getElementById('cc-line-count');
+      const ccCharCount = document.getElementById('cc-char-count');
+      const ccOutputLineCount = document.getElementById('cc-output-line-count');
+      const ccOutputCharCount = document.getElementById('cc-output-char-count');
+      const caseButtons = document.querySelectorAll('[data-case]');
+      
+      // 更新输入文本统计
+      function updateCCInputStats() {
+        const text = ccInputText.value;
+        const lines = text.split('\n');
+        ccLineCount.textContent = lines.length;
+        ccCharCount.textContent = text.length;
+      }
+      
+      // 更新输出文本统计
+      function updateCCOutputStats() {
+        const text = ccOutputText.value;
+        const lines = text.split('\n');
+        ccOutputLineCount.textContent = lines.length;
+        ccOutputCharCount.textContent = text.length;
+      }
+      
+      // 转换大小写
+      function convertCase(caseType) {
+        const text = ccInputText.value;
+        if (!text.trim()) {
+          setCCStatus('请输入要转换的文本', 'error');
+          return;
+        }
+        
+        let result = '';
+        
+        switch (caseType) {
+          case 'upper':
+            result = text.toUpperCase();
+            break;
+          case 'lower':
+            result = text.toLowerCase();
+            break;
+          case 'capitalize':
+            result = text.split('\n')
+              .map(line => line.split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ')
+              )
+              .join('\n');
+            break;
+          case 'camel':
+            result = text.split('\n')
+              .map(line => {
+                const words = line.trim().split(/[\s-_]+/);
+                return words.map((word, index) => {
+                  if (index === 0) {
+                    return word.toLowerCase();
+                  }
+                  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }).join('');
+              })
+              .join('\n');
+            break;
+          case 'snake':
+            result = text.split('\n')
+              .map(line => line.trim()
+                .replace(/[\s-]+/g, '_')
+                .toLowerCase()
+              )
+              .join('\n');
+            break;
+          case 'kebab':
+            result = text.split('\n')
+              .map(line => line.trim()
+                .replace(/[\s_]+/g, '-')
+                .toLowerCase()
+              )
+              .join('\n');
+            break;
+        }
+        
+        ccOutputText.value = result;
+        updateCCOutputStats();
+        setCCStatus('转换成功！', 'success');
+      }
+      
+      // 设置状态栏信息
+      function setCCStatus(message, type) {
+        ccStatusBar.textContent = message;
+        ccStatusBar.className = 'status-bar';
+        
+        if (type) {
+          ccStatusBar.classList.add(type);
+        }
+      }
+      
+      // 复制输出结果
+      function copyCCOutput() {
+        const output = ccOutputText.value;
+        
+        if (!output) {
+          setCCStatus('没有内容可复制', 'error');
+          return;
+        }
+        
+        navigator.clipboard.writeText(output)
+          .then(() => {
+            setCCStatus('已复制到剪贴板！', 'success');
+          })
+          .catch(err => {
+            setCCStatus('复制失败: ' + err, 'error');
+          });
+      }
+      
+      // 清空输入和输出
+      function clearCCAll() {
+        ccInputText.value = '';
+        ccOutputText.value = '';
+        ccStatusBar.style.display = 'none';
+        updateCCInputStats();
+        updateCCOutputStats();
+      }
+      
+      // 加载示例数据
+      function loadCCExample() {
+        ccInputText.value = 'Hello World\nthis is an EXAMPLE text\nwith Mixed Case\nfor_snake_case\nkebab-case-example';
+        updateCCInputStats();
+        convertCase('capitalize'); // 默认转换为首字母大写
+      }
+      
+      // 事件监听
+      caseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const caseType = this.getAttribute('data-case');
+          convertCase(caseType);
+        });
+      });
+      
+      ccCopyBtn.addEventListener('click', copyCCOutput);
+      ccClearBtn.addEventListener('click', clearCCAll);
+      ccExampleBtn.addEventListener('click', loadCCExample);
+      
+      ccInputText.addEventListener('input', updateCCInputStats);
+      
+      // 初始化统计
+      updateCCInputStats();
+      updateCCOutputStats();
+      
+      // =============== 文本统计工具 ===============
+      const tcInputText = document.getElementById('tc-input-text');
+      const tcOutput = document.getElementById('tc-output');
+      const tcCountBtn = document.getElementById('tc-count-btn');
+      const tcCopyBtn = document.getElementById('tc-copy-btn');
+      const tcClearBtn = document.getElementById('tc-clear-btn');
+      const tcExampleBtn = document.getElementById('tc-example-btn');
+      const tcStatusBar = document.getElementById('tc-status-bar');
+      const tcLineCount = document.getElementById('tc-line-count');
+      const tcCharCount = document.getElementById('tc-char-count');
+      const tcCountSpaces = document.getElementById('tc-count-spaces');
+      const tcCountPunctuation = document.getElementById('tc-count-punctuation');
+      
+      // 更新输入文本统计
+      function updateTCInputStats() {
+        const text = tcInputText.value;
+        const lines = text.split('\n');
+        tcLineCount.textContent = lines.length;
+        tcCharCount.textContent = text.length;
+      }
+      
+      // 统计文本
+      function countText() {
+        const text = tcInputText.value;
+        if (!text.trim()) {
+          setTCStatus('请输入要统计的文本', 'error');
+          return;
+        }
+        
+        const countSpaces = tcCountSpaces.checked;
+        const countPunctuation = tcCountPunctuation.checked;
+        
+        // 基本统计
+        const charCount = text.length;
+        const lines = text.split('\n');
+        const lineCount = lines.length;
+        const nonEmptyLines = lines.filter(line => line.trim() !== '').length;
+        
+        // 字符统计
+        let letters = 0;
+        let digits = 0;
+        let spaces = 0;
+        let punctuation = 0;
+        let other = 0;
+        
+        // 字符频率
+        const charFrequency = {};
+        
+        for (const char of text) {
+          // 更新字符频率
+          charFrequency[char] = (charFrequency[char] || 0) + 1;
+          
+          // 分类计数
+          if (/[a-zA-Z]/.test(char)) {
+            letters++;
+          } else if (/[0-9]/.test(char)) {
+            digits++;
+          } else if (/\s/.test(char)) {
+            spaces++;
+          } else if (/[.,\/#!$%\^&\*;:{}=\-_`~()'"?]/.test(char)) {
+            punctuation++;
+          } else {
+            other++;
+          }
+        }
+        
+        // 单词统计
+        const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+        const wordCount = words.length;
+        
+        // 单词频率
+        const wordFrequency = {};
+        words.forEach(word => {
+          const cleanWord = word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()'"?]/g, '');
+          if (cleanWord) {
+            wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1;
+          }
+        });
+        
+        // 排序字符频率
+        const sortedCharFreq = Object.entries(charFrequency)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10);
+        
+        // 排序单词频率
+        const sortedWordFreq = Object.entries(wordFrequency)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 10);
+        
+        // 平均单词长度
+        const avgWordLength = wordCount > 0 
+          ? words.reduce((sum, word) => sum + word.length, 0) / wordCount 
+          : 0;
+        
+        // 生成统计报告
+        let report = `<h3>基本统计</h3>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;">
+  <tr><td style="padding: 0.3rem 0;">字符总数:</td><td style="text-align: right; padding: 0.3rem 0;">${charCount}</td></tr>
+  <tr><td style="padding: 0.3rem 0;">单词总数:</td><td style="text-align: right; padding: 0.3rem 0;">${wordCount}</td></tr>
+  <tr><td style="padding: 0.3rem 0;">总行数:</td><td style="text-align: right; padding: 0.3rem 0;">${lineCount}</td></tr>
+  <tr><td style="padding: 0.3rem 0;">非空行数:</td><td style="text-align: right; padding: 0.3rem 0;">${nonEmptyLines}</td></tr>
+  <tr><td style="padding: 0.3rem 0;">空行数:</td><td style="text-align: right; padding: 0.3rem 0;">${lineCount - nonEmptyLines}</td></tr>
+  <tr><td style="padding: 0.3rem 0;">平均单词长度:</td><td style="text-align: right; padding: 0.3rem 0;">${avgWordLength.toFixed(2)}</td></tr>
+</table>
+
+<h3>字符分布</h3>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;">
+  <tr><td style="padding: 0.3rem 0;">字母:</td><td style="text-align: right; padding: 0.3rem 0;">${letters} (${(letters / charCount * 100).toFixed(2)}%)</td></tr>
+  <tr><td style="padding: 0.3rem 0;">数字:</td><td style="text-align: right; padding: 0.3rem 0;">${digits} (${(digits / charCount * 100).toFixed(2)}%)</td></tr>`;
+
+        if (countSpaces) {
+          report += `  <tr><td style="padding: 0.3rem 0;">空格:</td><td style="text-align: right; padding: 0.3rem 0;">${spaces} (${(spaces / charCount * 100).toFixed(2)}%)</td></tr>`;
+        }
+        
+        if (countPunctuation) {
+          report += `  <tr><td style="padding: 0.3rem 0;">标点符号:</td><td style="text-align: right; padding: 0.3rem 0;">${punctuation} (${(punctuation / charCount * 100).toFixed(2)}%)</td></tr>`;
+        }
+        
+        report += `  <tr><td style="padding: 0.3rem 0;">其他字符:</td><td style="text-align: right; padding: 0.3rem 0;">${other} (${(other / charCount * 100).toFixed(2)}%)</td></tr>
+</table>
+
+<h3>最常见的字符</h3>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;">
+  <tr>
+    <th style="text-align: left; padding: 0.3rem 0;">字符</th>
+    <th style="text-align: right; padding: 0.3rem 0;">出现次数</th>
+    <th style="text-align: right; padding: 0.3rem 0;">百分比</th>
+  </tr>`;
+        
+        sortedCharFreq.forEach(([char, count]) => {
+          const displayChar = char === ' ' ? '␣ (空格)' : 
+                             char === '\n' ? '↵ (换行)' : 
+                             char === '\t' ? '→ (制表符)' : char;
+          const percent = (count / charCount * 100).toFixed(2);
+          report += `  <tr>
+    <td style="text-align: left; padding: 0.3rem 0;">${displayChar}</td>
+    <td style="text-align: right; padding: 0.3rem 0;">${count}</td>
+    <td style="text-align: right; padding: 0.3rem 0;">${percent}%</td>
+  </tr>`;
+        });
+        
+        report += `</table>
+
+<h3>最常见的单词</h3>
+<table style="width: 100%; border-collapse: collapse;">
+  <tr>
+    <th style="text-align: left; padding: 0.3rem 0;">单词</th>
+    <th style="text-align: right; padding: 0.3rem 0;">出现次数</th>
+    <th style="text-align: right; padding: 0.3rem 0;">百分比</th>
+  </tr>`;
+        
+        sortedWordFreq.forEach(([word, count]) => {
+          const percent = (count / wordCount * 100).toFixed(2);
+          report += `  <tr>
+    <td style="text-align: left; padding: 0.3rem 0;">${word}</td>
+    <td style="text-align: right; padding: 0.3rem 0;">${count}</td>
+    <td style="text-align: right; padding: 0.3rem 0;">${percent}%</td>
+  </tr>`;
+        });
+        
+        report += `</table>`;
+        
+        tcOutput.innerHTML = report;
+        setTCStatus('统计完成！', 'success');
+      }
+      
+      // 设置状态栏信息
+      function setTCStatus(message, type) {
+        tcStatusBar.textContent = message;
+        tcStatusBar.className = 'status-bar';
+        
+        if (type) {
+          tcStatusBar.classList.add(type);
+        }
+      }
+      
+      // 复制统计结果
+      function copyTCOutput() {
+        // 创建一个不包含HTML标签的纯文本版本
+        const report = tcOutput.textContent;
+        
+        if (!report || report.includes('请输入文本以查看统计信息')) {
+          setTCStatus('没有内容可复制', 'error');
+          return;
+        }
+        
+        navigator.clipboard.writeText(report)
+          .then(() => {
+            setTCStatus('已复制到剪贴板！', 'success');
+          })
+          .catch(err => {
+            setTCStatus('复制失败: ' + err, 'error');
+          });
+      }
+      
+      // 清空输入和输出
+      function clearTCAll() {
+        tcInputText.value = '';
+        tcOutput.innerHTML = '<p>请输入文本以查看统计信息...</p>';
+        tcStatusBar.style.display = 'none';
+        updateTCInputStats();
+      }
+      
+      // 加载示例数据
+      function loadTCExample() {
+        tcInputText.value = `这是一个示例文本，用于展示文本统计工具的功能。
+这个工具可以统计字符数、单词数、行数等基本信息。
+它还可以分析字符分布，找出最常见的字符和单词。
+1234567890 是数字示例。
+标点符号包括：,.!?;:'"()[]{}。
+这个示例重复了一些单词，比如：示例、文本、统计、字符、单词。
+统计 统计 文本 文本 文本 字符 字符 字符 字符 单词 单词 单词 单词 单词。`;
+        updateTCInputStats();
+        countText();
+      }
+      
+      // 事件监听
+      tcCountBtn.addEventListener('click', countText);
+      tcCopyBtn.addEventListener('click', copyTCOutput);
+      tcClearBtn.addEventListener('click', clearTCAll);
+      tcExampleBtn.addEventListener('click', loadTCExample);
+      
+      tcInputText.addEventListener('input', updateTCInputStats);
+      tcCountSpaces.addEventListener('change', countText);
+      tcCountPunctuation.addEventListener('change', countText);
+      
+      // 初始化统计
+      updateTCInputStats();
+      
+      // =============== 查找替换工具 ===============
+      const frInputText = document.getElementById('fr-input-text');
+      const frOutputText = document.getElementById('fr-output-text');
+      const frFindText = document.getElementById('fr-find-text');
+      const frReplaceText = document.getElementById('fr-replace-text');
+      const frCaseSensitive = document.getElementById('fr-case-sensitive');
+      const frWholeWord = document.getElementById('fr-whole-word');
+      const frUseRegex = document.getElementById('fr-use-regex');
+      const frReplaceBtn = document.getElementById('fr-replace-btn');
+      const frCopyBtn = document.getElementById('fr-copy-btn');
+      const frClearBtn = document.getElementById('fr-clear-btn');
+      const frExampleBtn = document.getElementById('fr-example-btn');
+      const frStatusBar = document.getElementById('fr-status-bar');
+      const frLineCount = document.getElementById('fr-line-count');
+      const frCharCount = document.getElementById('fr-char-count');
+      const frOutputLineCount = document.getElementById('fr-output-line-count');
+      const frOutputCharCount = document.getElementById('fr-output-char-count');
+      const frReplaceCount = document.getElementById('fr-replace-count');
+      
+      // 更新输入文本统计
+      function updateFRInputStats() {
+        const text = frInputText.value;
+        const lines = text.split('\n');
+        frLineCount.textContent = lines.length;
+        frCharCount.textContent = text.length;
+      }
+      
+      // 更新输出文本统计
+      function updateFROutputStats() {
+        const text = frOutputText.value;
+        const lines = text.split('\n');
+        frOutputLineCount.textContent = lines.length;
+        frOutputCharCount.textContent = text.length;
+      }
+      
+      // 查找替换
+      function findAndReplace() {
+        const text = frInputText.value;
+        if (!text.trim()) {
+          setFRStatus('请输入要处理的文本', 'error');
+          return;
+        }
+        
+        const findValue = frFindText.value;
+        if (!findValue) {
+          setFRStatus('请输入要查找的文本', 'error');
+          return;
+        }
+        
+        const replaceValue = frReplaceText.value;
+        const caseSensitive = frCaseSensitive.checked;
+        const wholeWord = frWholeWord.checked;
+        const useRegex = frUseRegex.checked;
+        
+        let regex;
+        let count = 0;
+        
+        try {
+          if (useRegex) {
+            // 使用正则表达式
+            const flags = caseSensitive ? 'g' : 'gi';
+            regex = new RegExp(findValue, flags);
+          } else {
+            // 普通文本查找
+            let pattern = findValue;
+            
+            // 转义正则表达式特殊字符
+            pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            
+            // 全词匹配
+            if (wholeWord) {
+              pattern = `\\b${pattern}\\b`;
+            }
+            
+            const flags = caseSensitive ? 'g' : 'gi';
+            regex = new RegExp(pattern, flags);
+          }
+          
+          // 执行替换并计数
+          const result = text.replace(regex, match => {
+            count++;
+            return replaceValue;
+          });
+          
+          frOutputText.value = result;
+          frReplaceCount.textContent = count;
+          updateFROutputStats();
+          
+          if (count > 0) {
+            setFRStatus(`成功替换了 ${count} 处内容！`, 'success');
+          } else {
+            setFRStatus('未找到匹配的内容', 'error');
+          }
+        } catch (error) {
+          setFRStatus(`正则表达式错误: ${error.message}`, 'error');
+        }
+      }
+      
+      // 设置状态栏信息
+      function setFRStatus(message, type) {
+        frStatusBar.textContent = message;
+        frStatusBar.className = 'status-bar';
+        
+        if (type) {
+          frStatusBar.classList.add(type);
+        }
+      }
+      
+      // 复制输出结果
+      function copyFROutput() {
+        const output = frOutputText.value;
+        
+        if (!output) {
+          setFRStatus('没有内容可复制', 'error');
+          return;
+        }
+        
+        navigator.clipboard.writeText(output)
+          .then(() => {
+            setFRStatus('已复制到剪贴板！', 'success');
+          })
+          .catch(err => {
+            setFRStatus('复制失败: ' + err, 'error');
+          });
+      }
+      
+      // 清空输入和输出
+      function clearFRAll() {
+        frInputText.value = '';
+        frOutputText.value = '';
+        frFindText.value = '';
+        frReplaceText.value = '';
+        frReplaceCount.textContent = '0';
+        frStatusBar.style.display = 'none';
+        updateFRInputStats();
+        updateFROutputStats();
+      }
+      
+      // 加载示例数据
+      function loadFRExample() {
+        frInputText.value = `这是一个查找替换示例文本。
+可以查找和替换特定的单词或短语。
+例如，我们可以将"示例"替换为"样本"。
+或者将"文本"替换为"内容"。
+支持正则表达式，比如可以查找所有数字：123, 456, 789。
+还支持大小写敏感和全词匹配选项。
+示例 示例 示例 文本 文本 文本。`;
+        frFindText.value = '示例';
+        frReplaceText.value = '样本';
+        updateFRInputStats();
+        findAndReplace();
+      }
+      
+      // 事件监听
+      frReplaceBtn.addEventListener('click', findAndReplace);
+      frCopyBtn.addEventListener('click', copyFROutput);
+      frClearBtn.addEventListener('click', clearFRAll);
+      frExampleBtn.addEventListener('click', loadFRExample);
+      
+      frInputText.addEventListener('input', updateFRInputStats);
+      
+      // 初始化统计
+      updateFRInputStats();
+      updateFROutputStats();
+      
+      // =============== 文本格式化工具 ===============
+      const tfInputText = document.getElementById('tf-input-text');
+      const tfOutputText = document.getElementById('tf-output-text');
+      const tfCopyBtn = document.getElementById('tf-copy-btn');
+      const tfClearBtn = document.getElementById('tf-clear-btn');
+      const tfExampleBtn = document.getElementById('tf-example-btn');
+      const tfStatusBar = document.getElementById('tf-status-bar');
+      const tfLineCount = document.getElementById('tf-line-count');
+      const tfCharCount = document.getElementById('tf-char-count');
+      const tfOutputLineCount = document.getElementById('tf-output-line-count');
+      const tfOutputCharCount = document.getElementById('tf-output-char-count');
+      const formatButtons = document.querySelectorAll('[data-format]');
+      
+      // 更新输入文本统计
+      function updateTFInputStats() {
+        const text = tfInputText.value;
+        const lines = text.split('\n');
+        tfLineCount.textContent = lines.length;
+        tfCharCount.textContent = text.length;
+      }
+      
+      // 更新输出文本统计
+      function updateTFOutputStats() {
+        const text = tfOutputText.value;
+        const lines = text.split('\n');
+        tfOutputLineCount.textContent = lines.length;
+        tfOutputCharCount.textContent = text.length;
+      }
+      
+      // 格式化文本
+      function formatText(formatType) {
+        const text = tfInputText.value;
+        if (!text.trim()) {
+          setTFStatus('请输入要格式化的文本', 'error');
+          return;
+        }
+        
+        let result = '';
+        
+        switch (formatType) {
+          case 'trim-lines':
+            result = text.split('\n')
+              .map(line => line.trim())
+              .join('\n');
+            break;
+          case 'remove-empty':
+            result = text.split('\n')
+              .filter(line => line.trim() !== '')
+              .join('\n');
+            break;
+          case 'normalize-spaces':
+            result = text.split('\n')
+              .map(line => line.replace(/\s+/g, ' ').trim())
+              .join('\n');
+            break;
+          case 'sort-lines':
+            result = text.split('\n')
+              .filter(line => line.trim() !== '')
+              .sort()
+              .join('\n');
+            break;
+          case 'reverse-lines':
+            result = text.split('\n')
+              .reverse()
+              .join('\n');
+            break;
+          case 'shuffle-lines':
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            for (let i = lines.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [lines[i], lines[j]] = [lines[j], lines[i]];
+            }
+            result = lines.join('\n');
+            break;
+        }
+        
+        tfOutputText.value = result;
+        updateTFOutputStats();
+        setTFStatus('格式化成功！', 'success');
+      }
+      
+      // 设置状态栏信息
+      function setTFStatus(message, type) {
+        tfStatusBar.textContent = message;
+        tfStatusBar.className = 'status-bar';
+        
+        if (type) {
+          tfStatusBar.classList.add(type);
+        }
+      }
+      
+      // 复制输出结果
+      function copyTFOutput() {
+        const output = tfOutputText.value;
+        
+        if (!output) {
+          setTFStatus('没有内容可复制', 'error');
+          return;
+        }
+        
+        navigator.clipboard.writeText(output)
+          .then(() => {
+            setTFStatus('已复制到剪贴板！', 'success');
+          })
+          .catch(err => {
+            setTFStatus('复制失败: ' + err, 'error');
+          });
+      }
+      
+      // 清空输入和输出
+      function clearTFAll() {
+        tfInputText.value = '';
+        tfOutputText.value = '';
+        tfStatusBar.style.display = 'none';
+        updateTFInputStats();
+        updateTFOutputStats();
+      }
+      
+      // 加载示例数据
+      function loadTFExample() {
+        tfInputText.value = `   这行有多余的空格   
+这是第二行
+  
+
+这行前面有空行
+  这行有缩进  
+这是最后一行   `;
+        updateTFInputStats();
+        formatText('trim-lines'); // 默认使用去除行首尾空格
+      }
+      
+      // 事件监听
+      formatButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const formatType = this.getAttribute('data-format');
+          formatText(formatType);
+        });
+      });
+      
+      tfCopyBtn.addEventListener('click', copyTFOutput);
+      tfClearBtn.addEventListener('click', clearTFAll);
+      tfExampleBtn.addEventListener('click', loadTFExample);
+      
+      tfInputText.addEventListener('input', updateTFInputStats);
+      
+      // 初始化统计
+      updateTFInputStats();
+      updateTFOutputStats();
+    });
+  </script>
+</body>
+</html>
