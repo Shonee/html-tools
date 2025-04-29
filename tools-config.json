@@ -7,6 +7,12 @@
             "icon": "📝"
         },
         {
+            "title": "JSON 格式化2",
+            "description": "在线JSON数据格式化工具",
+            "url": "tools/json-parse.html",
+            "icon": "📝"
+        },
+        {
             "title": "字符串编解码",
             "description": "字符串编码/解码工具，url、base64、md5",
             "url": "tools/base64.html",
