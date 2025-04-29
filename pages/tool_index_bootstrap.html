@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>开发者工具箱 - 专业的开发工具集</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #f8f9fa;
+      --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      --border-radius: 8px;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f7;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      padding: 0.8rem 1rem;
+    }
+    
+    .navbar-brand {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 3rem 0;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      color: #666;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .tools-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem 3rem;
+    }
+    
+    .tool-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem;
+      height: 100%;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1.5rem;
+    }
+    
+    .tool-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tool-icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .tool-icon i, .tool-icon svg {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+    }
+    
+    .tool-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    .tool-description {
+      font-size: 0.95rem;
+      color: #666;
+      flex-grow: 1;
+    }
+    
+    .footer {
+      background-color: white;
+      text-align: center;
+      padding: 1.5rem 0;
+      border-top: 1px solid #eee;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: #777;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0.3rem;
+    }
+    
+    .github-link {
+      color: #777;
+      font-size: 1.2rem;
+      margin-left: 0.5rem;
+    }
+    
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #333;
+      color: white;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 1000;
+    }
+    
+    .help-btn .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #e74c3c;
+    }
+    
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .header p {
+        font-size: 1rem;
+      }
+      
+      .tool-card {
+        padding: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+      <a class="navbar-brand" href="#">开发者工具箱</a>
+      <div class="ms-auto d-flex">
+        <button class="theme-toggle" id="themeToggle" title="切换主题">
+          <i class="fas fa-moon"></i>
+        </button>
+        <a href="#" class="github-link" title="GitHub 仓库">
+          <i class="fab fa-github"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 头部 -->
+  <header class="header">
+    <h1>开发者工具箱</h1>
+    <p>专业的在线开发工具集，助力提升开发效率</p>
+  </header>
+
+  <!-- 工具卡片区域 -->
+  <div class="tools-container">
+    <div class="row g-4">
+      <!-- JSON 工具 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="tool-card" data-tool="json">
+          <div class="tool-icon">
+            <i class="fas fa-code text-primary"></i>
+          </div>
+          <h3 class="tool-title">JSON 工具</h3>
+          <p class="tool-description">支持多层嵌套 JSON 的格式化、美化、压缩和校验</p>
+        </div>
+      </div>
+
+      <!-- 时间转换 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="tool-card" data-tool="time">
+          <div class="tool-icon">
+            <i class="far fa-clock text-primary"></i>
+          </div>
+          <h3 class="tool-title">时间转换</h3>
+          <p class="tool-description">时间戳与日期格式互转、时区转换、日期计算、时间计算</p>
+        </div>
+      </div>
+
+      <!-- XML 工具 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="tool-card" data-tool="xml">
+          <div class="tool-icon">
+            <i class="far fa-file-code text-primary"></i>
+          </div>
+          <h3 class="tool-title">XML 工具</h3>
+          <p class="tool-description">XML 格式化、压缩、校验与转换工具</p>
+        </div>
+      </div>
+
+      <!-- 编码解码 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="tool-card" data-tool="encode">
+          <div class="tool-icon">
+            <i class="fas fa-exchange-alt text-primary"></i>
+          </div>
+          <h3 class="tool-title">编码解码</h3>
+          <p class="tool-description">Base64、URL、Unicode 等编码解码工具</p>
+        </div>
+      </div>
+
+      <!-- 条码工具 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="tool-card" data-tool="barcode">
+          <div class="tool-icon">
+            <i class="fas fa-barcode text-primary"></i>
+          </div>
+          <h3 class="tool-title">条码工具</h3>
+          <p class="tool-description">二维码/条形码生成与解析工具</p>
+        </div>
+      </div>
+
+      <!-- 字符串工具 -->
+      <div class="col-md-6 col-lg-4">
+        <div class="tool-card" data-tool="text">
+          <div class="tool-icon">
+            <i class="fas fa-font text-primary"></i>
+          </div>
+          <h3 class="tool-title">字符串工具</h3>
+          <p class="tool-description">字符统计、内容搜索、文本分割、列操作等多功能字符串工具</p>
+        </div>
+      </div>
+
+      <!-- UML 预览 -->
+      <div class="col-md-6 col-lg-4 mx-auto">
+        <div class="tool-card" data-tool="uml">
+          <div class="tool-icon">
+            <i class="fas fa-project-diagram text-primary"></i>
+          </div>
+          <h3 class="tool-title">UML 预览</h3>
+          <p class="tool-description">支持类图、时序图、流程图等多种 UML 图表的在线预览</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 帮助按钮 -->
+  <div class="help-btn" id="helpBtn">
+    <span class="badge rounded-pill">1</span>
+    <i class="fas fa-headset"></i>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 开发者工具箱 - 专业的开发工具集</p>
+    </div>
+  </footer>
+
+  <!-- 引入 JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 主题切换功能
+      const themeToggle = document.getElementById('themeToggle');
+      const body = document.body;
+      const icon = themeToggle.querySelector('i');
+      
+      themeToggle.addEventListener('click', function() {
+        body.classList.toggle('dark-mode');
+        if (body.classList.contains('dark-mode')) {
+          icon.classList.remove('fa-moon');
+          icon.classList.add('fa-sun');
+        } else {
+          icon.classList.remove('fa-sun');
+          icon.classList.add('fa-moon');
+        }
+      });
+      
+      // 工具卡片点击事件
+      const toolCards = document.querySelectorAll('.tool-card');
+      toolCards.forEach(card => {
+        card.addEventListener('click', function() {
+          const toolType = this.getAttribute('data-tool');
+          // 这里可以根据工具类型打开相应的工具页面
+          console.log(`打开 ${toolType} 工具`);
+          // 示例: window.location.href = `/${toolType}.html`;
+          
+          // 临时提示
+          alert(`${this.querySelector('.tool-title').textContent} 功能即将上线！`);
+        });
+      });
+      
+      // 帮助按钮点击事件
+      const helpBtn = document.getElementById('helpBtn');
+      helpBtn.addEventListener('click', function() {
+        alert('点击修改您的 ID 应用');
+        this.querySelector('.badge').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
