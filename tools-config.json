@@ -46,6 +46,12 @@
             "description": "主流大模型聚合中心",
             "url": "tools/html_ai_group.html",
             "icon": "🤖"
+        },
+        {
+            "title": "UML 实时预览",
+            "description": "在线编写并预览UML代码",
+            "url": "tools/uml-preview.html",
+            "icon": "🖥️"
         }
     ]
 }
