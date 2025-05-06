@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资讯热榜</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f6f6f6;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #eaeaea;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff4d4f;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-item {
+      font-size: 16px;
+      color: #333;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    
+    .nav-item:hover, .nav-item.active {
+      background-color: #f0f0f0;
+      color: #ff4d4f;
+    }
+    
+    /* 配置按钮样式 */
+    .config-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #f0f0f0;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-left: 15px;
+    }
+    
+    .config-btn:hover {
+      background-color: #e0e0e0;
+      color: #ff4d4f;
+    }
+    
+    /* 配置面板样式 */
+    .config-panel {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 320px;
+      height: 100vh;
+      background-color: white;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+      transition: right 0.3s ease;
+    }
+    
+    .config-panel.active {
+      right: 0;
+    }
+    
+    .config-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    .config-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .close-config {
+      cursor: pointer;
+      font-size: 18px;
+      color: #999;
+      transition: color 0.3s;
+    }
+    
+    .close-config:hover {
+      color: #ff4d4f;
+    }
+    
+    .config-section {
+      margin-bottom: 20px;
+    }
+    
+    .config-section-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .config-section-title i {
+      margin-right: 8px;
+      color: #ff4d4f;
+    }
+    
+    .config-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .config-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .config-item.active {
+      background-color: #fff1f0;
+      color: #ff4d4f;
+      border: 1px solid #ffccc7;
+    }
+    
+    .config-item input {
+      margin-right: 6px;
+    }
+    
+    .config-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eaeaea;
+    }
+    
+    .config-btn-save {
+      padding: 8px 16px;
+      background-color: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .config-btn-save:hover {
+      background-color: #ff7875;
+    }
+    
+    .config-btn-reset {
+      padding: 8px 16px;
+      background-color: #f5f5f5;
+      color: #666;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-right: 10px;
+    }
+    
+    .config-btn-reset:hover {
+      background-color: #e8e8e8;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s;
+    }
+    
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* 资讯来源分类样式 */
+    .source-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 5px 0;
+    }
+    
+    .source-tab {
+      display: flex;
+      align-items: center;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background-color: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .source-tab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .source-tab.active {
+      color: #ff4d4f;
+      border: 1px solid #ffccc7;
+      background-color: #fff1f0;
+    }
+    
+    .source-tab img {
+      width: 20px;
+      height: 20px;
+      margin-right: 6px;
+    }
+    
+    .source-tab:first-child {
+      background-color: #fff8e6;
+    }
+    
+    .source-tab:nth-child(2) {
+      background-color: #fff0f6;
+    }
+    
+    .source-tab:nth-child(3) {
+      background-color: #f6ffed;
+    }
+    
+    .source-tab:nth-child(4) {
+      background-color: #fff2e8;
+    }
+    
+    .source-tab:nth-child(5) {
+      background-color: #e6f7ff;
+    }
+    
+    .source-tab:nth-child(6) {
+      background-color: #fcf4ff;
+    }
+    
+    .source-tab:nth-child(7) {
+      background-color: #f0fff0;
+    }
+    
+    .source-tab:nth-child(8) {
+      background-color: #fff0f0;
+    }
+    
+    .content-wrapper {
+      display: flex;
+      gap: 20px;
+      position: relative;
+    }
+    
+    .sidebar {
+      flex: 0 0 280px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      transition: all 0.3s ease;
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+    
+    /* 侧边栏折叠状态 */
+    .sidebar.collapsed {
+      flex: 0 0 60px;
+      overflow: hidden;
+    }
+    
+    .sidebar.collapsed .sidebar-title {
+      justify-content: center;
+      padding-bottom: 5px;
+    }
+    
+    .sidebar.collapsed .sidebar-title span {
+      display: none;
+    }
+    
+    .sidebar.collapsed .category-item {
+      padding: 12px 0;
+      justify-content: center;
+    }
+    
+    .sidebar.collapsed .category-item span {
+      display: none;
+    }
+    
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eaeaea;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .sidebar-title i:first-child {
+      margin-right: 8px;
+      color: #ff4d4f;
+    }
+    
+    .toggle-sidebar {
+      cursor: pointer;
+      color: #999;
+      transition: color 0.3s;
+    }
+    
+    .toggle-sidebar:hover {
+      color: #ff4d4f;
+    }
+    
+    .category-list {
+      list-style: none;
+    }
+    
+    .category-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+    
+    .category-item.active {
+      background-color: #fff1f0;
+      color: #ff4d4f;
+      font-weight: 500;
+    }
+    
+    .category-item:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .category-item i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .main-content {
+      flex: 1;
+    }
+    
+    .hotlist-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .hotlist-title {
+      font-size: 22px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    
+    .hotlist-title i {
+      color: #ff4d4f;
+      margin-right: 10px;
+    }
+    
+    .hotlist-tabs {
+      display: flex;
+      gap: 10px;
+      background: white;
+      border-radius: 20px;
+      padding: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .hotlist-tab {
+      padding: 6px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+    
+    .hotlist-tab.active {
+      background-color: #ff4d4f;
+      color: white;
+    }
+    
+    .hotlist {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 5px 20px;
+    }
+    
+    .news-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #eaeaea;
+      position: relative;
+    }
+    
+    .news-item:last-child {
+      border-bottom: none;
+    }
+    
+    .rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      color: #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .rank.top1 {
+      background-color: #ff4d4f;
+      color: white;
+    }
+    
+    .rank.top2 {
+      background-color: #ff7a45;
+      color: white;
+    }
+    
+    .rank.top3 {
+      background-color: #ffa940;
+      color: white;
+    }
+    
+    .news-content {
+      flex: 1;
+    }
+    
+    .news-title {
+      font-size: 16px;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+    
+    .news-title:hover {
+      color: #ff4d4f;
+    }
+    
+    .news-meta {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .news-tag {
+      background-color: #f0f0f0;
+      color: #666;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-right: 10px;
+    }
+    
+    .news-source {
+      margin-right: 15px;
+    }
+    
+    .news-time {
+      margin-right: 15px;
+    }
+    
+    .news-hot {
+      display: flex;
+      align-items: center;
+      color: #ff4d4f;
+    }
+    
+    .news-hot i {
+      margin-right: 5px;
+    }
+    
+    .news-image {
+      width: 120px;
+      height: 80px;
+      border-radius: 4px;
+      object-fit: cover;
+      margin-left: 15px;
+      flex-shrink: 0;
+    }
+    
+    .trending-tag {
+      position: absolute;
+      right: 150px;
+      top: 15px;
+      background-color: #ff4d4f;
+      color: white;
+      font-size: 12px;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    
+    .load-more {
+      text-align: center;
+      padding: 15px 0;
+      color: #666;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    
+    .load-more:hover {
+      color: #ff4d4f;
+    }
+    
+    .refresh-time {
+      font-size: 12px;
+      color: #999;
+      text-align: right;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+    
+    @media (max-width: 768px) {
+      .content-wrapper {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        flex: none;
+        width: 100%;
+        margin-bottom: 20px;
+        position: static;
+      }
+      
+      .sidebar.collapsed {
+        width: 100%;
+        flex: none;
+      }
+      
+      .sidebar.collapsed .sidebar-title span {
+        display: block;
+      }
+      
+      .sidebar.collapsed .category-item {
+        padding: 12px 15px;
+        justify-content: flex-start;
+      }
+      
+      .sidebar.collapsed .category-item span {
+        display: inline;
+      }
+      
+      .news-image {
+        width: 80px;
+        height: 60px;
+      }
+      
+      .trending-tag {
+        right: 90px;
+      }
+      
+      .source-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+        padding-bottom: 10px;
+      }
+      
+      .source-tab {
+        flex-shrink: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">资讯热榜</div>
+      <div style="display: flex; align-items: center;">
+        <nav class="nav-menu" id="navMenu">
+          <a href="#" class="nav-item active">首页</a>
+          <a href="#" class="nav-item">热点</a>
+          <a href="#" class="nav-item">财经</a>
+          <a href="#" class="nav-item">科技</a>
+          <a href="#" class="nav-item">娱乐</a>
+        </nav>
+        <!-- 配置按钮 -->
+        <div class="config-btn" id="configBtn">
+          <i class="fas fa-cog"></i>
+        </div>
+      </div>
+    </header>
+    
+    <!-- 资讯来源分类导航 -->
+    <div class="source-tabs" id="sourceTabs">
+      <div class="source-tab active">
+        <img src="https://img.icons8.com/color/48/000000/weibo.png" alt="微博">
+        微博热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/tiktok.png" alt="抖音">
+        抖音热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/bilibili.png" alt="B站">
+        B站热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/kuaishou.png" alt="快手">
+        快手热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/baidu.png" alt="百度">
+        百度热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/xiaohongshu.png" alt="小红书">
+        小红书热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/douban.png" alt="豆瓣">
+        豆瓣热榜
+      </div>
+      <div class="source-tab">
+        <img src="https://img.icons8.com/color/48/000000/zhihu.png" alt="今日头条">
+        今日头条
+      </div>
+    </div>
+    
+    <div class="content-wrapper">
+      <!-- 左侧分类侧边栏 -->
+      <aside class="sidebar" id="sidebar">
+        <h3 class="sidebar-title">
+          <div>
+            <i class="fas fa-list"></i>
+            <span>热榜分类</span>
+          </div>
+          <i class="fas fa-chevron-left toggle-sidebar" id="toggleSidebar"></i>
+        </h3>
+        <ul class="category-list" id="categoryList">
+          <li class="category-item active">
+            <i class="fas fa-fire"></i>
+            <span>综合热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-chart-line"></i>
+            <span>财经热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-laptop-code"></i>
+            <span>科技热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-film"></i>
+            <span>娱乐热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-futbol"></i>
+            <span>体育热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-globe-asia"></i>
+            <span>国际热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-book"></i>
+            <span>教育热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-car"></i>
+            <span>汽车热榜</span>
+          </li>
+          <li class="category-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>购物热榜</span>
+          </li>
+        </ul>
+      </aside>
+      
+      <main class="main-content">
+        <div class="hotlist-header">
+          <h2 class="hotlist-title"><i class="fas fa-fire"></i> 微博热榜</h2>
+          <div class="hotlist-tabs">
+            <div class="hotlist-tab active">热度榜</div>
+            <div class="hotlist-tab">实时榜</div>
+            <div class="hotlist-tab">周榜</div>
+            <div class="hotlist-tab">月榜</div>
+          </div>
+        </div>
+        
+        <div class="refresh-time">更新时间：2023-11-30 12:30</div>
+        
+        <div class="hotlist">
+          <div class="news-item">
+            <div class="rank top1">1</div>
+            <div class="news-content">
+              <h3 class="news-title">国内多地迎来降温降雪天气，气象专家提醒做好防寒保暖措施</h3>
+              <div class="news-meta">
+                <span class="news-tag">热点</span>
+                <span class="news-source">央视新闻</span>
+                <span class="news-time">2小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 9827万</span>
+              </div>
+            </div>
+            <span class="trending-tag">热搜</span>
+            <img src="https://images.unsplash.com/photo-1516431883659-655d88b7598a?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank top2">2</div>
+            <div class="news-content">
+              <h3 class="news-title">最新科研成果：新型可降解材料有望替代传统塑料，减少环境污染</h3>
+              <div class="news-meta">
+                <span class="news-tag">科技</span>
+                <span class="news-source">科技日报</span>
+                <span class="news-time">4小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 7653万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1526951521990-620dc14c214b?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank top3">3</div>
+            <div class="news-content">
+              <h3 class="news-title">年度经济论坛开幕，多国专家学者共议全球经济复苏之路</h3>
+              <div class="news-meta">
+                <span class="news-tag">财经</span>
+                <span class="news-source">经济观察报</span>
+                <span class="news-time">5小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 6542万</span>
+              </div>
+            </div>
+            <span class="trending-tag">新</span>
+            <img src="https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">4</div>
+            <div class="news-content">
+              <h3 class="news-title">国内知名科技企业发布全新智能手机，搭载自研芯片引发行业关注</h3>
+              <div class="news-meta">
+                <span class="news-tag">科技</span>
+                <span class="news-source">科技新闻</span>
+                <span class="news-time">6小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 5823万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">5</div>
+            <div class="news-content">
+              <h3 class="news-title">全国多地推出文旅消费券，刺激旅游市场复苏，带动地方经济发展</h3>
+              <div class="news-meta">
+                <span class="news-tag">旅游</span>
+                <span class="news-source">旅游时报</span>
+                <span class="news-time">7小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 4986万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">6</div>
+            <div class="news-content">
+              <h3 class="news-title">教育部发布新规：中小学生睡眠时间不得少于规定标准，减轻学生课业负担</h3>
+              <div class="news-meta">
+                <span class="news-tag">教育</span>
+                <span class="news-source">教育在线</span>
+                <span class="news-time">9小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 4325万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">7</div>
+            <div class="news-content">
+              <h3 class="news-title">国家体育总局：加强青少年体育锻炼，提高国民体质健康水平</h3>
+              <div class="news-meta">
+                <span class="news-tag">体育</span>
+                <span class="news-source">体育报道</span>
+                <span class="news-time">10小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 3986万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">8</div>
+            <div class="news-content">
+              <h3 class="news-title">明星艺人公益行动获赞，带动粉丝参与环保活动，共建美好家园</h3>
+              <div class="news-meta">
+                <span class="news-tag">娱乐</span>
+                <span class="news-source">娱乐周刊</span>
+                <span class="news-time">12小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 3542万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">9</div>
+            <div class="news-content">
+              <h3 class="news-title">国内汽车市场新能源车销量持续增长，多家车企加大研发投入</h3>
+              <div class="news-meta">
+                <span class="news-tag">汽车</span>
+                <span class="news-source">汽车之家</span>
+                <span class="news-time">14小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 3128万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="news-item">
+            <div class="rank">10</div>
+            <div class="news-content">
+              <h3 class="news-title">互联网企业数字化转型案例分享，助力传统行业升级，推动产业创新</h3>
+              <div class="news-meta">
+                <span class="news-tag">互联网</span>
+                <span class="news-source">互联网周刊</span>
+                <span class="news-time">16小时前</span>
+                <span class="news-hot"><i class="fas fa-fire"></i> 2875万</span>
+              </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=160&q=80" alt="新闻图片" class="news-image">
+          </div>
+          
+          <div class="load-more">
+            <span>加载更多</span>
+            <i class="fas fa-angle-down"></i>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  
+  <!-- 遮罩层 -->
+  <div class="overlay" id="overlay"></div>
+  
+  <!-- 配置面板 -->
+  <div class="config-panel" id="configPanel">
+    <div class="config-header">
+      <h3 class="config-title">自定义配置</h3>
+      <i class="fas fa-times close-config" id="closeConfig"></i>
+    </div>
+    
+    <!-- 新增顶部导航菜单配置 -->
+    <div class="config-section">
+      <h4 class="config-section-title">
+        <i class="fas fa-compass"></i> 顶部导航设置
+      </h4>
+      <div class="config-items" id="navConfig">
+        <div class="config-item active">
+          <input type="checkbox" checked id="nav-1">
+          <label for="nav-1">首页</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="nav-2">
+          <label for="nav-2">热点</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="nav-3">
+          <label for="nav-3">财经</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="nav-4">
+          <label for="nav-4">科技</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="nav-5">
+          <label for="nav-5">娱乐</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-6">
+          <label for="nav-6">体育</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-7">
+          <label for="nav-7">国际</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-8">
+          <label for="nav-8">军事</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-9">
+          <label for="nav-9">汽车</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-10">
+          <label for="nav-10">健康</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-11">
+          <label for="nav-11">教育</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-12">
+          <label for="nav-12">旅游</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-13">
+          <label for="nav-13">房产</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="nav-14">
+          <label for="nav-14">游戏</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="config-section">
+      <h4 class="config-section-title">
+        <i class="fas fa-globe"></i> 顶部来源设置
+      </h4>
+      <div class="config-items" id="sourcesConfig">
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-1">
+          <label for="source-1">微博热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-2">
+          <label for="source-2">抖音热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-3">
+          <label for="source-3">B站热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-4">
+          <label for="source-4">快手热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-5">
+          <label for="source-5">百度热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-6">
+          <label for="source-6">小红书热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-7">
+          <label for="source-7">豆瓣热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="source-8">
+          <label for="source-8">今日头条</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="source-9">
+          <label for="source-9">知乎热榜</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="source-10">
+          <label for="source-10">腾讯新闻</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="source-11">
+          <label for="source-11">网易新闻</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="source-12">
+          <label for="source-12">搜狐新闻</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="config-section">
+      <h4 class="config-section-title">
+        <i class="fas fa-list"></i> 左侧分类设置
+      </h4>
+      <div class="config-items" id="categoriesConfig">
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-1">
+          <label for="cat-1">综合热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-2">
+          <label for="cat-2">财经热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-3">
+          <label for="cat-3">科技热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-4">
+          <label for="cat-4">娱乐热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-5">
+          <label for="cat-5">体育热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-6">
+          <label for="cat-6">国际热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-7">
+          <label for="cat-7">教育热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-8">
+          <label for="cat-8">汽车热榜</label>
+        </div>
+        <div class="config-item active">
+          <input type="checkbox" checked id="cat-9">
+          <label for="cat-9">购物热榜</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cat-10">
+          <label for="cat-10">游戏热榜</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cat-11">
+          <label for="cat-11">健康热榜</label>
+        </div>
+        <div class="config-item">
+          <input type="checkbox" id="cat-12">
+          <label for="cat-12">房产热榜</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="config-footer">
+      <button class="config-btn-reset" id="resetConfig">恢复默认</button>
+      <button class="config-btn-save" id="saveConfig">保存设置</button>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 左侧栏折叠/展开功能
+      const toggleSidebar = document.getElementById('toggleSidebar');
+      const sidebar = document.getElementById('sidebar');
+      
+      toggleSidebar.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        
+        // 切换箭头方向
+        if (sidebar.classList.contains('collapsed')) {
+          toggleSidebar.classList.remove('fa-chevron-left');
+          toggleSidebar.classList.add('fa-chevron-right');
+        } else {
+          toggleSidebar.classList.remove('fa-chevron-right');
+          toggleSidebar.classList.add('fa-chevron-left');
+        }
+      });
+      
+      // 配置面板功能
+      const configBtn = document.getElementById('configBtn');
+      const configPanel = document.getElementById('configPanel');
+      const closeConfig = document.getElementById('closeConfig');
+      const overlay = document.getElementById('overlay');
+      const saveConfig = document.getElementById('saveConfig');
+      const resetConfig = document.getElementById('resetConfig');
+      
+      // 打开配置面板
+      configBtn.addEventListener('click', function() {
+        configPanel.classList.add('active');
+        overlay.classList.add('active');
+      });
+      
+      // 关闭配置面板
+      function closeConfigPanel() {
+        configPanel.classList.remove('active');
+        overlay.classList.remove('active');
+      }
+      
+      closeConfig.addEventListener('click', closeConfigPanel);
+      overlay.addEventListener('click', closeConfigPanel);
+      
+      // 保存配置
+      saveConfig.addEventListener('click', function() {
+        // 获取顶部导航配置
+        const navConfig = Array.from(document.querySelectorAll('#navConfig input')).map(input => {
+          return {
+            id: input.id,
+            checked: input.checked,
+            label: input.nextElementSibling.textContent
+          };
+        });
+        
+        // 获取左侧分类配置
+        const categoryConfig = Array.from(document.querySelectorAll('#categoriesConfig input')).map(input => {
+          return {
+            id: input.id,
+            checked: input.checked,
+            label: input.nextElementSibling.textContent
+          };
+        });
+        
+        // 获取顶部来源配置
+        const sourceConfig = Array.from(document.querySelectorAll('#sourcesConfig input')).map(input => {
+          return {
+            id: input.id,
+            checked: input.checked,
+            label: input.nextElementSibling.textContent
+          };
+        });
+        
+        // 更新顶部导航
+        updateNavMenu(navConfig);
+        
+        // 更新左侧分类
+        updateCategories(categoryConfig);
+        
+        // 更新顶部来源
+        updateSources(sourceConfig);
+        
+        // 保存到本地存储
+        localStorage.setItem('navConfig', JSON.stringify(navConfig));
+        localStorage.setItem('categoryConfig', JSON.stringify(categoryConfig));
+        localStorage.setItem('sourceConfig', JSON.stringify(sourceConfig));
+        
+        // 关闭配置面板
+        closeConfigPanel();
+      });
+      
+      // 更新顶部导航
+      function updateNavMenu(config) {
+        const navMenu = document.getElementById('navMenu');
+        navMenu.innerHTML = '';
+        
+        config.forEach((item, index) => {
+          if (item.checked) {
+            const a = document.createElement('a');
+            a.href = '#';
+            a.className = 'nav-item';
+            if (index === 0) a.classList.add('active');
+            a.textContent = item.label;
+            
+            navMenu.appendChild(a);
+          }
+        });
+        
+        // 重新绑定导航点击事件
+        bindNavEvents();
+      }
+      
+      // 更新左侧分类
+      function updateCategories(config) {
+        const categoryList = document.getElementById('categoryList');
+        categoryList.innerHTML = '';
+        
+        const icons = [
+          'fa-fire', 'fa-chart-line', 'fa-laptop-code', 'fa-film', 
+          'fa-futbol', 'fa-globe-asia', 'fa-book', 'fa-car', 
+          'fa-shopping-bag', 'fa-gamepad', 'fa-heartbeat', 'fa-home'
+        ];
+        
+        config.forEach((item, index) => {
+          if (item.checked) {
+            const li = document.createElement('li');
+            li.className = 'category-item';
+            if (index === 0) li.classList.add('active');
+            
+            li.innerHTML = `
+              <i class="fas ${icons[index]}"></i>
+              <span>${item.label}</span>
+            `;
+            
+            categoryList.appendChild(li);
+          }
+        });
+        
+        // 重新绑定分类点击事件
+        bindCategoryEvents();
+      }
+      
+      // 更新顶部来源
+      function updateSources(config) {
+        const sourceTabs = document.getElementById('sourceTabs');
+        sourceTabs.innerHTML = '';
+        
+        const icons = [
+          'weibo', 'tiktok', 'bilibili', 'kuaishou', 
+          'baidu', 'xiaohongshu', 'douban', 'zhihu', 
+          'zhihu', 'tencent', 'netease', 'sohu'
+        ];
+        
+        config.forEach((item, index) => {
+          if (item.checked) {
+            const div = document.createElement('div');
+            div.className = 'source-tab';
+            if (index === 0) div.classList.add('active');
+            
+            div.innerHTML = `
+              <img src="https://img.icons8.com/color/48/000000/${icons[index]}.png" alt="${item.label}">
+              ${item.label}
+            `;
+            
+            sourceTabs.appendChild(div);
+          }
+        });
+        
+        // 重新绑定来源点击事件
+        bindSourceEvents();
+      }
+      
+      // 重置配置
+      resetConfig.addEventListener('click', function() {
+        // 重置顶部导航复选框
+        document.querySelectorAll('#navConfig input').forEach((input, index) => {
+          input.checked = index < 5; // 默认前5个选中
+        });
+        
+        // 重置左侧分类复选框
+        document.querySelectorAll('#categoriesConfig input').forEach((input, index) => {
+          input.checked = index < 9; // 默认前9个选中
+        });
+        
+        // 重置顶部来源复选框
+        document.querySelectorAll('#sourcesConfig input').forEach((input, index) => {
+          input.checked = index < 8; // 默认前8个选中
+        });
+      });
+      
+      // 加载保存的配置
+      function loadSavedConfig() {
+        const savedNavConfig = localStorage.getItem('navConfig');
+        const savedCategoryConfig = localStorage.getItem('categoryConfig');
+        const savedSourceConfig = localStorage.getItem('sourceConfig');
+        
+        if (savedNavConfig) {
+          const navConfig = JSON.parse(savedNavConfig);
+          navConfig.forEach(item => {
+            const input = document.getElementById(item.id);
+            if (input) input.checked = item.checked;
+          });
+          
+          updateNavMenu(navConfig);
+        }
+        
+        if (savedCategoryConfig) {
+          const categoryConfig = JSON.parse(savedCategoryConfig);
+          categoryConfig.forEach(item => {
+            const input = document.getElementById(item.id);
+            if (input) input.checked = item.checked;
+          });
+          
+          updateCategories(categoryConfig);
+        }
+        
+        if (savedSourceConfig) {
+          const sourceConfig = JSON.parse(savedSourceConfig);
+          sourceConfig.forEach(item => {
+            const input = document.getElementById(item.id);
+            if (input) input.checked = item.checked;
+          });
+          
+          updateSources(sourceConfig);
+        }
+      }
+      
+      // 页面加载时读取配置
+      loadSavedConfig();
+      
+      // 顶部导航点击事件
+      function bindNavEvents() {
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+          item.addEventListener('click', function(e) {
+            e.preventDefault();
+            navItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 模拟页面切换效果
+            simulatePageChange(this.textContent);
+          });
+        });
+      }
+      
+      // 模拟页面切换效果
+      function simulatePageChange(pageName) {
+        // 更新页面标题
+        document.title = pageName + ' - 资讯热榜';
+        
+        // 根据不同页面调整内容
+        if (pageName === '首页') {
+          // 显示所有内容
+          document.querySelector('.source-tabs').style.display = 'flex';
+          document.querySelector('.sidebar').style.display = 'block';
+          document.querySelector('.hotlist-title').innerHTML = '<i class="fas fa-fire"></i> 微博热榜';
+        } else {
+          // 更新热榜标题
+          document.querySelector('.hotlist-title').innerHTML = '<i class="fas fa-fire"></i> ' + pageName + '热榜';
+          
+          // 模拟加载不同页面的数据
+          simulateLoading();
+        }
+      }
+      
+      // 资讯来源分类切换
+      function bindSourceEvents() {
+        const sourceTabs = document.querySelectorAll('.source-tab');
+        sourceTabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+            sourceTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 更新热榜标题
+            const sourceText = this.textContent.trim();
+            document.querySelector('.hotlist-title').innerHTML = `<i class="fas fa-fire"></i> ${sourceText}`;
+            
+            // 模拟加载不同来源的数据
+            simulateLoading();
+          });
+        });
+      }
+      
+      // 分类点击切换
+      function bindCategoryEvents() {
+        const categoryItems = document.querySelectorAll('.category-item');
+        categoryItems.forEach(item => {
+          item.addEventListener('click', function() {
+            categoryItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 模拟加载不同分类的数据
+            simulateLoading();
+          });
+        });
+      }
+      
+      // 初始绑定事件
+      bindNavEvents();
+      bindSourceEvents();
+      bindCategoryEvents();
+      
+      // 热榜标签切换
+      const hotlistTabs = document.querySelectorAll('.hotlist-tab');
+      hotlistTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          hotlistTabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // 模拟加载不同标签的数据
+          simulateLoading();
+        });
+      });
+      
+      // 模拟加载中效果
+      function simulateLoading() {
+        const hotlist = document.querySelector('.hotlist');
+        const loadMore = document.querySelector('.load-more');
+        
+        // 更新刷新时间
+        const now = new Date();
+        const timeString = now.toLocaleString('zh-CN', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(/\//g, '-');
+        document.querySelector('.refresh-time').textContent = `更新时间：${timeString}`;
+        
+        // 添加加载动画
+        loadMore.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
+        
+        // 模拟延迟
+        setTimeout(() => {
+          // 获取当前选中的页面
+          const activePage = document.querySelector('.nav-item.active')?.textContent || '首页';
+          // 获取当前选中的资讯来源
+          const activeSource = document.querySelector('.source-tab.active')?.textContent.trim() || '微博热榜';
+          // 获取当前选中的分类
+          const activeCategory = document.querySelector('.category-item.active')?.textContent.trim() || '综合热榜';
+          
+          // 根据不同来源生成不同的模拟数据
+          const newsItems = hotlist.querySelectorAll('.news-item');
+          
+          // 修改新闻来源
+          newsItems.forEach(item => {
+            const sourceElement = item.querySelector('.news-source');
+            if (activeSource.includes('微博')) {
+              sourceElement.textContent = '微博热搜';
+            } else if (activeSource.includes('抖音')) {
+              sourceElement.textContent = '抖音热点';
+            } else if (activeSource.includes('B站')) {
+              sourceElement.textContent = 'B站热门';
+            } else if (activeSource.includes('快手')) {
+              sourceElement.textContent = '快手热点';
+            } else if (activeSource.includes('百度')) {
+              sourceElement.textContent = '百度热搜';
+            } else if (activeSource.includes('小红书')) {
+              sourceElement.textContent = '小红书笔记';
+            } else if (activeSource.includes('豆瓣')) {
+              sourceElement.textContent = '豆瓣热门';
+            } else if (activeSource.includes('头条')) {
+              sourceElement.textContent = '头条热点';
+            }
+            
+            // 根据页面调整标签
+            const tagElement = item.querySelector('.news-tag');
+            if (activePage !== '首页') {
+              tagElement.textContent = activePage;
+            }
+            
+            // 随机调整热度数值
+            const hotElement = item.querySelector('.news-hot');
+            const randomHot = Math.floor(Math.random() * 5000) + 2000;
+            hotElement.innerHTML = `<i class="fas fa-fire"></i> ${randomHot}万`;
+            
+            // 随机调整时间
+            const timeElement = item.querySelector('.news-time');
+            const randomTime = Math.floor(Math.random() * 12) + 1;
+            timeElement.textContent = `${randomTime}小时前`;
+          });
+          
+          loadMore.innerHTML = '<span>加载更多</span> <i class="fas fa-angle-down"></i>';
+        }, 800);
+      }
+      
+      // 加载更多
+      const loadMore = document.querySelector('.load-more');
+      loadMore.addEventListener('click', function() {
+        // 添加加载动画
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 加载中...';
+        
+        // 模拟加载更多内容
+        setTimeout(() => {
+          const hotlist = document.querySelector('.hotlist');
+          const activePage = document.querySelector('.nav-item.active')?.textContent || '首页';
+          const activeSource = document.querySelector('.source-tab.active')?.textContent.trim() || '微博热榜';
+          
+          // 创建新的新闻项
+          for (let i = 11; i <= 15; i++) {
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            
+            const randomHot = Math.floor(Math.random() * 2000) + 800;
+            const randomTime = Math.floor(Math.random() * 10) + 16;
+            const randomImgId = Math.floor(Math.random() * 1000) + 100;
+            
+            // 随机标签
+            let newsTag = activePage !== '首页' ? activePage : ['热点', '科技', '财经', '娱乐', '体育', '教育'][Math.floor(Math.random() * 6)];
+            
+            // 根据当前选中的资讯来源设置来源
+            let newsSource = '新闻来源';
+            if (activeSource.includes('微博')) {
+              newsSource = '微博热搜';
+            } else if (activeSource.includes('抖音')) {
+              newsSource = '抖音热点';
+            } else if (activeSource.includes('B站')) {
+              newsSource = 'B站热门';
+            } else if (activeSource.includes('快手')) {
+              newsSource = '快手热点';
+            } else if (activeSource.includes('百度')) {
+              newsSource = '百度热搜';
+            } else if (activeSource.includes('小红书')) {
+              newsSource = '小红书笔记';
+            } else if (activeSource.includes('豆瓣')) {
+              newsSource = '豆瓣热门';
+            } else if (activeSource.includes('头条')) {
+              newsSource = '头条热点';
+            }
+            
+            newsItem.innerHTML = `
+              <div class="rank">${i}</div>
+              <div class="news-content">
+                <h3 class="news-title">${activeSource}热榜 ${i}：这是一条自动加载的热门新闻标题示例</h3>
+                <div class="news-meta">
+                  <span class="news-tag">${newsTag}</span>
+                  <span class="news-source">${newsSource}</span>
+                  <span class="news-time">${randomTime}小时前</span>
+                  <span class="news-hot"><i class="fas fa-fire"></i> ${randomHot}万</span>
+                </div>
+              </div>
+              <img src="https://source.unsplash.com/random/240x160?sig=${randomImgId}" alt="新闻图片" class="news-image">
+            `;
+            
+            hotlist.insertBefore(newsItem, loadMore);
+          }
+          
+          // 恢复加载更多按钮
+          this.innerHTML = '<span>加载更多</span> <i class="fas fa-angle-down"></i>';
+        }, 800);
+      });
+      
+      // 新闻点击效果
+      document.querySelector('.hotlist').addEventListener('click', function(e) {
+        const newsTitle = e.target.closest('.news-title');
+        if (newsTitle) {
+          alert('你点击了新闻：' + newsTitle.textContent);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
