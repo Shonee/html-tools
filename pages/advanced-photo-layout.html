@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高级证件照排版工具</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      color: #6c757d;
+      font-size: 1.1rem;
+    }
+
+    h2 {
+      color: #3498db;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .upload-section, .settings-section {
+      flex: 1;
+      min-width: 300px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-area {
+      margin-top: 15px;
+      width: 100%;
+      height: 200px;
+      border: 2px dashed #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background-color: #f9f9f9;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .rotate-controls {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0 5px;
+    }
+
+    .btn:hover {
+      background-color: #5a6268;
+    }
+
+    .btn.primary {
+      background-color: #3498db;
+    }
+
+    .btn.primary:hover {
+      background-color: #2980b9;
+    }
+
+    .btn:disabled {
+      background-color: #adb5bd;
+      cursor: not-allowed;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .result-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      gap: 10px;
+    }
+
+    .result-area {
+      margin-top: 15px;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      background-color: #f9f9f9;
+      border: 1px solid #e9ecef;
+      padding: 15px;
+      position: relative;
+    }
+
+    .canvas {
+      background-color: white;
+      position: relative;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .photo-cell {
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: absolute;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.3s;
+      cursor: move;
+    }
+
+    .photo-cell:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+    }
+
+    .photo-cell.dragging {
+      opacity: 0.8;
+      z-index: 100;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .photo-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center;
+    }
+
+    .photo {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .rotate-handle {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      background-color: #3498db;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .rotate-handle:hover {
+      background-color: #2980b9;
+    }
+
+    .actions {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+      color: #6c757d;
+    }
+
+    .placeholder {
+      color: #adb5bd;
+      font-style: italic;
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .instructions {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .instructions ul {
+      margin-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 5px;
+    }
+
+    .tab-controls {
+      display: flex;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .tab-btn {
+      padding: 10px 15px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #6c757d;
+    }
+
+    .tab-btn.active {
+      color: #3498db;
+      border-bottom: 2px solid #3498db;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .layout-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .layout-row label {
+      margin-right: 10px;
+      margin-bottom: 0;
+      width: 100px;
+    }
+
+    .layout-row select, .layout-row input {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>高级证件照排版工具</h1>
+      <p class="description">上传照片，自由排版，一键打印</p>
+    </header>
+    
+    <div class="controls">
+      <div class="upload-section">
+        <h2>上传照片</h2>
+        <input type="file" id="photoUpload" accept="image/*">
+        <div class="preview-area" id="previewArea">
+          <div class="placeholder">预览区域</div>
+        </div>
+        <div class="rotate-controls hidden" id="rotateControls">
+          <button class="btn" id="rotateLeftBtn">向左旋转</button>
+          <span id="rotationAngle">0°</span>
+          <button class="btn" id="rotateRightBtn">向右旋转</button>
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h2>排版设置</h2>
+        
+        <div class="tab-controls">
+          <button class="tab-btn active" data-tab="auto">自动排版</button>
+          <button class="tab-btn" data-tab="custom">自定义排版</button>
+        </div>
+        
+        <div id="autoTab" class="tab-content active">
+          <div class="form-group">
+            <label for="pageSize">页面尺寸:</label>
+            <select id="pageSize">
+              <option value="6x4" selected>6寸 (6x4英寸, 15.24x10.16厘米)</option>
+              <option value="5x7">5x7英寸 (12.7x17.78厘米)</option>
+              <option value="4x6">4x6英寸 (10.16x15.24厘米)</option>
+              <option value="a4">A4 (21x29.7厘米)</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          
+          <div id="customPageSize" class="form-group hidden">
+            <label>自定义页面尺寸 (厘米):</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="number" id="customPageWidth" min="1" step="0.1" placeholder="宽">
+              <span>x</span>
+              <input type="number" id="customPageHeight" min="1" step="0.1" placeholder="高">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="pageOrientation">页面方向:</label>
+            <select id="pageOrientation">
+              <option value="portrait">纵向</option>
+              <option value="landscape">横向</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="photoSize">证件照尺寸:</label>
+            <select id="photoSize">
+              <option value="1x1">1寸 (2.5x3.5厘米)</option>
+              <option value="2x2" selected>大2寸 (3.5x5.3厘米)</option>
+              <option value="small-2">小2寸 (3.3x4.8厘米)</option>
+              <option value="passport">护照 (3.3x4.8厘米)</option>
+              <option value="visa">签证 (3.3x4.8厘米)</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          
+          <div id="customPhotoSize" class="form-group hidden">
+            <label>自定义照片尺寸 (厘米):</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="number" id="customPhotoWidth" min="1" step="0.1" placeholder="宽">
+              <span>x</span>
+              <input type="number" id="customPhotoHeight" min="1" step="0.1" placeholder="高">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="photoMargin">照片间距 (毫米):</label>
+            <input type="number" id="photoMargin" min="0" max="50" value="5">
+          </div>
+          
+          <div class="form-group">
+            <label>行设置:</label>
+            <div id="rowsContainer">
+              <div class="layout-row">
+                <label>第1行:</label>
+                <select class="row-orientation">
+                  <option value="horizontal">横向照片</option>
+                  <option value="vertical">纵向照片</option>
+                </select>
+                <input type="number" class="row-count" min="1" max="10" value="3" style="width: 60px; margin-left: 10px;">
+              </div>
+            </div>
+            <button class="btn" id="addRowBtn" style="margin-top: 10px;">添加行</button>
+          </div>
+        </div>
+        
+        <div id="customTab" class="tab-content">
+          <div class="form-group">
+            <label for="customPageSizeCustom">页面尺寸:</label>
+            <select id="customPageSizeCustom">
+              <option value="6x4" selected>6寸 (6x4英寸, 15.24x10.16厘米)</option>
+              <option value="5x7">5x7英寸 (12.7x17.78厘米)</option>
+              <option value="4x6">4x6英寸 (10.16x15.24厘米)</option>
+              <option value="a4">A4 (21x29.7厘米)</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          
+          <div id="customPageSizeCustomDiv" class="form-group hidden">
+            <label>自定义页面尺寸 (厘米):</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="number" id="customPageWidthCustom" min="1" step="0.1" placeholder="宽">
+              <span>x</span>
+              <input type="number" id="customPageHeightCustom" min="1" step="0.1" placeholder="高">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="pageOrientationCustom">页面方向:</label>
+            <select id="pageOrientationCustom">
+              <option value="portrait">纵向</option>
+              <option value="landscape">横向</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="photoSizeCustom">证件照尺寸:</label>
+            <select id="photoSizeCustom">
+              <option value="1x1">1寸 (2.5x3.5厘米)</option>
+              <option value="2x2" selected>大2寸 (3.5x5.3厘米)</option>
+              <option value="small-2">小2寸 (3.3x4.8厘米)</option>
+              <option value="passport">护照 (3.3x4.8厘米)</option>
+              <option value="visa">签证 (3.3x4.8厘米)</option>
+              <option value="custom">自定义</option>
+            </select>
+          </div>
+          
+          <div id="customPhotoSizeCustom" class="form-group hidden">
+            <label>自定义照片尺寸 (厘米):</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="number" id="customPhotoWidthCustom" min="1" step="0.1" placeholder="宽">
+              <span>x</span>
+              <input type="number" id="customPhotoHeightCustom" min="1" step="0.1" placeholder="高">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="photoCountCustom">照片数量:</label>
+            <input type="number" id="photoCountCustom" min="1" max="50" value="6">
+          </div>
+          
+          <div class="instructions">
+            <p><strong>自定义排版说明:</strong></p>
+            <ul>
+              <li>拖动照片可以自由调整位置</li>
+              <li>点击照片右上角的旋转按钮可以旋转照片</li>
+              <li>点击"添加照片"可以增加更多照片</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 20px;">
+          <button class="btn primary" id="generateBtn" disabled>生成排版</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="result-section">
+      <h2>排版结果</h2>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn" id="addPhotoBtn" disabled>添加照片</button>
+          <button class="btn" id="resetBtn" disabled>重置排版</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn" id="downloadBtn" disabled>下载图片</button>
+        </div>
+      </div>
+      <div class="result-area" id="resultArea">
+        <div class="placeholder">排版结果将显示在这里</div>
+      </div>
+      <div class="note">提示：拖动照片可以调整位置，点击照片右上角的旋转按钮可以旋转照片</div>
+    </div>
+    
+    <footer>
+      <p>© 2023 高级证件照排版工具</p>
+    </footer>
+  </div>
+
+  <script>
+    // 等待DOM加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取DOM元素
+      const photoUpload = document.getElementById('photoUpload');
+      const previewArea = document.getElementById('previewArea');
+      const rotateControls = document.getElementById('rotateControls');
+      const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+      const rotateRightBtn = document.getElementById('rotateRightBtn');
+      const rotationAngle = document.getElementById('rotationAngle');
+      const pageSize = document.getElementById('pageSize');
+      const customPageSize = document.getElementById('customPageSize');
+      const photoSize = document.getElementById('photoSize');
+      const customPhotoSize = document.getElementById('customPhotoSize');
+      const generateBtn = document.getElementById('generateBtn');
+      const resultArea = document.getElementById('resultArea');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const addPhotoBtn = document.getElementById('addPhotoBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const addRowBtn = document.getElementById('addRowBtn');
+      const rowsContainer = document.getElementById('rowsContainer');
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      // 自定义排版相关元素
+      const customPageSizeCustom = document.getElementById('customPageSizeCustom');
+      const customPageSizeCustomDiv = document.getElementById('customPageSizeCustomDiv');
+      const photoSizeCustom = document.getElementById('photoSizeCustom');
+      const customPhotoSizeCustom = document.getElementById('customPhotoSizeCustom');
+      
+      // 全局变量
+      let uploadedImage = null;
+      let currentRotation = 0;
+      let isCustomLayout = false;
+      let photoCells = [];
+      let isDragging = false;
+      let currentDragElement = null;
+      let offsetX = 0;
+      let offsetY = 0;
+      let rowCount = 1;
+      
+      // 尺寸预设（以厘米为单位）
+      const pageSizes = {
+        '6x4': { width: 15.24, height: 10.16 },
+        '5x7': { width: 12.7, height: 17.78 },
+        '4x6': { width: 10.16, height: 15.24 },
+        'a4': { width: 21, height: 29.7 }
+      };
+      
+      const photoSizes = {
+        '1x1': { width: 2.5, height: 3.5 },
+        '2x2': { width: 3.5, height: 5.3 },
+        'small-2': { width: 3.3, height: 4.8 },
+        'passport': { width: 3.3, height: 4.8 },
+        'visa': { width: 3.3, height: 4.8 }
+      };
+      
+      // 标签切换
+      if (tabBtns && tabBtns.length > 0) {
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            isCustomLayout = tabId === 'custom';
+            
+            // 更新标签状态
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            const tabContent = document.getElementById(tabId + 'Tab');
+            if (tabContent) tabContent.classList.add('active');
+          });
+        });
+      }
+      
+      // 添加新行函数
+      function addNewRow() {
+        rowCount++;
+        const newRow = document.createElement('div');
+        newRow.className = 'layout-row';
+        newRow.innerHTML = `
+          <label>第${rowCount}行:</label>
+          <select class="row-orientation">
+            <option value="horizontal">横向照片</option>
+            <option value="vertical">纵向照片</option>
+          </select>
+          <input type="number" class="row-count" min="1" max="10" value="3" style="width: 60px; margin-left: 10px;">
+        `;
+        if (rowsContainer) {
+          rowsContainer.appendChild(newRow);
+        }
+      }
+      
+      // 事件监听器 - 添加安全检查
+      if (photoUpload) photoUpload.addEventListener('change', handlePhotoUpload);
+      if (pageSize) pageSize.addEventListener('change', toggleCustomPageSize);
+      if (photoSize) photoSize.addEventListener('change', toggleCustomPhotoSize);
+      if (customPageSizeCustom) customPageSizeCustom.addEventListener('change', toggleCustomPageSizeCustom);
+      if (photoSizeCustom) photoSizeCustom.addEventListener('change', toggleCustomPhotoSizeCustom);
+      if (rotateLeftBtn) rotateLeftBtn.addEventListener('click', function() { rotateImage(-90); });
+      if (rotateRightBtn) rotateRightBtn.addEventListener('click', function() { rotateImage(90); });
+      if (generateBtn) generateBtn.addEventListener('click', generateLayout);
+      if (downloadBtn) downloadBtn.addEventListener('click', downloadLayout);
+      if (addPhotoBtn) addPhotoBtn.addEventListener('click', addPhoto);
+      if (resetBtn) resetBtn.addEventListener('click', resetLayout);
+      if (addRowBtn) addRowBtn.addEventListener('click', function() {
+        addNewRow();
+      });
+      
+      // 处理照片上传
+      function handlePhotoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImage = new Image();
+          uploadedImage.onload = function() {
+            currentRotation = 0;
+            updateRotationDisplay();
+            showPreview();
+            rotateControls.classList.remove('hidden');
+            generateBtn.disabled = false;
+          };
+          uploadedImage.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      // 显示预览
+      function showPreview() {
+        previewArea.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '100%';
+        wrapper.style.height = '100%';
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.justifyContent = 'center';
+        wrapper.style.transform = `rotate(${currentRotation}deg)`;
+        wrapper.style.transformOrigin = 'center';
+        
+        const img = document.createElement('img');
+        img.src = uploadedImage.src;
+        img.className = 'preview-image';
+        
+        wrapper.appendChild(img);
+        previewArea.appendChild(wrapper);
+      }
+      
+      // 旋转图片
+      function rotateImage(angle) {
+        currentRotation = (currentRotation + angle) % 360;
+        if (currentRotation < 0) currentRotation += 360;
+        updateRotationDisplay();
+        showPreview();
+      }
+      
+      // 更新旋转角度显示
+      function updateRotationDisplay() {
+        rotationAngle.textContent = `${currentRotation}°`;
+      }
+      
+      // 切换自定义页面尺寸
+      function toggleCustomPageSize() {
+        const isCustom = pageSize.value === 'custom';
+        customPageSize.classList.toggle('hidden', !isCustom);
+      }
+      
+      // 切换自定义照片尺寸
+      function toggleCustomPhotoSize() {
+        const isCustom = photoSize.value === 'custom';
+        customPhotoSize.classList.toggle('hidden', !isCustom);
+      }
+      
+      // 切换自定义排版的自定义页面尺寸
+      function toggleCustomPageSizeCustom() {
+        const isCustom = customPageSizeCustom.value === 'custom';
+        customPageSizeCustomDiv.classList.toggle('hidden', !isCustom);
+      }
+      
+      // 切换自定义排版的自定义照片尺寸
+      function toggleCustomPhotoSizeCustom() {
+        const isCustom = photoSizeCustom.value === 'custom';
+        customPhotoSizeCustom.classList.toggle('hidden', !isCustom);
+      }
+      
+      // 获取页面尺寸
+      function getPageDimensions(isCustomTab) {
+        let pageSizeSelect, customWidthInput, customHeightInput, pageOrientationSelect;
+        
+        if (isCustomTab) {
+          pageSizeSelect = customPageSizeCustom;
+          customWidthInput = document.getElementById('customPageWidthCustom');
+          customHeightInput = document.getElementById('customPageHeightCustom');
+          pageOrientationSelect = document.getElementById('pageOrientationCustom');
+        } else {
+          pageSizeSelect = pageSize;
+          customWidthInput = document.getElementById('customPageWidth');
+          customHeightInput = document.getElementById('customPageHeight');
+          pageOrientationSelect = document.getElementById('pageOrientation');
+        }
+        
+        let pageWidth, pageHeight;
+        if (pageSizeSelect.value === 'custom') {
+          pageWidth = parseFloat(customWidthInput.value);
+          pageHeight = parseFloat(customHeightInput.value);
+          
+          if (!pageWidth || !pageHeight) {
+            alert('请输入有效的页面尺寸');
+            return null;
+          }
+        } else {
+          const selectedSize = pageSizes[pageSizeSelect.value];
+          pageWidth = selectedSize.width;
+          pageHeight = selectedSize.height;
+        }
+        
+        // 应用页面方向
+        if (pageOrientationSelect.value === 'landscape') {
+          [pageWidth, pageHeight] = [pageHeight, pageWidth];
+        }
+        
+        return { width: pageWidth, height: pageHeight };
+      }
+      
+      // 获取照片尺寸
+      function getPhotoDimensions(isCustomTab, rotation = 0) {
+        let photoSizeSelect, customWidthInput, customHeightInput;
+        
+        if (isCustomTab) {
+          photoSizeSelect = photoSizeCustom;
+          customWidthInput = document.getElementById('customPhotoWidthCustom');
+          customHeightInput = document.getElementById('customPhotoHeightCustom');
+        } else {
+          photoSizeSelect = photoSize;
+          customWidthInput = document.getElementById('customPhotoWidth');
+          customHeightInput = document.getElementById('customPhotoHeight');
+        }
+        
+        let photoWidth, photoHeight;
+        if (photoSizeSelect.value === 'custom') {
+          photoWidth = parseFloat(customWidthInput.value);
+          photoHeight = parseFloat(customHeightInput.value);
+          
+          if (!photoWidth || !photoHeight) {
+            alert('请输入有效的照片尺寸');
+            return null;
+          }
+        } else {
+          const selectedSize = photoSizes[photoSizeSelect.value];
+          photoWidth = selectedSize.width;
+          photoHeight = selectedSize.height;
+        }
+        
+        // 根据旋转角度调整照片尺寸
+        const isRotated = rotation === 90 || rotation === 270;
+        if (isRotated) {
+          [photoWidth, photoHeight] = [photoHeight, photoWidth];
+        }
+        
+        return { width: photoWidth, height: photoHeight, isRotated };
+      }
+      
+      // 生成排版
+      function generateLayout() {
+        if (!uploadedImage) {
+          alert('请先上传照片');
+          return;
+        }
+        
+        // 清空结果区域
+        if (resultArea) {
+          resultArea.innerHTML = '';
+          photoCells = [];
+          
+          // 获取页面尺寸
+          const pageDimensions = getPageDimensions(isCustomLayout);
+          if (!pageDimensions) return;
+          
+          // 创建画布
+          const canvas = document.createElement('div');
+          canvas.className = 'canvas';
+          canvas.id = 'layoutCanvas';
+          canvas.style.width = `${pageDimensions.width}cm`;
+          canvas.style.height = `${pageDimensions.height}cm`;
+          
+          if (isCustomLayout) {
+            // 自定义排版模式
+            generateCustomLayout(canvas, pageDimensions);
+          } else {
+            // 自动排版模式
+            generateAutoLayout(canvas, pageDimensions);
+          }
+          
+          resultArea.appendChild(canvas);
+          
+          // 启用工具栏按钮
+          if (downloadBtn) downloadBtn.disabled = false;
+          if (addPhotoBtn) addPhotoBtn.disabled = isCustomLayout ? false : true;
+          if (resetBtn) resetBtn.disabled = false;
+        }
+      }
+      
+      // 生成自动排版
+      function generateAutoLayout(canvas, pageDimensions) {
+        // 获取行设置
+        const rows = document.querySelectorAll('.layout-row');
+        
+        // 获取照片间距（毫米转厘米）
+        const marginInput = document.getElementById('photoMargin');
+        const marginValue = marginInput ? parseInt(marginInput.value, 10) / 10 : 0.5; // 默认5mm
+        
+        // 计算每行的照片和位置
+        let currentY = marginValue;
+        
+        if (rows && rows.length > 0) {
+          rows.forEach((row, rowIndex) => {
+            const orientationSelect = row.querySelector('.row-orientation');
+            const countInput = row.querySelector('.row-count');
+            
+            if (!orientationSelect || !countInput) return;
+            
+            const orientation = orientationSelect.value;
+            const count = parseInt(countInput.value, 10);
+            
+            // 获取照片尺寸，根据行的方向设置旋转角度
+            const rotation = orientation === 'vertical' ? 90 : 0;
+            const photoDimensions = getPhotoDimensions(false, rotation);
+            if (!photoDimensions) return;
+            
+            // 计算每行的照片位置
+            const totalWidth = count * photoDimensions.width + (count + 1) * marginValue;
+            let startX = (pageDimensions.width - totalWidth) / 2 + marginValue;
+            
+            for (let i = 0; i < count; i++) {
+              const photoCell = createPhotoCell(
+                photoDimensions.width,
+                photoDimensions.height,
+                startX,
+                currentY,
+                rotation
+              );
+              
+              canvas.appendChild(photoCell);
+              photoCells.push({
+                element: photoCell,
+                rotation: rotation
+              });
+              
+              startX += photoDimensions.width + marginValue;
+            }
+            
+            // 更新Y坐标，为下一行做准备
+            currentY += photoDimensions.height + marginValue;
+          });
+        } else {
+          // 如果没有行设置，创建默认的一行
+          const photoDimensions = getPhotoDimensions(false, 0);
+          if (photoDimensions) {
+            const count = 3; // 默认3列
+            const totalWidth = count * photoDimensions.width + (count + 1) * marginValue;
+            let startX = (pageDimensions.width - totalWidth) / 2 + marginValue;
+            
+            for (let i = 0; i < count; i++) {
+              const photoCell = createPhotoCell(
+                photoDimensions.width,
+                photoDimensions.height,
+                startX,
+                currentY,
+                0
+              );
+              
+              canvas.appendChild(photoCell);
+              photoCells.push({
+                element: photoCell,
+                rotation: 0
+              });
+              
+              startX += photoDimensions.width + marginValue;
+            }
+          }
+        }
+      }
+      
+      // 生成自定义排版
+      function generateCustomLayout(canvas, pageDimensions) {
+        // 获取照片尺寸
+        const photoDimensions = getPhotoDimensions(true, currentRotation);
+        if (!photoDimensions) return;
+        
+        // 获取照片数量
+        const countInput = document.getElementById('photoCountCustom');
+        const count = countInput ? parseInt(countInput.value, 10) : 6; // 默认6张
+        
+        // 计算每个照片的初始位置（均匀分布）
+        const cols = Math.ceil(Math.sqrt(count));
+        const rows = Math.ceil(count / cols);
+        
+        const cellWidth = pageDimensions.width / cols;
+        const cellHeight = pageDimensions.height / rows;
+        
+        for (let i = 0; i < count; i++) {
+          const row = Math.floor(i / cols);
+          const col = i % cols;
+          
+          const x = col * cellWidth + (cellWidth - photoDimensions.width) / 2;
+          const y = row * cellHeight + (cellHeight - photoDimensions.height) / 2;
+          
+          const photoCell = createPhotoCell(
+            photoDimensions.width,
+            photoDimensions.height,
+            x,
+            y,
+            currentRotation,
+            true
+          );
+          
+          canvas.appendChild(photoCell);
+          photoCells.push({
+            element: photoCell,
+            rotation: currentRotation
+          });
+        }
+      }
+      
+      // 创建照片单元格
+      function createPhotoCell(width, height, x, y, rotation = 0, draggable = false) {
+        const photoCell = document.createElement('div');
+        photoCell.className = 'photo-cell';
+        photoCell.style.width = `${width}cm`;
+        photoCell.style.height = `${height}cm`;
+        photoCell.style.left = `${x}cm`;
+        photoCell.style.top = `${y}cm`;
+        
+        // 创建照片包装器
+        const photoWrapper = document.createElement('div');
+        photoWrapper.className = 'photo-wrapper';
+        photoWrapper.style.transform = `rotate(${rotation}deg)`;
+        
+        // 创建照片
+        const photo = document.createElement('img');
+        photo.src = uploadedImage.src;
+        photo.className = 'photo';
+        
+        photoWrapper.appendChild(photo);
+        photoCell.appendChild(photoWrapper);
+        
+        if (draggable) {
+          // 添加旋转按钮
+          const rotateHandle = document.createElement('div');
+          rotateHandle.className = 'rotate-handle';
+          rotateHandle.innerHTML = '⟳';
+          rotateHandle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // 找到当前照片的索引
+            const index = photoCells.findIndex(cell => cell.element === photoCell);
+            if (index === -1) return;
+            
+            // 更新旋转角度
+            photoCells[index].rotation = (photoCells[index].rotation + 90) % 360;
+            photoWrapper.style.transform = `rotate(${photoCells[index].rotation}deg)`;
+            
+            // 如果旋转了90°或270°，交换宽高
+            const isRotated = photoCells[index].rotation === 90 || photoCells[index].rotation === 270;
+            if (isRotated !== (photoCell.dataset.rotated === 'true')) {
+              // 交换宽高
+              const temp = photoCell.style.width;
+              photoCell.style.width = photoCell.style.height;
+              photoCell.style.height = temp;
+              photoCell.dataset.rotated = isRotated ? 'true' : 'false';
+            }
+          });
+          photoCell.appendChild(rotateHandle);
+          
+          // 添加拖动功能
+          photoCell.dataset.rotated = 'false';
+          photoCell.addEventListener('mousedown', startDrag);
+        }
+        
+        return photoCell;
+      }
+      
+      // 开始拖动
+      function startDrag(e) {
+        if (e.target.className === 'rotate-handle') return;
+        
+        e.preventDefault();
+        
+        currentDragElement = this;
+        isDragging = true;
+        
+        // 计算鼠标点击位置与元素左上角的偏移
+        const rect = currentDragElement.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        
+        // 添加拖动样式
+        currentDragElement.classList.add('dragging');
+        
+        // 添加鼠标移动和松开事件
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', dragEnd);
+      }
+      
+      // 拖动移动
+      function dragMove(e) {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        
+        // 获取画布位置和尺寸
+        const canvas = document.getElementById('layoutCanvas');
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        // 计算新位置
+        let newX = e.clientX - canvasRect.left - offsetX;
+        let newY = e.clientY - canvasRect.top - offsetY;
+        
+        // 限制在画布内
+        newX = Math.max(0, Math.min(canvasRect.width - currentDragElement.offsetWidth, newX));
+        newY = Math.max(0, Math.min(canvasRect.height - currentDragElement.offsetHeight, newY));
+        
+        // 更新位置（转换为厘米）
+        const cmPerPx = parseFloat(canvas.style.width) / canvasRect.width;
+        currentDragElement.style.left = `${newX * cmPerPx}cm`;
+        currentDragElement.style.top = `${newY * cmPerPx}cm`;
+      }
+      
+      // 结束拖动
+      function dragEnd() {
+        if (!isDragging) return;
+        
+        // 移除拖动样式
+        currentDragElement.classList.remove('dragging');
+        
+        // 重置拖动状态
+        isDragging = false;
+        currentDragElement = null;
+        
+        // 移除鼠标事件
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
+      }
+      
+      // 添加照片
+      function addPhoto() {
+        if (!uploadedImage || !isCustomLayout) return;
+        
+        const canvas = document.getElementById('layoutCanvas');
+        if (!canvas) return;
+        
+        // 获取画布尺寸
+        const canvasRect = canvas.getBoundingClientRect();
+        const canvasWidth = parseFloat(canvas.style.width);
+        const canvasHeight = parseFloat(canvas.style.height);
+        
+        // 获取照片尺寸
+        const photoDimensions = getPhotoDimensions(true, currentRotation);
+        if (!photoDimensions) return;
+        
+        // 计算中心位置
+        const centerX = canvasWidth / 2 - photoDimensions.width / 2;
+        const centerY = canvasHeight / 2 - photoDimensions.height / 2;
+        
+        // 创建照片单元格
+        const photoCell = createPhotoCell(
+          photoDimensions.width,
+          photoDimensions.height,
+          centerX,
+          centerY,
+          currentRotation,
+          true
+        );
+        
+        canvas.appendChild(photoCell);
+        photoCells.push({
+          element: photoCell,
+          rotation: currentRotation
+        });
+      }
+      
+      // 重置排版
+      function resetLayout() {
+        generateLayout();
+      }
+      
+      // 下载排版
+      function downloadLayout() {
+        alert('由于环境限制，下载功能暂不可用。请使用浏览器的截图功能保存排版结果。');
+      }
+    });
+  </script>
+</body>
+</html>
