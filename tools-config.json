@@ -52,6 +52,12 @@
             "description": "在线编写并预览UML代码",
             "url": "tools/uml-preview.html",
             "icon": "🖥️"
+        },
+        {
+            "title": "飞书文档转Markdown",
+            "description": "飞书文档转Markdown",
+            "url": "tools/feishu_2_md.html",
+            "icon": "🖥️"
         }
     ]
 }
