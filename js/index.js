@@ -27,7 +27,7 @@ function renderToolCards(tools) {
             <div class="tool-icon">${tool.icon || '⚙️'}</div>
             <h2>${tool.title}</h2>
             <p>${tool.description}</p>
-            <a href="${tool.url}">立即使用</a>
+            <a href="${tool.url}" target="_blank">立即使用</a>
         </div>
     `).join('');
 
