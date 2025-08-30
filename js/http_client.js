@@ -252,3 +252,91 @@ class HttpClient {
 // 解决：将 sendRequest 函数定义在 HTML 按钮的 onclick 事件中
 // [在 html 标签中使用 onclick 绑定事件时 报错 Uncaught ReferenceError: handleClick is not defined\_htmlbuttonelement.onclick-CSDN 博客](https://blog.csdn.net/JZH20/article/details/109572181)
 // [报错 Uncaught ReferenceError: xxx is not defined at HTMLButtonElement.onclick\_ones is not defined at htmlbuttonelement.onclick-CSDN 博客](https://blog.csdn.net/qq_39019865/article/details/79867091)
+
+
+// [分享一些前端常用功能集合我在做一些\`H5\`单页（活动页）的时候，像我这种最求极致加载速度，且不喜欢用第三方库的人，所以决 - 掘金](https://juejin.cn/post/6844904066418491406#heading-1)
+// [怎么用原生js获取json | PingCode智库](https://docs.pingcode.com/baike/3867386)
+/**
+ * 基于`fetch`请求 [MDN文档](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API)
+ * @param {"GET"|"POST"|"PUT"|"DELETE"} method 请求方法
+ * @param {string} url 请求路径
+ * @param {object|FormData|string=} data 传参对象，json、formdata、普通表单字符串
+ * @param {RequestInit & { timeout: number }} option 其他配置
+ */
+function fetchRequest(method, url, data = {}, option = {}) {
+    /** 非`GET`请求传参 */
+    let body = undefined;
+    /** `GET`请求传参 */
+    let query = "";
+    /** 默认请求头 */
+    const headers = {};
+    /** 超时毫秒 */
+    const timeout = option.timeout || 8000;
+    /** 传参数据类型 */
+    const dataType = checkType(data);
+    // 传参处理
+    if (method === "GET") {
+      // 解析对象传参
+      if (dataType === "object") {
+        for (const key in data) {
+          query += "&" + key + "=" + data[key];
+        }
+      } else {
+        console.warn("fetch 传参处理 GET 传参有误，需要的请求参数应为 object 类型");
+      }
+      if (query) {
+        query = "?" + query.slice(1);
+        url += query;
+      }
+    } else {
+      body = ["object", "array"].includes(dataType) ? JSON.stringify(data) : data;
+    }
+    // 设置对应的传参请求头，GET 方法不需要
+    if (method !== "GET") {
+      switch (dataType) {
+        case "object":
+        case "array":
+          headers["Content-Type"] = "application/json";
+          break;
+  
+        case "string":
+          headers["Content-Type"] = "application/x-www-form-urlencoded"; // 表单请求，`id=1&type=2` 非`new FormData()`
+          break;
+  
+        default:
+          break;
+      }
+    }
+    const controller = new AbortController();
+    let timer;
+    return new Promise(function(resolve, reject) {
+      fetch(url, {
+        method,
+        body,
+        headers,
+        signal: controller.signal,
+        // credentials: "include",  // 携带cookie配合后台用
+        // mode: "cors",            // 配合后台设置用的跨域模式
+        ...option,
+      }).then(response => {
+        // 把响应的信息转为`json`
+        return response.json();
+      }).then(res => {
+        clearTimeout(timer);
+        resolve(res);
+      }).catch(error => {
+        clearTimeout(timer);
+        reject(error);
+      });
+      timer = setTimeout(function() {
+        reject("fetch is timeout");
+        controller.abort();
+      }, timeout);
+    });
+}
+  
+//   调用
+fetch("http://xxx.com/api/get").then(response => response.json()).then(res => {
+console.log("请求成功", res);
+})
+
