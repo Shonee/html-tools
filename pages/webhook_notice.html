@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>webhook消息推送</title>
+</head>
+
+<!-- 
+webhook URL如何获取: 
+- 微信群创建一个机器人就有URL了，这个百度搜索一下也有详细的教程 
+- 只有企业微信的内部群可以使用，外部群没有
+-->
+
+<body>
+    <h1>webhook 消息推送</h1>
+    <!-- 输入Webhook URL的表单 -->
+    <label for="webhookUrl">Webhook URL:</label>
+    <input type="text" id="webhookUrl" placeholder="请输入Webhook URL">
+    <br><br>
+    <!-- 输入消息内容的表单 -->
+    <label for="message">消息内容:</label>
+    <input type="text" id="message" placeholder="请输入消息内容">
+    <br><br>
+    <!-- 触发消息发送的按钮 -->
+    <button onclick="sendWecomMessage()">发送消息</button>
+    <!-- 显示状态信息的地方 -->
+    <p id="status"></p>
+ 
+    <script>
+        // 定义发送消息的函数
+        async function sendWecomMessage() {
+            // 获取Webhook URL
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            // 获取消息内容
+            const message = document.getElementById('message').value;
+ 
+            // 检查Webhook URL和消息内容是否为空
+            if (!webhookUrl.trim() || !message.trim()) {
+                // 如果为空，则显示错误信息
+                document.getElementById('status').innerText = '请输入有效的Webhook URL和消息内容。';
+                return;
+            }
+ 
+            // 构造消息体
+            const data = {
+                msgtype: 'text', // 指定消息类型为文本
+                text: {
+                    content: message, // 文本消息的内容
+                },
+            };
+            // 将消息体对象转换为JSON字符串
+            const payload = JSON.stringify(data);
+ 
+            try {
+                // 发送POST请求到指定的Webhook URL
+                const response = await fetch(webhookUrl, {
+                    method: 'POST', // 使用POST方法
+                    headers: {
+                        'Content-Type': 'application/json', // 设置请求头
+                    },
+                    body: payload, // 请求体
+                    mode: 'no-cors', // 关闭CORS检查，使得请求变为不透明响应
+                });
+                // 注意：在这种模式下，您无法访问response对象，因为它是一个不透明的响应
+                // 在控制台输出消息发送成功的提示
+                document.getElementById('status').innerText = '消息已发送。';
+            } catch (error) {
+                // 捕获并处理请求过程中的错误
+                // 在控制台输出错误信息
+                document.getElementById('status').innerText = '发送消息时出错: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
