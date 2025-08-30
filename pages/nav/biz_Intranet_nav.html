@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具导航</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section-title {
+            padding: 20px 30px;
+            border-left: 4px solid #1890ff;
+            font-size: 18px;
+            font-weight: 500;
+            background: #fafafa;
+            margin: 0;
+        }
+
+        .capability-map {
+            padding: 30px;
+        }
+
+        .domain-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .domain-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .domain-label {
+            width: 80px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            text-align: center;
+            line-height: 1.4;
+            margin-right: 30px;
+            margin-top: 10px;
+        }
+
+        .domain-items {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+        }
+
+        .domain-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .domain-item:hover {
+            background-color: #f0f8ff;
+            color: #1890ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+        }
+
+        .domain-item i {
+            font-size: 16px;
+            margin-right: 8px;
+            color: #1890ff;
+        }
+
+        .internal-external {
+            padding: 0;
+        }
+
+        .tab-container {
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .tabs {
+            display: flex;
+            padding: 0 30px;
+        }
+
+        .tab {
+            padding: 16px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #1890ff;
+            border-bottom-color: #1890ff;
+        }
+
+        .tab:hover {
+            color: #1890ff;
+        }
+
+        .tab-content {
+            padding: 30px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+        }
+
+        .tool-item {
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            border: 1px solid #f0f0f0;
+        }
+
+        .tool-item:hover {
+            background-color: #f0f8ff;
+            color: #1890ff;
+            border-color: #1890ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .domain-items {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .domain-row {
+                flex-direction: column;
+            }
+            
+            .domain-label {
+                width: 100%;
+                text-align: left;
+                margin-bottom: 15px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>工具导航</h1>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">能力地图</h2>
+            <div class="capability-map">
+                <div class="domain-row">
+                    <div class="domain-label">电商<br>领域</div>
+                    <div class="domain-items" id="ecommerce-domain"></div>
+                </div>
+                <div class="domain-row">
+                    <div class="domain-label">协同<br>领域</div>
+                    <div class="domain-items" id="collaboration-domain"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section internal-external">
+            <h2 class="section-title">阿里内外</h2>
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" data-tab="common">常用</div>
+                    <div class="tab" data-tab="hr">HR</div>
+                    <div class="tab" data-tab="admin">行政</div>
+                    <div class="tab" data-tab="finance">财务</div>
+                    <div class="tab" data-tab="it">IT</div>
+                    <div class="tab" data-tab="study">学习</div>
+                    <div class="tab" data-tab="other">其他</div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <div class="tools-grid" id="tools-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock 数据
+        const mockData = {
+            ecommerceDomain: [
+                { name: '会员域', icon: 'fas fa-users' },
+                { name: '店铺域', icon: 'fas fa-store' },
+                { name: '招商域', icon: 'fas fa-handshake' },
+                { name: '商品域', icon: 'fas fa-box' },
+                { name: '商户域', icon: 'fas fa-building' },
+                { name: '营销域', icon: 'fas fa-bullhorn' },
+                { name: '交易域', icon: 'fas fa-shopping-cart' },
+                { name: '评价域', icon: 'fas fa-star' },
+                { name: '数据域', icon: 'fas fa-chart-bar' },
+                { name: '汇金域', icon: 'fas fa-coins' },
+                { name: '规则域', icon: 'fas fa-balance-scale' },
+                { name: '内容域', icon: 'fas fa-file-alt' }
+            ],
+            collaborationDomain: [
+                { name: '界面域', icon: 'fas fa-desktop' },
+                { name: '法务域', icon: 'fas fa-gavel' },
+                { name: '财务域', icon: 'fas fa-calculator' },
+                { name: '安全域', icon: 'fas fa-shield-alt' },
+                { name: '问答域', icon: 'fas fa-question-circle' },
+                { name: '测试域', icon: 'fas fa-vial' }
+            ],
+            internalTools: {
+                common: [
+                    '阿里味儿', '小邮局'
+                ],
+                hr: [
+                    'i 新福系统', '提交费用报销'
+                ],
+                admin: [
+                    '假期系统', '阿里部'
+                ],
+                finance: [
+                    '招聘系统', 'IT服务中心'
+                ],
+                it: [
+                    '绩效系统', '法务中心'
+                ],
+                study: [
+                    '学习平台'
+                ],
+                other: [
+                    '会议室预订'
+                ]
+            }
+        };
+
+        // 渲染能力地图
+        function renderCapabilityMap() {
+            const ecommerceContainer = document.getElementById('ecommerce-domain');
+            const collaborationContainer = document.getElementById('collaboration-domain');
+
+            // 渲染电商领域
+            mockData.ecommerceDomain.forEach(item => {
+                const domainItem = document.createElement('a');
+                domainItem.className = 'domain-item';
+                domainItem.href = '#';
+                domainItem.innerHTML = `
+                    <i class="${item.icon}"></i>
+                    <span>${item.name}</span>
+                `;
+                ecommerceContainer.appendChild(domainItem);
+            });
+
+            // 渲染协同领域
+            mockData.collaborationDomain.forEach(item => {
+                const domainItem = document.createElement('a');
+                domainItem.className = 'domain-item';
+                domainItem.href = '#';
+                domainItem.innerHTML = `
+                    <i class="${item.icon}"></i>
+                    <span>${item.name}</span>
+                `;
+                collaborationContainer.appendChild(domainItem);
+            });
+        }
+
+        // 渲染工具列表
+        function renderTools(category) {
+            const toolsGrid = document.getElementById('tools-grid');
+            toolsGrid.innerHTML = '';
+
+            const tools = mockData.internalTools[category] || [];
+            tools.forEach(tool => {
+                const toolItem = document.createElement('a');
+                toolItem.className = 'tool-item';
+                toolItem.href = '#';
+                toolItem.textContent = tool;
+                toolsGrid.appendChild(toolItem);
+            });
+        }
+
+        // 标签页切换
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有活动状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前活动状态
+                    tab.classList.add('active');
+                    // 渲染对应工具
+                    renderTools(tab.dataset.tab);
+                });
+            });
+        }
+
+        // 初始化页面
+        function init() {
+            renderCapabilityMap();
+            renderTools('common'); // 默认显示常用工具
+            initTabs();
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
