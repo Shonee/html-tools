@@ -1,0 +1,74 @@
+
+<!-- 
+ [将文章内的超链接改成卡片式链接展示-腾讯云开发者社区-腾讯云](https://cloud.tencent.com/developer/article/2234323)
+ [Lete114/CardLink: 为页面上的超链接生成卡片式链接 | Generate card-based links for hyperlinks on the page](https://github.com/Lete114/CardLink)
+ github 地址： [lete114/CardLink: 为页面上的超链接生成卡片式链接 | Generate card-based links for hyperlinks on the page](https://github.com/Lete114/CardLink) 
+ https://lete114.github.io/CardLink/
+ -->
+ 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<div id="input">
+    <textarea id="input-text">
+    </textarea>
+    <button id="btn">生成卡片式链接</button>
+</div>
+
+<article id="post-content">
+    <a href="https://cloud.tencent.com/developer/article/2234323" target="_blank">
+        <!-- [将文章内的超链接改成卡片式链接展示-腾讯云开发者社区-腾讯云](https://cloud.tencent.com/developer/article/2234323) -->
+    </a>
+</article>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/cardlink"></script>
+    <script>
+        // 1.cardLink.server => 在执行cardLink 之前预设代理服务器
+        // 2.只有发生跨域请求时，cardLink 才会将请求发送到代理服务器
+        cardLink.server = 'https://api.allorigins.win/raw?url='
+        cardLink(document.querySelectorAll('#post-content a[target=_blank]'))
+
+        // 标准方式：为<article></article>标签下所有打开新标签窗口的a标签生成卡片链接。
+        // cardLink(document.querySelectorAll('article a[target=_blank]'))
+
+        // 为div的id=post-content内的超链接，采用卡片式。
+        // cardLink(document.querySelectorAll('#post-content a[target=_blank]'))
+        
+    </script>
+
+    <!-- 点击 id = btn 触发生成 a 标签列表，从而生成卡片式链接 -->
+     <script>
+        document.getElementById('btn').addEventListener('click', function () {
+            // 作为当此 div 的 id ，否则 生成 card 会作用在所有 a 标签上，导致重复生成
+            timestamp = Date.now()
+            let div = document.createElement('div')
+            cur_id = 'post-content' + timestamp
+            div.id = cur_id
+            // 将 div 标签放入 article 标签中
+            document.getElementById('post-content').appendChild(div)
+
+            // 获取输入的 url 列表
+            urls = document.getElementById('input-text').value.split('\n')
+            for (let i = 0; i < urls.length; i++) {
+                // 创建 a 标签
+                let a = document.createElement('a')
+                // 设置 a 标签的 href 属性
+                a.href = urls[i]
+                // 设置 a 标签的 target 属性
+                a.target = '_blank'
+                // 将 a 标签放入 article 标签中
+                div.appendChild(a)
+            }
+
+            cardLink.server = 'https://api.allorigins.win/raw?url='
+            cardLink(document.querySelectorAll('#' + cur_id + ' a[target=_blank]'))
+        })
+    </script>
+
+</body>
+</html>
