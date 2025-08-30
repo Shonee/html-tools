@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="Author" content="Noah">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="favicon" href="favicon.ico">
+  <title>上传csv文件渲染为html页面</title>
+  <meta name="keywords" content="文件上传"/>
+  <meta name="description" content="文件上传"/>
+</head>
+
+<style>
+    output {
+    display: block;
+    margin-top: 4em;
+    font-family: monospace;
+    font-size: .8em;
+}
+
+    /* 设置表格样式 */
+    table {
+        margin: 20px auto;
+        border-collapse: collapse;
+        width: 80%;
+        background-color: #fff;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    caption {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        padding-bottom: 10px;
+    }
+
+    /* 设置奇偶行的背景色 */
+    tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    /* 设置表格列的边框样式和文本居中 */
+    th, td {
+        border: 1px solid #ccc;
+        text-align: center;
+        padding: 8px;
+    }
+</style>
+
+
+<body>
+<h1>Title!</h1>
+<p>Please enter the subject(s) that you wish to search for:</p>
+<input id="numb" type="text"/>
+<button onclick="myFunction()">Click me to see! :) </button>
+
+<div>
+    <p>Select local CSV File:</p>
+    <input id="input" type="file" accept=".csv">
+  </div>
+  <!-- <pre id="out"><p>File contents will appear here</p></pre> -->
+  <output id="out">
+    file contents will appear here
+</output>
+
+<table id="output"></table>
+
+
+<script>
+function myFunction() {
+    var splitResearchArea = [];
+    var textInput = document.getElementById('numb').value;
+    var splitTextInput = textInput.split(",");
+
+  for(var i =0; i<splitTextInput.length; i++) {
+    var spltResearchArea = splitTextInput[i];
+    splitResearchArea.push(spltResearchArea);
+  }
+}
+
+const fileInput = document.getElementById('csv')
+const readFile = () => {
+  const reader = new FileReader()
+  reader.onload = () => {
+    document.getElementById('out').innerHTML = reader.result
+  }
+  // start reading the file. When it is done, calls the onload event defined above.
+  reader.readAsBinaryString(fileInput.files[0])
+}
+
+fileInput.addEventListener('change', readFile)
+</script>
+
+<script>
+    // 获取 input 标签和 output 标签
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+
+    // 当用户选择文件时执行
+    input.addEventListener('change', function() {
+      
+      //获取读取文件的File对象
+      var selectedFile = input.files[0];
+      var name = selectedFile.name; //读取选中文件的文件名
+      var size = selectedFile.size; //读取选中文件的大小
+      console.log("文件名:" + name + "大小:" + size);
+    
+        // 读取文件
+      const reader = new FileReader();
+      reader.readAsText(selectedFile, "GB2312"); //读取文件的内容,参数二设置编码，不设置默认utf-8
+ 
+      // 当文件读取完成时执行
+      reader.onload = function() {
+        // 解析 CSV 文件
+        const csv = reader.result;
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',');
+        const data = lines.slice(1).map(line => line.split(','));
+
+        // 渲染表格
+        output.innerHTML = `
+          <thead>
+            <tr>
+              ${headers.map(header => `<th>${header}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(row => `
+              <tr>
+                ${row.map(cell => `<td>${cell}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+      };
+    });
+  </script>
+</body>
+</html>
+
