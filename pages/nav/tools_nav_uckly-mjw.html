@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>效率工具列表</title>
+  <meta charset="UTF-8">
+  <meta name="author" content="毛静文,Momo">
+  <meta name="keywords" content="开发效率工具, Efficient tool">
+  <meta name="description" content="开发效率工具, 毛静文博客, Efficient tool, Momo's Blog">
+  <meta name="baidu_union_verify" content="dd9cfc69299d0d1ec9b56132dfffce6d">
+  <meta name="baidu-site-verification" content="ywmw6HyRWPJjBpvT" />
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+    /* text-underline: none; */
+    text-decoration: none;
+    font-family: "Microsoft YaHei", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+  html, body, #app {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    color: #333333;
+  }
+  #app {
+    padding: 60px;
+    overflow: auto;
+    box-sizing: border-box;
+
+    /* 背景填充适应 */
+    background-size:100%;
+    background-attachment: fixed;
+    background-image: url(https://imgapi.xl0408.top/index.php);
+
+    /* 背景重复 */
+    /* background-repeat: no-repeat; */
+    /* background-image: url(http://upyun.luckly-mjw.cn/Assets/blog/background.jpeg); */
+  }
+  #app::-webkit-scrollbar { width: 0 !important;}
+  .title {
+    padding: 0 0 60px;
+    width: 100%;
+    color: white;
+    font-size: 50px;
+    font-weight: 800;
+    text-align: center;
+    text-shadow: 5px 2px 10px #0000009c;
+  }
+  .sum {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 6px 20px;
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    border-bottom-right-radius: 0;
+    border: 1px solid transparent;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 4;
+  }
+  a {
+    position: relative;
+    display: inline-block;
+    top: 0;
+    padding-bottom: 10px;
+    width: 310px;
+    height: 330px;
+    color: white;
+    overflow: hidden;
+    border: 1px solid #4E84E6;
+    border-radius: 4px;
+    text-decoration: none;
+    background-color: #4E84E6;
+    transition: 0.3s all;
+  }
+  .img {
+    width: 100%;
+    height: 180px;
+    background-size: cover;
+    -webkit-background-size: cover;
+  }
+  .name, .intro, .tips {
+    position: absolute;
+    left: 20px;
+    width: calc(330px - 53px);
+    transition: 0.5s all;
+  }
+  .name {
+    top: 190px;
+    font-size: 20px;
+    font-weight: bolder;
+  }
+  .name i {
+    position: relative;
+    top: -3px;
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    background-color: #56B962;
+  }
+  .intro {
+    top: 226px;
+    height: 110px;
+    font-size: 14px;
+  }
+  .star {
+    position: absolute;
+    left: 20px;
+    bottom: 10px;
+    transition: 0.5s all;
+  }
+  .tips {
+    bottom: 0;
+    left: 100%;
+    width: 312px;
+    height: 150px;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 150px;
+  }
+  .tips img {
+    display: inline-block;
+    margin-right: 6px;
+    height: 36px;
+    vertical-align: sub;
+  }
+  section {
+    display: grid;
+    justify-content: space-evenly;
+    justify-items: center;
+    grid-row-gap: 50px;
+    grid-template-columns: repeat(auto-fill, 320px);
+  }
+  section a:hover {
+    top: -10px;
+    color: #333333;
+    border: 1px solid transparent;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 2px 11px 20px 0 rgba(0, 0, 0, 0.6);
+  }
+  section a:hover .name, section a:hover .intro, section a:hover .star {
+    left: -100%;
+  }
+  section a:hover .tips {
+    left: 0;
+  }
+  .back {
+    display: block;
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    padding: 0;
+    margin: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    z-index: 3;
+    -webkit-background-size: 60px 60px;
+    transition: 0.3s all;
+    background-size: 60px 60px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url(//upyun.luckly-mjw.cn/Assets/blog/click.png);
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .back:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <a class="back" title="返回首页" href="https://webpage.shone.net.cn/"></a>
+  <div class="title">效 率 工 具</div>
+  <div class="sum">统计数据加载中...</div>
+  <section>
+    
+    <a title="Simple Spa Swo" href="https://segmentfault.com/a/1190000044232116" target="_blank">
+      <div class="img" style="background-image: url(//upyun.luckly-mjw.cn/Assets/blog/simple-apa-seo.jpeg);"></div>
+      <p class="name">低成本单页应用 SEO<i>原创</i></p>
+      <p class="intro">屏蔽框架差异，无依赖，单文本实现，直接拷贝粘贴本脚本即可实现功能，低成本实现 SPA 项目定制 SEO</p>
+      <p class="tips"><img src="imgs/click.png">点击运行</p>
+    </a>
+
+    <a title="热榜" href="./page/hotList" target="_blank">
+      <div class="img" style="background-image: url(//upyun.luckly-mjw.cn/Assets/blog/iconfont-preview.jpeg);"></div>
+      <p class="name"><i>资讯热榜</i></p>
+      <p class="intro">资讯热榜</p>
+      <p class="tips"><img src="imgs/click.png">点击运行</p>
+    </a>
+    
+    <a title="热榜" href="./utilpage/github_download.html" target="_blank">
+      <div class="img" style="background-image: url(//upyun.luckly-mjw.cn/Assets/blog/iconfont-preview.jpeg);"></div>
+      <p class="name"><i>JSON 解析</i></p>
+      <p class="intro">在线JSON 解析工具</p>
+      <p class="star"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Momo707577045/iconfont-preview?style=social"> <img alt="GitHub Repo fork" src="https://img.shields.io/github/forks/Momo707577045/iconfont-preview?style=social"></p>
+      <p class="tips"><img src="imgs/click.png">点击运行</p>
+    </a>
+
+    <a title="文本处理工具" href="./page/talk" target="_blank">
+      <div class="img" style="background-image: url(//upyun.luckly-mjw.cn/Assets/blog/iconfont-preview.jpeg);"></div>
+      <p class="name"><i>文本处理</i></p>
+      <p class="intro">文本处理工具</p>
+      <p class="tips"><img src="imgs/click.png">点击运行</p>
+    </a>
+
+  </section>
+</div>
+</body>
+<script>
+// var _hmt = _hmt || [];
+// (function () {
+//   var hm = document.createElement("script");
+//   hm.src = "https://hm.baidu.com/hm.js?1f12b0865d866ae1b93514870d93ce89";
+//   var s = document.getElementsByTagName("script")[0];
+//   s.parentNode.insertBefore(hm, s);
+// })();
+// document.getElementById('loading') && document.getElementById('loading').remove()
+// 数字格式化正则表达式
+// const toThousands = (num = 0) => num.toString().replace(/\d+/, n => n.replace(/(\d)(?=(?:\d{3})+$)/g, '$1,'))
+// 加载百度统计数据
+// fetch('http://tongji.luckly-mjw.cn/getData?siteId=14314575', { mode: 'cors' })
+//  .then(res => res.text())
+//  .then(text => {
+//    const { data } = JSON.parse(text)
+//    document.getElementsByClassName('sum')[0].innerHTML = `总访问数：${toThousands(data.pvSum)}，今日访问数：${toThousands(data.todayPvSum)}`
+//  })
+</script>
+
+</html>
