@@ -1,0 +1,235 @@
+
+<!-- [卡片悬浮效果\_js 悬浮卡片-CSDN博客](https://blog.csdn.net/qq_44223394/article/details/105810788) -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+    <!-- <link rel="stylesheet" href="./css/style.css"> -->
+    <!-- <script src="./js/jquery.min.js"></script> -->
+    <!-- <script src="./js/base.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <title>每日一句</title>
+</head>
+
+<style>
+    body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #333;
+    display: flex;
+    font-family: 'Microsoft Yahei';
+}
+
+.container {
+    width: 1000px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+}
+
+.container .card {
+    position: relative;
+    margin: auto;
+}
+
+.container .card .face {
+    width: 500px;
+    height: 300px;
+    transition: 0.8s;
+}
+
+.container .card .face.face1 {
+    position: relative;
+    background: url('') no-repeat;
+    background-size: 100% 100%;
+    display: flex;
+    z-index: 1;
+    transform: translateY(100px);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.container .card:hover .face.face1 {
+    background-size: 100% 100%;
+    transform: translateY(0);
+}
+
+.container .card .face.face1 .content {
+    opacity: 0.6;
+    transition: 0.3s;
+}
+
+.container .card:hover .face.face1 .content {
+    opacity: 0.8;
+}
+
+.container .card .face.face1 .content h3 {
+    margin: auto;
+    padding: 0;
+    color: #3f80e2;
+    font-size: 6em;
+    margin-top: 211px;
+    margin-left: 30px;
+}
+
+.container .card .face.face2 {
+    position: relative;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding: 35px;
+    box-sizing: border-box;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    transform: translateY(-100px);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.container .card:hover .face.face2 {
+    transform: translateY(0px);
+}
+
+.day {
+    position: absolute;
+    right: 30px;
+    top: 35px;
+    margin: 0;
+    padding: 0;
+}
+
+.rs {
+    position: absolute;
+    left: 15px;
+    top: 100px;
+    padding: 3px;
+}
+
+.container .card .face.face2 .author {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    right: 30px;
+    top: 220px;
+}
+
+</style>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="face face1">
+                <div class="content">
+                    <i class="fab fa-html5 fa-6x"></i>
+                    <h3 class="date"></h3>
+                </div>
+            </div>
+            <div class="face face2">
+                <div class="content">
+                    <p class="day"></p>
+                    <p class="rs"></p>
+                    <p class="author"></p>
+                </div>
+            </div>
+        </div>
+
+<script>
+    $(function() {
+    // do something
+    var now = new Date();
+    var date = now.getDate(); //得到日期
+    if (date < 10) date = '0' + date;
+    $('.date').html(date);
+    $.ajax({
+        type: 'GET',
+        url: 'http://120.25.227.106:8899/api',
+        dataType: 'json',
+        success: function(data) {
+            backUrl = data['result'][0]['backImage'];
+            content = data['result'][0]['content'];
+            author = data['result'][0]['author_name'];
+
+            $('.container .card .face.face1').css(
+                'background',
+                "url('" + backUrl + "') no-repeat"
+            );
+            $('.container .card .face.face1').css('background-size', '100% 100%');
+            $('.rs').html(content);
+            $('.author').html(author);
+        },
+        error: function(request) {
+            alert('资源获取失败');
+            // mock 数据
+                backUrl = "https://th.bing.com/th/id/OIP.p4JQA7HVN4vnqQz4jHG6LQHaKX?&rs=1&pid=ImgDetMain&o=7&rm=3";
+                content = "content";
+                author = "shone";
+
+                $('.container .card .face.face1').css(
+                    'background',
+                    "url('" + backUrl + "') no-repeat"
+                );
+                $('.container .card .face.face1').css('background-size', '100% 100%');
+                $('.rs').html(content);
+                $('.author').html(author);
+        },
+    });
+});
+
+function writeCurrentDate() {
+    var now = new Date();
+    var year = now.getFullYear(); //得到年份
+    var month = now.getMonth(); //得到月份
+    var date = now.getDate(); //得到日期
+    var day = now.getDay(); //得到周几
+    var hour = now.getHours(); //得到小时
+    var minu = now.getMinutes(); //得到分钟
+    var sec = now.getSeconds(); //得到秒
+    var MS = now.getMilliseconds(); //获取毫秒
+    var week;
+    month = month + 1;
+    if (month < 10) month = '0' + month;
+    if (date < 10) date = '0' + date;
+    if (hour < 10) hour = '0' + hour;
+    if (minu < 10) minu = '0' + minu;
+    if (sec < 10) sec = '0' + sec;
+    if (MS < 100) MS = '0' + MS;
+    var arr_week = new Array(
+        '星期日',
+        '星期一',
+        '星期二',
+        '星期三',
+        '星期四',
+        '星期五',
+        '星期六'
+    );
+    week = arr_week[day];
+    var time = '';
+    time =
+        year +
+        '年' +
+        month +
+        '月' +
+        date +
+        '日' +
+        ' ' +
+        hour +
+        ':' +
+        minu +
+        ':' +
+        sec +
+        ' ' +
+        week;
+    $('.day').html(time);
+    //设置得到当前日期的函数的执行间隔时间，每1000毫秒刷新一次。
+    var timer = setTimeout('writeCurrentDate()', 1000);
+}
+writeCurrentDate();
+
+</script>
+
+</body>
+</html>
