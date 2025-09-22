@@ -1,0 +1,918 @@
+<!DOCTYPE <strong><font color="#FF0000">html</font></strong>>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学生键盘指法练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: 'Comic Sans MS', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+ 
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            max-width: 750px;
+            width: 100%;
+            text-align: center;
+        }
+ 
+        h1 {
+            color: #5a67d8;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .game-area {
+            margin: 30px 0;
+        }
+ 
+        .target-key {
+            font-size: 2.8em;
+            color: #e53e3e;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 20px 40px;
+            border: 3px solid #e53e3e;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+            display: inline-block;
+            min-width: 120px;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .target-key:hover {
+            background: linear-gradient(135deg, #fed7d7, #feb2b2);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+ 
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+ 
+        .keyboard {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin: 4px 0;
+            gap: 3px;
+        }
+ 
+        .key {
+            background: #e2e8f0;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2d3748;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-width: 45px;
+            position: relative;
+        }
+ 
+        .key:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+ 
+        .key.active {
+            background: #4299e1;
+            color: white;
+            transform: translateY(2px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+ 
+        .key.target {
+            background: #ffd700;
+            color: #2d3748;
+            animation: targetPulse 1s infinite;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+ 
+        @keyframes targetPulse {
+            0% { 
+                background: #ffd700;
+                transform: scale(1);
+            }
+            50% { 
+                background: #ffed4e;
+                transform: scale(1.1);
+            }
+            100% { 
+                background: #ffd700;
+                transform: scale(1);
+            }
+        }
+ 
+        .key.correct {
+            background: #48bb78;
+            color: white;
+            animation: correctPop 0.5s ease;
+        }
+ 
+        @keyframes correctPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+ 
+        .key.wrong {
+            background: #f56565;
+            color: white;
+            animation: shake 0.5s ease;
+        }
+ 
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+ 
+        .space-key {
+            min-width: 200px;
+            background: #a0aec0;
+        }
+ 
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            gap: 10px;
+        }
+ 
+        .stat-box {
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 10px;
+            flex: 1;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #5a67d8;
+        }
+ 
+        .controls {
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+ 
+        .btn {
+            background: #5a67d8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-width: 60px;
+        }
+ 
+        .btn:hover {
+            background: #4c51bf;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+ 
+        .btn:active, .btn.active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: #38a169;
+        }
+ 
+ 
+ 
+        .mode-selector {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+ 
+        .mode-btn {
+            background: #ed8936;
+            padding: 8px 16px;
+            font-size: 1em;
+            margin: 0;
+        }
+ 
+        .mode-btn.active {
+            background: #38a169;
+        }
+ 
+ 
+ 
+        [url=home.php?mod=space&uid=945662]@media[/url] (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+ 
+            h1 {
+                font-size: 2em;
+            }
+ 
+            .key {
+                padding: 10px 12px;
+                font-size: 1em;
+                min-width: 35px;
+            }
+ 
+            .space-key {
+                min-width: 200px;
+            }
+ 
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>&#127918; 小学生键盘指法练习</h1>
+ 
+        <div class="mode-selector">
+            <button class="btn mode-btn active" data-mode="basic">基础练习</button>
+            <button class="btn mode-btn" data-mode="left">左手练习</button>
+            <button class="btn mode-btn" data-mode="right">右手练习</button>
+            <button class="btn mode-btn" data-mode="numbers">数字练习</button>
+            <button class="btn mode-btn" data-mode="symbols">符号练习</button>
+            <button class="btn mode-btn" data-mode="words">单词练习</button>
+            <button class="btn mode-btn" data-mode="sentences">句子练习</button>
+            <button class="btn mode-btn" data-mode="zuowen">作文语句</button>
+        </div>
+ 
+        <div class="game-area">
+            <div class="target-key" id="targetKey">按<开始练习>开始</div>
+        </div>
+ 
+        <div class="keyboard">
+            <!-- 数字行 - 包含符号 -->
+            <div class="keyboard-row">
+                <button class="key" data-key="`">`</button>
+                <button class="key" data-key="1">1<br><span style="font-size: 0.7em;">!</span></button>
+                <button class="key" data-key="2">2<br><span style="font-size: 0.7em;">@</span></button>
+                <button class="key" data-key="3">3<br><span style="font-size: 0.7em;">#</span></button>
+                <button class="key" data-key="4">4<br><span style="font-size: 0.7em;">$</span></button>
+                <button class="key" data-key="5">5<br><span style="font-size: 0.7em;">%</span></button>
+                <button class="key" data-key="6">6<br><span style="font-size: 0.7em;">^</span></button>
+                <button class="key" data-key="7">7<br><span style="font-size: 0.7em;">&</span></button>
+                <button class="key" data-key="8">8<br><span style="font-size: 0.7em;">*</span></button>
+                <button class="key" data-key="9">9<br><span style="font-size: 0.7em;">(</span></button>
+                <button class="key" data-key="0">0<br><span style="font-size: 0.7em;">)</span></button>
+                <button class="key" data-key="-">-<br><span style="font-size: 0.7em;">_</span></button>
+                <button class="key" data-key="=">=<br><span style="font-size: 0.7em;">+</span></button>
+                <button class="key" data-key="backspace" style="min-width: 80px;">退格</button>
+            </div>
+             
+            <!-- 字母行1 -->
+            <div class="keyboard-row">
+                <button class="key" data-key="tab" style="min-width: 60px;">Tab</button>
+                <button class="key" data-key="q">Q</button>
+                <button class="key" data-key="w">W</button>
+                <button class="key" data-key="e">E</button>
+                <button class="key" data-key="r">R</button>
+                <button class="key" data-key="t">T</button>
+                <button class="key" data-key="y">Y</button>
+                <button class="key" data-key="u">U</button>
+                <button class="key" data-key="i">I</button>
+                <button class="key" data-key="o">O</button>
+                <button class="key" data-key="p">P</button>
+                <button class="key" data-key="[">[<br><span style="font-size: 0.7em;">{</span></button>
+                <button class="key" data-key="]">]<br><span style="font-size: 0.7em;">}</span></button>
+                <button class="key" data-key="backslash">\\<br><span style="font-size: 0.7em;">|</span></button>
+            </div>
+             
+            <!-- 字母行2 -->
+            <div class="keyboard-row">
+                <button class="key" data-key="caps" style="min-width: 70px;">Caps</button>
+                <button class="key" data-key="a">A</button>
+                <button class="key" data-key="s">S</button>
+                <button class="key" data-key="d">D</button>
+                <button class="key" data-key="f">F</button>
+                <button class="key" data-key="g">G</button>
+                <button class="key" data-key="h">H</button>
+                <button class="key" data-key="j">J</button>
+                <button class="key" data-key="k">K</button>
+                <button class="key" data-key="l">L</button>
+                <button class="key" data-key=";">;<br><span style="font-size: 0.7em;">:</span></button>
+                <button class="key" data-key="'">'<br><span style="font-size: 0.7em;">"</span></button>
+                <button class="key" data-key="enter" style="min-width: 80px;">Enter</button>
+            </div>
+             
+            <!-- 字母行3 -->
+            <div class="keyboard-row">
+                <button class="key" data-key="shift" style="min-width: 90px;">Shift</button>
+                <button class="key" data-key="z">Z</button>
+                <button class="key" data-key="x">X</button>
+                <button class="key" data-key="c">C</button>
+                <button class="key" data-key="v">V</button>
+                <button class="key" data-key="b">B</button>
+                <button class="key" data-key="n">N</button>
+                <button class="key" data-key="m">M</button>
+                <button class="key" data-key=",">,<br><span style="font-size: 0.7em;"><</span></button>
+                <button class="key" data-key=".">.<br><span style="font-size: 0.7em;">></span></button>
+                <button class="key" data-key="/">/<br><span style="font-size: 0.7em;">?</span></button>
+                <button class="key" data-key="shift2" style="min-width: 90px;">Shift</button>
+            </div>
+             
+            <!-- 空格行 -->
+            <div class="keyboard-row">
+                <button class="key" data-key="ctrl" style="min-width: 60px;">Ctrl</button>
+                <button class="key" data-key="win" style="min-width: 50px;">Win</button>
+                <button class="key" data-key="alt" style="min-width: 50px;">Alt</button>
+                <button class="key space-key" data-key=" ">空格键</button>
+                <button class="key" data-key="alt2" style="min-width: 50px;">Alt</button>
+                <button class="key" data-key="win2" style="min-width: 50px;">Win</button>
+                <button class="key" data-key="ctrl2" style="min-width: 60px;">Ctrl</button>
+            </div>
+        </div>
+ 
+        <div class="stats">
+            <div class="stat-box">
+                <div>准确率</div>
+                <div class="stat-number" id="accuracy">0%</div>
+            </div>
+            <div class="stat-box">
+                <div>正确按键</div>
+                <div class="stat-number" id="correct">0</div>
+            </div>
+            <div class="stat-box">
+                <div>总按键</div>
+                <div class="stat-number" id="total">0</div>
+            </div>
+        </div>
+ 
+        <div class="controls">
+            <button class="btn" id="startBtn">开始练习</button>
+            <button class="btn" id="resetBtn">重置</button>
+            <button class="btn" id="slowBtn">慢速</button>
+            <button class="btn active" id="normalBtn">中速</button>
+            <button class="btn" id="fastBtn">快速</button>
+        </div>
+ 
+ 
+    </div>
+ 
+    <script>
+        // 完整的汉字转拼音映射表
+        const pinyinMap = {
+            '我': 'wo', '爱': 'ai', '的': 'de', '家': 'jia',
+            '今': 'jin', '天': 'tian', '气': 'qi', '很': 'hen', '好': 'hao',
+            '和': 'he', '小': 'xiao', '朋': 'peng', '友': 'you', '一': 'yi', '起': 'qi', '玩': 'wan',
+            '喜': 'xi', '欢': 'huan', '吃': 'chi', '苹': 'ping', '果': 'guo',
+            '妈': 'ma', '对': 'dui', '学': 'xue', '校': 'xiao', '里': 'li', '有': 'you', '多': 'duo', '书': 'shu',
+            '老': 'lao', '师': 'shi', '教': 'jiao', '们': 'men', '习': 'xi',
+            '个': 'ge', '妹': 'mei', '妹': 'mei',
+            '爸': 'ba', '带': 'dai', '去': 'qu', '公': 'gong', '园': 'yuan',
+            '画': 'hua', '上': 'shang', '白': 'bai', '云': 'yun',
+            '鸟': 'niao', '在': 'zai', '飞': 'fei',
+            '花': 'hua', '儿': 'er', '开': 'kai', '了': 'le', '美': 'mei', '丽': 'li',
+            '草': 'cao', '绿': 'lv',
+            '快': 'kuai', '乐': 'le',
+            '新': 'xin', '书': 'shu', '包': 'bao',
+            '开': 'kai', '心': 'xin',
+            '同': 'tong', '上': 'shang', '学': 'xue',
+            '冰': 'bing', '淇': 'qi', '淋': 'lin',
+            '爷': 'ye', '爷': 'ye', '讲': 'jiang', '故': 'gu', '事': 'shi', '给': 'gei', '听': 'ting',
+            '奶': 'nai', '奶': 'nai', '做': 'zuo', '好': 'hao', '饭': 'fan', '菜': 'cai',
+            '狗': 'gou', '可': 'ke', '爱': 'ai',
+            '买': 'mai', '衣': 'yi', '服': 'fu',
+            '家': 'jia', '里': 'li', '看': 'kan', '书': 'shu',
+            '帮': 'bang', '扫': 'sao', '地': 'di',
+            '骑': 'qi', '自': 'zi', '行': 'xing', '车': 'che',
+            '具': 'ju',
+            '花': 'hua', '园': 'yuan', '漂': 'piao', '亮': 'liang',
+            '语': 'yu', '文': 'wen', '课': 'ke',
+            // 新增汉字拼音
+            '春': 'chun', '夏': 'xia', '秋': 'qiu', '冬': 'dong',
+            '树': 'shu', '叶': 'ye', '变': 'bian', '黄': 'huang',
+            '雪': 'xue', '真': 'zhen', '学': 'xue', '会': 'hui', '字': 'zi',
+            '数': 'shu', '得': 'de', '分': 'fen', '桌': 'zhuo',
+            '路': 'lu', '买': 'mai', '铅': 'qian', '笔': 'bi',
+            '长': 'zhang', '大': 'da', '当': 'dang', '科': 'ke', '学': 'xue', '家': 'jia',
+            '助': 'zhu', '人': 'ren', '快': 'kuai', '乐': 'le'
+        };
+ 
+        // 汉字转拼音函数
+            function chineseToPinyin(text) {
+                return text.split('').map(char => pinyinMap[char] || char).join('');
+            }
+ 
+            // 获取整个句子的拼音
+            function getFullPinyin(text) {
+                return text.split('').map(char => pinyinMap[char] || char).join('');
+            }
+ 
+        class KeyboardGame {
+            constructor() {
+                this.currentKey = '';
+                this.isPlaying = false;
+                this.correctCount = 0;
+                this.totalCount = 0;
+                this.currentMode = 'basic';
+                 
+                this.modes = {
+                basic: {
+                    keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'],
+                    name: '基础练习'
+                },
+                left: {
+                    keys: ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'],
+                    name: '左手练习'
+                },
+                right: {
+                    keys: ['y', 'u', 'i', 'o', 'p', 'h', 'j', 'k', 'l', 'n', 'm'],
+                    name: '右手练习'
+                },
+                numbers: {
+                    keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+                    name: '数字练习'
+                },
+                symbols: {
+                    keys: ['-', '=', '[', ']', ';', "'", ',', '.', '/', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+                    name: '符号练习'
+                },
+                words: {
+                    name: '单词练习',
+                    content: [
+                        // 基础动物
+                        'cat', 'dog', 'bird', 'fish', 'duck', 'frog', 'bear', 'lion', 'tiger', 'rabbit',
+                        // 日常物品
+                        'book', 'pen', 'desk', 'chair', 'bag', 'cup', 'ball', 'toy', 'shoe', 'hat',
+                        // 自然现象
+                        'sun', 'moon', 'star', 'tree', 'flower', 'grass', 'sky', 'cloud', 'rain', 'snow',
+                        // 动作词汇
+                        'run', 'jump', 'walk', 'swim', 'sing', 'dance', 'read', 'write', 'play', 'eat',
+                        // 人物称呼
+                        'mom', 'dad', 'teacher', 'friend', 'baby', 'girl', 'boy', 'sister', 'brother', 'family'
+                    ]
+                },
+                sentences: {
+                    name: '句子练习',
+                    content: [
+                        // 原有句子
+                        'I love my cat.', 'The sun is bright.', 'I can run fast.', 'This is fun!', 'I have a book.',
+                        // 新增20句
+                        // 家庭主题
+                        'My mom is very kind.', 'I love my family.', 'Dad reads me stories.', 'My sister is my friend.',
+                        // 学校生活
+                        'I go to school every day.', 'My teacher is nice.', 'I like my classmates.', 'We play at recess.',
+                        // 日常活动
+                        'I eat breakfast at home.', 'I brush my teeth daily.', 'I help my mom cook.', 'I walk to school.',
+                        // 兴趣爱好
+                        'I love drawing pictures.', 'Reading books is fun.', 'I can sing songs.', 'Dancing makes me happy.',
+                        // 自然天气
+                        'The sky is blue today.', 'It is raining now.', 'I see a rainbow.', 'The flowers are beautiful.', 'Birds can fly high.'
+                    ]
+                },
+                zuowen: {
+                    name: '作文语句',
+                    content: [
+                        // 原有30句
+                        '我爱我的家',
+                        '今天天气很好',
+                        '我和小朋友一起玩',
+                        '我喜欢吃苹果',
+                        '妈妈对我很好',
+                        '学校里有很多书',
+                        '老师教我们学习',
+                        '我有一个妹妹',
+                        '爸爸带我去公园',
+                        '我喜欢画画',
+                        '天上有白云',
+                        '小鸟在飞',
+                        '花儿开了很美丽',
+                        '小草绿了',
+                        '我在学校很快乐',
+                        '我爱我的老师',
+                        '我有新的书包',
+                        '今天我很开心',
+                        '我和同学一起上学',
+                        '我喜欢吃冰淇淋',
+                        '爷爷讲故事给我听',
+                        '奶奶做好吃的饭菜',
+                        '我的小狗很可爱',
+                        '妈妈买了新衣服',
+                        '我在家里看书',
+                        '我帮妈妈扫地',
+                        '爸爸教我骑自行车',
+                        '我有新的玩具',
+                        '学校的花园很漂亮',
+                        '我喜欢上语文课',
+                        // 新增10句
+                        // 季节天气
+                        '春天来了花儿开了',
+                        '夏天很热可以吃冰淇淋',
+                        '秋天树叶变黄了',
+                        '冬天会下雪真美丽',
+                        // 学习生活
+                        '我今天学会了新字',
+                        '数学课我得了100分',
+                        '我和同桌一起画画',
+                        '放学路上我买铅笔',
+                        // 情感表达
+                        '我长大要当科学家',
+                        '帮助别人我很快乐'
+                    ]
+                }
+            };
+ 
+                this.init();
+            }
+ 
+            init() {
+                this.targetKeyEl = document.getElementById('targetKey');
+                this.startBtn = document.getElementById('startBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.accuracyEl = document.getElementById('accuracy');
+                this.correctEl = document.getElementById('correct');
+                this.totalEl = document.getElementById('total');
+ 
+                this.currentWord = '';
+                this.currentIndex = 0;
+                this.typingMode = false;
+ 
+                this.bindEvents();
+                this.updateDisplay();
+            }
+ 
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.startGame());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                document.getElementById('slowBtn').addEventListener('click', () => this.setSpeed(2000));
+                document.getElementById('normalBtn').addEventListener('click', () => this.setSpeed(1500));
+                document.getElementById('fastBtn').addEventListener('click', () => this.setSpeed(1000));
+ 
+                // 键盘点击事件
+                document.querySelectorAll('.key').forEach(key => {
+                    key.addEventListener('click', (e) => {
+                        if (this.isPlaying) {
+                            this.checkKey(key.dataset.key);
+                        }
+                    });
+                });
+ 
+                // 键盘按键事件
+                document.addEventListener('keydown', (e) => {
+                    if (this.isPlaying) {
+                        e.preventDefault();
+                        this.checkKey(e.key.toLowerCase());
+                        this.highlightKey(e.key.toLowerCase());
+                    }
+                });
+ 
+                // 模式切换
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.switchMode(e.target.dataset.mode);
+                    });
+                });
+            }
+ 
+            switchMode(mode) {
+                this.currentMode = mode;
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+                this.resetGame();
+            }
+ 
+            startGame() {
+                this.isPlaying = true;
+                this.speed = this.speed || 1500;
+                this.generateNewKey();
+                this.startBtn.textContent = '练习中...';
+                this.startBtn.disabled = true;
+            }
+ 
+            resetGame() {
+                this.isPlaying = false;
+                this.correctCount = 0;
+                this.totalCount = 0;
+                this.currentKey = '';
+                this.currentWord = '';
+                this.currentIndex = 0;
+                this.typingMode = false;
+                this.pinyinProgress = '';
+                this.currentPinyin = '';
+                this.targetKeyEl.textContent = '按<开始练习>开始';
+                this.targetKeyEl.className = 'target-key';
+                this.startBtn.textContent = '开始练习';
+                this.startBtn.disabled = false;
+                this.updateDisplay();
+                this.clearAllHighlights();
+            }
+ 
+            setSpeed(ms) {
+                this.speed = ms;
+                // 更新按钮样式
+                document.querySelectorAll('.controls .btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                if (ms === 2000) document.getElementById('slowBtn').classList.add('active');
+                if (ms === 1500) document.getElementById('normalBtn').classList.add('active');
+                if (ms === 1000) document.getElementById('fastBtn').classList.add('active');
+            }
+ 
+            generateNewKey() {
+                if (this.currentMode === 'words' || this.currentMode === 'sentences') {
+                    this.typingMode = true;
+                    const content = this.modes[this.currentMode].content;
+                    this.currentWord = content[Math.floor(Math.random() * content.length)];
+                    this.currentIndex = 0;
+                    this.displayTypingText();
+                } else if (this.currentMode === 'zuowen') {
+                    // 作文模式特殊处理
+                    this.typingMode = true;
+                    const content = this.modes[this.currentMode].content;
+                    this.currentWord = content[Math.floor(Math.random() * content.length)];
+                    this.currentPinyin = getFullPinyin(this.currentWord);
+                    this.currentIndex = 0;
+                    this.pinyinIndex = 0;
+                    this.displayZuowenText();
+                } else {
+                    this.typingMode = false;
+                    const keys = this.modes[this.currentMode].keys;
+                    this.currentKey = keys[Math.floor(Math.random() * keys.length)];
+                    this.targetKeyEl.textContent = this.currentKey.toUpperCase();
+                    this.targetKeyEl.className = 'target-key';
+                     
+                    // 高亮显示对应的键盘按键
+                    this.highlightTargetKey();
+                }
+            }
+ 
+            displayTypingText() {
+                let displayText = '';
+                for (let i = 0; i < this.currentWord.length; i++) {
+                    if (i < this.currentIndex) {
+                        displayText += `<span style="color: #48bb78;">${this.currentWord[i]}</span>`;
+                    } else if (i === this.currentIndex) {
+                        displayText += `<span style="color: #e53e3e; font-size: 1.2em;">${this.currentWord[i]}</span>`;
+                    } else {
+                        displayText += `<span style="color: #2d3748;">${this.currentWord[i]}</span>`;
+                    }
+                }
+                this.targetKeyEl.innerHTML = displayText;
+                this.targetKeyEl.className = 'target-key';
+                 
+                // 高亮当前需要输入的字符
+                this.highlightTypingKey();
+            }
+ 
+            displayZuowenText() {
+                let displayText = '';
+                let pinyinDisplay = '';
+                 
+                // 显示中文句子
+                for (let i = 0; i < this.currentWord.length; i++) {
+                    if (i < this.currentIndex) {
+                        displayText += `<span style="color: #48bb78;">${this.currentWord[i]}</span>`;
+                    } else if (i === this.currentIndex) {
+                        displayText += `<span style="color: #e53e3e; font-size: 1.2em;">${this.currentWord[i]}</span>`;
+                    } else {
+                        displayText += `<span style="color: #2d3748;">${this.currentWord[i]}</span>`;
+                    }
+                }
+                 
+                // 显示拼音输入进度
+                const currentCharPinyin = pinyinMap[this.currentWord[this.currentIndex]] || '';
+                if (currentCharPinyin) {
+                    const progress = this.pinyinProgress || '';
+                    const remaining = currentCharPinyin.substring(progress.length);
+                    pinyinDisplay = `<div style="font-size: 1.2em; color: #666; margin-top: 10px; font-family: monospace;">
+                        <span style="color: #48bb78;">${progress}</span>
+                        <span style="color: #e53e3e; text-decoration: underline;">${remaining}</span>
+                    </div>`;
+                }
+                 
+                this.targetKeyEl.innerHTML = displayText + pinyinDisplay;
+                this.targetKeyEl.className = 'target-key';
+                 
+                // 高亮当前需要输入的字符
+                this.highlightZuowenKey();
+            }
+ 
+            highlightTypingKey() {
+                this.clearAllHighlights();
+                if (this.currentIndex < this.currentWord.length) {
+                    const char = this.currentWord[this.currentIndex].toLowerCase();
+                    let key = char;
+                    if (char === ' ') key = ' ';
+                    const keyEl = document.querySelector(`[data-key="${key}"]`);
+                    if (keyEl) {
+                        keyEl.classList.add('target');
+                    }
+                }
+            }
+ 
+            highlightZuowenKey() {
+                this.clearAllHighlights();
+                if (this.currentIndex < this.currentWord.length) {
+                    const pinyin = pinyinMap[this.currentWord[this.currentIndex]] || '';
+                    if (pinyin) {
+                        const progress = this.pinyinProgress || '';
+                        const nextLetter = pinyin[progress.length];
+                        if (nextLetter) {
+                            const keyEl = document.querySelector(`[data-key="${nextLetter}"]`);
+                            if (keyEl) {
+                                keyEl.classList.add('target');
+                            }
+                        }
+                    }
+                }
+            }
+ 
+            highlightTargetKey() {
+                // 清除之前的高亮
+                document.querySelectorAll('.key').forEach(key => {
+                    key.classList.remove('target');
+                });
+ 
+                // 高亮当前目标按键
+                const keyEl = document.querySelector(`[data-key="${this.currentKey}"]`);
+                if (keyEl) {
+                    keyEl.classList.add('target');
+                }
+            }
+ 
+            checkKey(pressedKey) {
+                if (this.typingMode) {
+                    this.handleTypingKey(pressedKey);
+                } else {
+                    this.handleSingleKey(pressedKey);
+                }
+            }
+ 
+            handleSingleKey(pressedKey) {
+                this.totalCount++;
+                 
+                if (pressedKey === this.currentKey) {
+                    this.correctCount++;
+                    this.showFeedback('correct');
+                } else {
+                    this.showFeedback('wrong');
+                }
+ 
+                this.updateDisplay();
+                 
+                if (this.isPlaying) {
+                    setTimeout(() => this.generateNewKey(), this.speed || 1500);
+                }
+            }
+ 
+            handleTypingKey(pressedKey) {
+                if (this.currentIndex >= this.currentWord.length) return;
+                 
+                let expectedChar = this.currentWord[this.currentIndex].toLowerCase();
+                 
+                if (this.currentMode === 'zuowen') {
+                    // 作文模式：显示中文，输入完整拼音
+                    const expectedPinyin = pinyinMap[this.currentWord[this.currentIndex]] || '';
+                     
+                    // 初始化拼音输入状态
+                    if (!this.pinyinProgress) {
+                        this.pinyinProgress = '';
+                        this.currentPinyin = expectedPinyin;
+                    }
+                     
+                    // 获取当前期望的拼音字母
+                    const expectedNextLetter = this.currentPinyin[this.pinyinProgress.length];
+                     
+                    if (pressedKey.toLowerCase() === expectedNextLetter) {
+                        // 正确按键，累加拼音进度
+                        this.pinyinProgress += pressedKey.toLowerCase();
+                        this.correctCount++;
+                         
+                        // 检查拼音是否完成
+                        if (this.pinyinProgress === this.currentPinyin) {
+                            // 当前汉字拼音完成，立即移动到下一个汉字（无延迟）
+                            this.currentIndex++;
+                            this.pinyinProgress = '';
+                             
+                            if (this.currentIndex >= this.currentWord.length) {
+                                // 句子完成，快速进入下一个
+                                this.showFeedback('correct');
+                                setTimeout(() => this.generateNewKey(), 300); // 快速延迟300ms
+                            } else {
+                                // 立即显示下一个汉字，无延迟
+                                this.displayZuowenText();
+                            }
+                        } else {
+                            // 继续输入当前汉字的拼音，无延迟
+                            this.displayZuowenText();
+                        }
+                    } else {
+                        this.showFeedback('wrong');
+                    }
+                } else {
+                    // 优化后的单词和句子模式
+                    if (pressedKey === expectedChar || (expectedChar === ' ' && pressedKey === ' ')) {
+                        this.correctCount++;
+                        this.currentIndex++;
+                         
+                        if (this.currentIndex >= this.currentWord.length) {
+                            // 单词/句子完成，快速进入下一个
+                            this.showFeedback('correct');
+                            setTimeout(() => this.generateNewKey(), 300); // 快速延迟300ms
+                        } else {
+                            // 立即显示下一个字符，无延迟
+                            this.displayTypingText();
+                        }
+                    } else {
+                        this.showFeedback('wrong');
+                    }
+                }
+                 
+                this.totalCount++;
+                this.updateDisplay();
+            }
+ 
+            showFeedback(type) {
+                this.targetKeyEl.classList.add(type);
+                 
+                // 高亮对应的键盘按键
+                const keyEl = document.querySelector(`[data-key="${this.currentKey}"]`);
+                if (keyEl) {
+                    keyEl.classList.add(type);
+                    setTimeout(() => {
+                        keyEl.classList.remove(type);
+                    }, 500);
+                }
+ 
+                setTimeout(() => {
+                    this.targetKeyEl.classList.remove(type);
+                }, 500);
+            }
+ 
+            highlightKey(key) {
+                const keyEl = document.querySelector(`[data-key="${key}"]`);
+                if (keyEl) {
+                    keyEl.classList.add('active');
+                    setTimeout(() => {
+                        keyEl.classList.remove('active');
+                    }, 200);
+                }
+            }
+ 
+            clearAllHighlights() {
+                document.querySelectorAll('.key').forEach(key => {
+                    key.classList.remove('correct', 'wrong', 'active', 'target');
+                });
+            }
+ 
+            updateDisplay() {
+                const accuracy = this.totalCount > 0 ? Math.round((this.correctCount / this.totalCount) * 100) : 0;
+                this.accuracyEl.textContent = accuracy + '%';
+                this.correctEl.textContent = this.correctCount;
+                this.totalEl.textContent = this.totalCount;
+            }
+        }
+ 
+        // 启动游戏
+        const game = new KeyboardGame();
+    </script>
+</body>
+</html>
