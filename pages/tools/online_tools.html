@@ -1,0 +1,761 @@
+<!DOCTYPE <strong><font color="#FF0000">html</font></strong>>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全能工具箱 - 在线工具集合</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --hover-color: #1d4ed8;
+            --background: #f8fafc;
+        }
+ 
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 20px;
+            color: #334155;
+        }
+ 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+ 
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+ 
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin: 20px 0;
+        }
+ 
+        .search-box {
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+ 
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 30px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+ 
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.1);
+        }
+ 
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+ 
+        .tool-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: inherit;
+        }
+ 
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            border-radius: 8px;
+            color: var(--primary-color);
+        }
+ 
+        .tool-text {
+            flex: 1;
+        }
+ 
+        .tool-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+ 
+        .tool-desc {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+ 
+        .category-section {
+            margin: 40px 0;
+        }
+ 
+        .category-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+ 
+        .category-icon {
+            font-size: 1.2em;
+        }
+ 
+        [url=home.php?mod=space&uid=945662]@media[/url] (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tools"></i> 全能工具箱</h1>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索工具...">
+            </div>
+        </header>
+ 
+        <!-- 编码/解码工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-code category-icon"></i>编码/解码工具</h2>
+            <div class="tools-grid">
+                <a href="ASCII_List.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-laptop-code"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">ASCII编码列表</div>
+                        <div class="tool-desc">美国信息交换标准代码编码列表</div>
+                    </div>
+                </a>
+                <a href="EncodeDecode_Base64.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-key"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Base64 编解码</div>
+                        <div class="tool-desc">支持文本的Base64编码与解码</div>
+                    </div>
+                </a>
+                <a href="EncodeDecode_URL.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-link"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">URL 编解码</div>
+                        <div class="tool-desc">URL编码与解码工具</div>
+                    </div>
+                </a>
+                <a href="EncodingList.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-file-code"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">编码列表</div>
+                        <div class="tool-desc">各种编码格式参考</div>
+                    </div>
+                </a>
+                <a href="GB2312List.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-language"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">GB2312代码表</div>
+                        <div class="tool-desc">中文编码标准参考</div>
+                    </div>
+                </a>
+                <a href="GBKList.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-language"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">GBK代码表</div>
+                        <div class="tool-desc">扩展中文编码标准参考</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 开发工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-code-branch category-icon"></i>开发工具</h2>
+            <div class="tools-grid">
+                <a href="Format_CSS.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-css3-alt"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">CSS格式化</div>
+                        <div class="tool-desc">CSS代码格式化工具</div>
+                    </div>
+                </a>
+                <a href="Format_HTML.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-html5"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">HTML格式化</div>
+                        <div class="tool-desc">HTML代码格式化工具</div>
+                    </div>
+                </a>
+                <a href="Format_JavaScript.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-js-square"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">JS格式化</div>
+                        <div class="tool-desc">JavaScript代码格式化工具</div>
+                    </div>
+                </a>
+                <a href="regexr-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-terminal"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">正则表达式工具</div>
+                        <div class="tool-desc">正则表达式测试与学习</div>
+                    </div>
+                </a>
+                <a href="GUID.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-fingerprint"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">GUID生成器</div>
+                        <div class="tool-desc">生成全局唯一标识符</div>
+                    </div>
+                </a>
+                <a href="Password.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-lock"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">密码生成器</div>
+                        <div class="tool-desc">生成安全随机密码</div>
+                    </div>
+                </a>
+                <a href="python基础语法整理汇总1.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-python"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Python基础语法1</div>
+                        <div class="tool-desc">Python语法参考手册</div>
+                    </div>
+                </a>
+                <a href="python基础语法整理汇总2.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-python"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Python基础语法2</div>
+                        <div class="tool-desc">Python语法参考手册续</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 多媒体工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-photo-video category-icon"></i>多媒体工具</h2>
+            <div class="tools-grid">
+                <a href="avatar.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-image"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">图片转SVG</div>
+                        <div class="tool-desc">将图片转换为SVG矢量格式</div>
+                    </div>
+                </a>
+                <a href="index1.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-music"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">音乐播放器1</div>
+                        <div class="tool-desc">在线音乐播放器</div>
+                    </div>
+                </a>
+                <a href="index2.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-music"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">音乐播放器2</div>
+                        <div class="tool-desc">在线音乐播放器</div>
+                    </div>
+                </a>
+                <a href="index3.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-music"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">音乐播放器3</div>
+                        <div class="tool-desc">在线音乐播放器</div>
+                    </div>
+                </a>
+                <a href="index4.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-music"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">音乐播放器4</div>
+                        <div class="tool-desc">在线音乐播放器</div>
+                    </div>
+                </a>
+                <a href="/ads.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-music"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">音乐播放器5</div>
+                        <div class="tool-desc">在线音乐播放器</div>
+                    </div>
+                </a>
+                <a href="lrc.php" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-align-left"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">LRC歌词显示</div>
+                        <div class="tool-desc">在线显示LRC歌词</div>
+                    </div>
+                </a>
+                <a href="m3u.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-list"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">M3U播放器</div>
+                        <div class="tool-desc">在线M3U播放器</div>
+                    </div>
+                </a>
+                <a href="m3u8.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-list"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">M3U8播放器</div>
+                        <div class="tool-desc">在线M3U8播放器</div>
+                    </div>
+                </a>
+                <a href="m1907.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-video"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MP4/M3U8播放器</div>
+                        <div class="tool-desc">在线视频播放器</div>
+                    </div>
+                </a>
+                <a href="MIDI" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-music"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MIDI播放器</div>
+                        <div class="tool-desc">MIDI音乐播放器</div>
+                    </div>
+                </a>
+                <a href="Wallpaper" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-image"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">壁纸大全</div>
+                        <div class="tool-desc">精选壁纸集合</div>
+                    </div>
+                </a>
+                <a href="beepbox_offline.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-sliders-h"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">BeepBox音乐制作</div>
+                        <div class="tool-desc">在线音乐创作工具</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 办公/文档工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-file-alt category-icon"></i>办公/文档工具</h2>
+            <div class="tools-grid">
+                <a href="Excel.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-file-excel"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Excel查看器</div>
+                        <div class="tool-desc">在线打开Excel文件</div>
+                    </div>
+                </a>
+                <a href="ppt.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-file-powerpoint"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">PPT查看器</div>
+                        <div class="tool-desc">在线运行PPT演示</div>
+                    </div>
+                </a>
+                <a href="pdf/web/PDF.HTML" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-file-pdf"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">PDF查看器</div>
+                        <div class="tool-desc">在线PDF阅读器</div>
+                    </div>
+                </a>
+                <a href="TextHandle.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-font"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">文本处理</div>
+                        <div class="tool-desc">文本格式处理工具</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 计算工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-calculator category-icon"></i>计算工具</h2>
+            <div class="tools-grid">
+                <a href="calc.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-calculator"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">计算器</div>
+                        <div class="tool-desc">基本计算器工具</div>
+                    </div>
+                </a>
+                <a href="calc2" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-calculator"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">计算器2</div>
+                        <div class="tool-desc">高级计算器工具</div>
+                    </div>
+                </a>
+                <a href="Age.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-birthday-cake"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">年龄计算器</div>
+                        <div class="tool-desc">计算年龄和日期差</div>
+                    </div>
+                </a>
+                <a href="Date_Calc.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="far fa-calendar-alt"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">日期时间差</div>
+                        <div class="tool-desc">计算两个日期之间的差值</div>
+                    </div>
+                </a>
+                <a href="UnixTimestamp.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-clock"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">UNIX时间戳</div>
+                        <div class="tool-desc">时间戳转换工具</div>
+                    </div>
+                </a>
+                <a href="WorldTime.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-globe"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">世界时间</div>
+                        <div class="tool-desc">全球时区时间查看</div>
+                    </div>
+                </a>
+                <a href="GetTime.php" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-clock"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">北京时间</div>
+                        <div class="tool-desc">当前北京时间显示</div>
+                    </div>
+                </a>
+                <a href="Calendar.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="far fa-calendar"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">万年历</div>
+                        <div class="tool-desc">农历公历转换工具</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 图形/设计工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-paint-brush category-icon"></i>图形/设计工具</h2>
+            <div class="tools-grid">
+                <a href="BarCode.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-barcode"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">条形码生成器</div>
+                        <div class="tool-desc">生成各种条形码</div>
+                    </div>
+                </a>
+                <a href="davidshimjs-qrcodejs-04f46c6" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-qrcode"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">二维码生成器</div>
+                        <div class="tool-desc">生成自定义二维码</div>
+                    </div>
+                </a>
+                <a href="RGBToHex.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-palette"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">RGB颜色代码</div>
+                        <div class="tool-desc">RGB与十六进制颜色转换</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 教育/学习 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-graduation-cap category-icon"></i>教育/学习</h2>
+            <div class="tools-grid">
+                <a href="how_to_calculate_buoyancy.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-water"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">浮力计算原理</div>
+                        <div class="tool-desc">浮力计算方法讲解</div>
+                    </div>
+                </a>
+                <a href="ohm_law_introduction.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">欧姆定律</div>
+                        <div class="tool-desc">电路基本定律讲解</div>
+                    </div>
+                </a>
+                <a href="串并联电路电流电压电阻规律.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-project-diagram"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">串并联电路规律</div>
+                        <div class="tool-desc">电路基本规律讲解</div>
+                    </div>
+                </a>
+                <a href="功与机械效率计算讲解.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-cogs"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">功与机械效率</div>
+                        <div class="tool-desc">物理概念讲解</div>
+                    </div>
+                </a>
+                <a href="pressure_and_pressure_calculation.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-weight"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">压力与压强计算</div>
+                        <div class="tool-desc">物理概念讲解</div>
+                    </div>
+                </a>
+                <a href="mAh_to_kWh_conversion.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-battery-full"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">能量单位换算</div>
+                        <div class="tool-desc">毫安时-千瓦时转换</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 游戏 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-gamepad category-icon"></i>游戏</h2>
+            <div class="tools-grid">
+                <a href="1024.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-th"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">1024游戏</div>
+                        <div class="tool-desc">数字合并益智游戏</div>
+                    </div>
+                </a>
+                <a href="2048.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-th"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">2048游戏</div>
+                        <div class="tool-desc">数字合并益智游戏</div>
+                    </div>
+                </a>
+                <a href="maze.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-route"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">迷宫游戏</div>
+                        <div class="tool-desc">迷宫探索游戏</div>
+                    </div>
+                </a>
+                <a href="%C8%A6%D0%A1%C3%A811X11" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-cat"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">抓猫游戏11X11</div>
+                        <div class="tool-desc">益智策略游戏</div>
+                    </div>
+                </a>
+                <a href="%C8%A6%D0%A1%C3%A820X20" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-cat"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">抓猫游戏20X20</div>
+                        <div class="tool-desc">益智策略游戏</div>
+                    </div>
+                </a>
+                <a href="yang-game-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-chess"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">杨氏游戏</div>
+                        <div class="tool-desc">传统棋类游戏</div>
+                    </div>
+                </a>
+                <a href="Solitude" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-chess-board"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Solitude</div>
+                        <div class="tool-desc">单人棋类游戏</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 系统/模拟器 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-laptop-code category-icon"></i>系统/模拟器</h2>
+            <div class="tools-grid">
+                <a href="v86-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-desktop"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">v86模拟器</div>
+                        <div class="tool-desc">x86计算机模拟器</div>
+                    </div>
+                </a>
+                <a href="computer-museum-dnbwg-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-history"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">电脑博物馆</div>
+                        <div class="tool-desc">网页里的电脑博物馆</div>
+                    </div>
+                </a>
+                <a href="famicn-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-gamepad"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">游戏博物馆</div>
+                        <div class="tool-desc">中文家用游戏博物馆</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- 其他工具 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-tools category-icon"></i>其他工具</h2>
+            <div class="tools-grid">
+                <a href="EmojiList.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="far fa-smile"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Emoji代码表</div>
+                        <div class="tool-desc">Emoji表情符号参考</div>
+                    </div>
+                </a>
+                <a href="SymbolList.html" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-icons"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">特殊符号</div>
+                        <div class="tool-desc">各种特殊符号集合</div>
+                    </div>
+                </a>
+                <a href="pipes" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-random"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">管道游戏</div>
+                        <div class="tool-desc">益智连接游戏</div>
+                    </div>
+                </a>
+                <a href="beta-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-cube"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">ModBox Beta</div>
+                        <div class="tool-desc">模块化工具箱</div>
+                    </div>
+                </a>
+                <a href="LLQPlayer-Pro" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-play"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">LLQPlayer-Pro</div>
+                        <div class="tool-desc">HTML5视频播放器</div>
+                    </div>
+                </a>
+                <a href="picture.php" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-images"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">图床</div>
+                        <div class="tool-desc">在线图片托管服务</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+ 
+        <!-- CMS系统 -->
+        <section class="category-section">
+            <h2 class="category-title"><i class="fas fa-globe category-icon"></i>CMS系统</h2>
+            <div class="tools-grid">
+                <a href="Discuz_X3.3_SC_UTF8\upload" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-comments"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Discuz X3.3</div>
+                        <div class="tool-desc">中文论坛系统</div>
+                    </div>
+                </a>
+                <a href="Discuz_X3.4_SC_UTF8_20230520\upload" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-comments"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Discuz X3.4</div>
+                        <div class="tool-desc">中文论坛系统</div>
+                    </div>
+                </a>
+                <a href="Discuz_X3.5_SC_UTF8_20240520\upload" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-comments"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Discuz X3.5</div>
+                        <div class="tool-desc">中文论坛系统</div>
+                    </div>
+                </a>
+                <a href="DiscuzWDev-master\upload" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-comments"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">DiscuzWDev</div>
+                        <div class="tool-desc">Discuz开发版</div>
+                    </div>
+                </a>
+                <a href="empirecms7.5" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-newspaper"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">EmpireCMS 7.5</div>
+                        <div class="tool-desc">内容管理系统</div>
+                    </div>
+                </a>
+                <a href="metinfo7.1" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-sitemap"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MetInfo 7.1</div>
+                        <div class="tool-desc">企业网站管理系统</div>
+                    </div>
+                </a>
+                <a href="mybb_1837\Upload" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-comments"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MyBB 1837</div>
+                        <div class="tool-desc">英文论坛系统</div>
+                    </div>
+                </a>
+                <a href="maccms_down-2025.1000.4047\maccms8\maccms8-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-film"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MacCMS 8</div>
+                        <div class="tool-desc">影视管理系统</div>
+                    </div>
+                </a>
+                <a href="maccms_down-2025.1000.4047\maccms10\maccms10-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-film"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MacCMS 10</div>
+                        <div class="tool-desc">影视管理系统</div>
+                    </div>
+                </a>
+                <a href="mediawiki-master" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-wikipedia-w"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">MediaWiki</div>
+                        <div class="tool-desc">维基百科系统</div>
+                    </div>
+                </a>
+                <a href="wordpress-6.4.1-zh_CN\wordpress" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fab fa-wordpress"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">WordPress</div>
+                        <div class="tool-desc">博客/网站系统</div>
+                    </div>
+                </a>
+                <a href="Z-BlogPHP_1_7_3_3290_Finch" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-blog"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">Z-BlogPHP</div>
+                        <div class="tool-desc">轻量级博客系统</div>
+                    </div>
+                </a>
+                <a href="zxmls-main" class="tool-card" target="_blank">
+                    <div class="tool-icon"><i class="fas fa-sitemap"></i></div>
+                    <div class="tool-text">
+                        <div class="tool-title">zxmls</div>
+                        <div class="tool-desc">XML站点地图工具</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
