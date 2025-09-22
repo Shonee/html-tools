@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年会抽奖大转盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+ 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 35%, #4338ca 100%);
+            padding: 1rem;
+        }
+ 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+ 
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+ 
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fcd34d;
+            margin: 1rem 0;
+        }
+ 
+        .header p {
+            color: white;
+            font-size: 1.125rem;
+        }
+ 
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+ 
+        @media (min-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+ 
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+ 
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+ 
+        .panel-header h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: white;
+        }
+ 
+        .icon {
+            color: #fcd34d;
+            font-size: 1.5rem;
+        }
+ 
+        .input-group {
+            margin-bottom: 1rem;
+        }
+ 
+        .input-label {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+ 
+        .input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+ 
+        input, textarea {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+        }
+ 
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+ 
+        input:focus, textarea:focus {
+            border-color: #fcd34d;
+            box-shadow: 0 0 0 2px rgba(252, 211, 77, 0.3);
+        }
+ 
+        .input-row input {
+            flex: 1;
+        }
+ 
+        textarea {
+            width: 100%;
+            resize: none;
+            rows: 2;
+        }
+ 
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+ 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+ 
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+            color: white;
+        }
+ 
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ea580c 0%, #b91c1c 100%);
+        }
+ 
+        .btn-secondary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+        }
+ 
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+        }
+ 
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e 0%, #3b82f6 100%);
+            color: white;
+            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .btn-success:hover:not(:disabled) {
+            background: linear-gradient(135deg, #16a34a 0%, #2563eb 100%);
+        }
+ 
+        .btn-gray {
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .btn-gray:hover {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        }
+ 
+        .participant-list {
+            max-height: 16rem;
+            overflow-y: auto;
+        }
+ 
+        .participant-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            color: white;
+            font-weight: 500;
+        }
+ 
+        .participant-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+ 
+        .participant-item.winner {
+            background: #fcd34d;
+            color: #7c2d12;
+            animation: pulse 2s infinite;
+        }
+ 
+        .participant-item .remove-btn {
+            background: none;
+            border: none;
+            color: #fca5a5;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+            border-radius: 50%;
+            transition: color 0.3s;
+        }
+ 
+        .participant-item .remove-btn:hover {
+            color: #f87171;
+        }
+ 
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+ 
+        .wheel-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+ 
+        .wheel-pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid #fcd34d;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+        }
+ 
+        .wheel-svg {
+            transition-property: transform;
+            transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.4));
+        }
+ 
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+ 
+        .result-display {
+            background: linear-gradient(135deg, #fcd34d 0%, #f97316 100%);
+            color: #7c2d12;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .result-display p {
+            margin: 0.25rem 0;
+        }
+ 
+        .prize-list {
+            max-height: 16rem;
+            overflow-y: auto;
+        }
+ 
+        .prize-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+ 
+        .prize-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+ 
+        .prize-type {
+            color: #fcd34d;
+            font-weight: 500;
+        }
+ 
+        .prize-name {
+            color: white;
+            font-size: 0.875rem;
+        }
+ 
+        .celebration-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+ 
+        .celebration-content {
+            background: linear-gradient(135deg, #fcd34d 0%, #f97316 35%, #dc2626 100%);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 28rem;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: celebrationBounce 0.6s ease-out;
+        }
+ 
+        .celebration-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+ 
+        .celebration-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2rem;
+            height: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+ 
+        .celebration-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+ 
+        .celebration-inner {
+            position: relative;
+            z-index: 10;
+        }
+ 
+        .celebration-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+ 
+        .celebration-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+ 
+        .celebration-trophy {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+ 
+        .celebration-result {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+ 
+        .celebration-winner {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+ 
+        .celebration-prize-text {
+            font-size: 1.25rem;
+            color: #fef3c7;
+        }
+ 
+        .celebration-prize {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+ 
+        .celebration-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 2.5rem;
+            animation: pulse 2s infinite;
+            margin-bottom: 1.5rem;
+        }
+ 
+        .celebration-btn {
+            background: white;
+            color: #f97316;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+ 
+        .celebration-btn:hover {
+            background: #f3f4f6;
+            transform: translateY(-1px);
+        }
+ 
+        .empty-state {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+ 
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+ 
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+            40%, 43% { transform: translateY(-10px); }
+            70% { transform: translateY(-5px); }
+            90% { transform: translateY(-2px); }
+        }
+ 
+        @keyframes celebrationBounce {
+            0% { transform: scale(0.3) translateY(-50px); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+ 
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+ 
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部标题 -->
+        <div class="header">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span style="font-size: 2.5rem;">&#127881;</span>
+                <h1>2025年会抽奖大转盘</h1>
+                <span style="font-size: 2.5rem;">&#127881;</span>
+            </div>
+            <p>祝愿大家新年快乐，好运连连！</p>
+        </div>
+ 
+        <div class="main-grid">
+            <!-- 参与人员 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="icon">&#128101;</span>
+                    <h2>参与人员</h2>
+                </div>
+                 
+                <div class="input-group">
+                    <label class="input-label">添加参与者：</label>
+                    <div class="input-row">
+                        <input type="text" id="participantInput" placeholder="输入姓名">
+                        <button class="btn btn-primary">添加</button>
+                    </div>
+                </div>
+ 
+                <div class="participant-list" id="participantList">
+                    <div class="empty-state">暂无参与人员，请先添加参与者</div>
+                </div>
+            </div>
+ 
+            <!-- 抽奖转盘 -->
+            <div class="panel">
+                <div class="wheel-container">
+                    <div class="panel-header">
+                        <span class="icon">&#127919;</span>
+                        <h2>抽奖转盘</h2>
+                    </div>
+ 
+                    <div class="wheel-wrapper">
+                        <div class="wheel-pointer"></div>
+                        <svg id="wheelSvg" class="wheel-svg" width="480" height="480" viewBox="-240 -240 480 480">
+                            <defs>
+                                <radialGradient id="centerGradient">
+                                    <stop offset="0%" stop-color="#6366f1" />
+                                    <stop offset="100%" stop-color="#4338ca" />
+                                </radialGradient>
+                            </defs>
+                            <g id="wheelSections"></g>
+                            <circle cx="0" cy="0" r="35" fill="url(#centerGradient)" stroke="#fff" stroke-width="4" />
+                        </svg>
+                    </div>
+ 
+                    <div class="control-buttons">
+                        <button class="btn btn-success" id="startBtn">
+                            <span>&#9654;</span>
+                            <span id="startBtnText">开始抽奖</span>
+                        </button>
+                        <button class="btn btn-gray">
+                            <span>&#8635;</span>
+                            重置
+                        </button>
+                    </div>
+ 
+                    <div id="resultDisplay" class="result-display hidden">
+                        <p style="font-size: 1.125rem;">&#127881; 恭喜 &#127881;</p>
+                        <p style="font-size: 1.25rem;" id="winnerName"></p>
+                        <p style="font-size: 1.125rem;">获得 <span id="winnerPrize"></span></p>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- 奖品设置 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="icon">&#127942;</span>
+                    <h2>奖品设置</h2>
+                </div>
+ 
+                <div class="input-group">
+                    <label class="input-label">奖品名称：</label>
+                    <input type="text" id="prizeNameInput" placeholder="输入奖品名称">
+                    <label class="input-label" style="margin-top: 0.5rem;">奖品描述：</label>
+                    <textarea id="prizeDescInput" placeholder="输入奖品描述" rows="2"></textarea>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem;">添加奖品</button>
+                </div>
+ 
+                <div class="prize-list" id="prizeList">
+                    <!-- 奖品列表将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- 获奖庆祝弹窗 -->
+    <div id="celebrationModal" class="celebration-modal hidden">
+        <div class="celebration-content">
+            <div class="celebration-bg"></div>
+            <button class="celebration-close">×</button>
+            <div class="celebration-inner">
+                <div class="celebration-emoji">&#127881;</div>
+                <h2 class="celebration-title">恭喜中奖！</h2>
+                <div class="celebration-trophy">&#127942;</div>
+                 
+                <div class="celebration-result">
+                    <p class="celebration-winner" id="celebrationWinner"></p>
+                    <p class="celebration-prize-text">获得</p>
+                    <p class="celebration-prize" id="celebrationPrize"></p>
+                </div>
+ 
+                <div class="celebration-icons">
+                    <span>&#127882;</span>
+                    <span>&#10024;</span>
+                    <span>&#127880;</span>
+                    <span>&#127873;</span>
+                    <span>&#127775;</span>
+                </div>
+ 
+                <button class="celebration-btn">太棒了！</button>
+            </div>
+        </div>
+    </div>
+ 
+    <script>
+        // 全局变量
+        let participants = ['王五', '赵六', '钱七', '孙八', '周九', '吴十', '郑十一'];
+        let prizes = [
+            { id: 1, name: 'iPhone 15 Pro Max 256GB', type: '一等奖', level: 1 },
+            { id: 2, name: 'iPad Air 128GB', type: '二等奖', level: 2 },
+            { id: 3, name: 'Apple Watch Series 9', type: '三等奖', level: 3 },
+            { id: 4, name: '精美礼品一份', type: '参与奖', level: 4 }
+        ];
+        let isSpinning = false;
+        let currentRotation = 0;
+        let winner = '';
+        let winnerPrize = '';
+ 
+        // 颜色数组
+        const colors = [
+            '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', 
+            '#FD79A8', '#FDCB6E', '#E17055', '#74B9FF',
+            '#6C5CE7', '#A29BFE', '#00B894', '#00CEC9',
+            '#E84393', '#FF7675', '#FDCB6E', '#55A3FF'
+        ];
+ 
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateParticipantList();
+            updatePrizeList();
+            updateWheel();
+             
+            // 添加回车键支持
+            document.getElementById('participantInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addParticipant();
+                }
+            });
+        });
+ 
+        // 添加参与者
+        function addParticipant() {
+            const input = document.getElementById('participantInput');
+            const name = input.value.trim();
+             
+            if (name && !participants.includes(name)) {
+                participants.push(name);
+                input.value = '';
+                updateParticipantList();
+                updateWheel();
+            }
+        }
+ 
+        // 移除参与者
+        function removeParticipant(index) {
+            participants.splice(index, 1);
+            updateParticipantList();
+            updateWheel();
+        }
+ 
+        // 更新参与者列表
+        function updateParticipantList() {
+            const list = document.getElementById('participantList');
+             
+            if (participants.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无参与人员，请先添加参与者</div>';
+                return;
+            }
+             
+            list.innerHTML = participants.map((participant, index) => `
+                <div class="participant-item ${winner === participant ? 'winner' : ''}">
+                    <span>${participant}</span>
+                    <button class="remove-btn">×</button>
+                </div>
+            `).join('');
+        }
+ 
+        // 添加奖品
+        function addPrize() {
+            const nameInput = document.getElementById('prizeNameInput');
+            const descInput = document.getElementById('prizeDescInput');
+            const name = nameInput.value.trim();
+            const desc = descInput.value.trim();
+             
+            if (name) {
+                const newPrize = {
+                    id: Date.now(),
+                    name: name,
+                    type: desc || '特别奖',
+                    level: prizes.length + 1
+                };
+                prizes.push(newPrize);
+                nameInput.value = '';
+                descInput.value = '';
+                updatePrizeList();
+            }
+        }
+ 
+        // 更新奖品列表
+        function updatePrizeList() {
+            const list = document.getElementById('prizeList');
+             
+            list.innerHTML = prizes.map(prize => {
+                let emoji = '&#127873;';
+                if (prize.level === 1) emoji = '&#129351;';
+                else if (prize.level === 2) emoji = '&#129352;';
+                else if (prize.level === 3) emoji = '&#129353;';
+                 
+                return `
+                    <div class="prize-item">
+                        <div class="prize-header">
+                            <span>${emoji}</span>
+                            <span class="prize-type">${prize.type}</span>
+                        </div>
+                        <p class="prize-name">${prize.name}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+ 
+        // 更新转盘
+        function updateWheel() {
+            const sectionsGroup = document.getElementById('wheelSections');
+            sectionsGroup.innerHTML = '';
+             
+            if (participants.length === 0) {
+                // 显示空状态
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M 0 0 L 220 0 A 220 220 0 1 1 -220 0 Z');
+                path.setAttribute('fill', '#95A5A6');
+                path.setAttribute('stroke', '#fff');
+                path.setAttribute('stroke-width', '3');
+                 
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', '0');
+                text.setAttribute('y', '0');
+                text.setAttribute('fill', '#fff');
+                text.setAttribute('font-size', '24');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.textContent = '暂无参与者';
+                 
+                sectionsGroup.appendChild(path);
+                sectionsGroup.appendChild(text);
+                return;
+            }
+             
+            const sectionAngle = 360 / participants.length;
+             
+            participants.forEach((participant, index) => {
+                const startAngle = index * sectionAngle;
+                const endAngle = (index + 1) * sectionAngle;
+                 
+                const startAngleRad = (startAngle * Math.PI) / 180;
+                const endAngleRad = (endAngle * Math.PI) / 180;
+                 
+                const largeArcFlag = sectionAngle > 180 ? 1 : 0;
+                 
+                const x1 = Math.cos(startAngleRad) * 220;
+                const y1 = Math.sin(startAngleRad) * 220;
+                const x2 = Math.cos(endAngleRad) * 220;
+                const y2 = Math.sin(endAngleRad) * 220;
+                 
+                const pathData = `M 0 0 L ${x1} ${y1} A 220 220 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+                 
+                // 创建扇形
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', colors[index % colors.length]);
+                path.setAttribute('stroke', '#fff');
+                path.setAttribute('stroke-width', '3');
+                 
+                // 计算文字位置
+                const midAngle = (startAngle + endAngle) / 2;
+                const textRadius = 150;
+                const textX = Math.cos((midAngle * Math.PI) / 180) * textRadius;
+                const textY = Math.sin((midAngle * Math.PI) / 180) * textRadius;
+                 
+                // 根据参与人数调整字体大小
+                const fontSize = participants.length > 12 ? 16 : participants.length > 8 ? 20 : 24;
+                 
+                // 创建文字
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', textX);
+                text.setAttribute('y', textY);
+                text.setAttribute('fill', '#fff');
+                text.setAttribute('font-size', fontSize);
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('transform', `rotate(${midAngle}, ${textX}, ${textY})`);
+                text.textContent = participant;
+                 
+                sectionsGroup.appendChild(path);
+                sectionsGroup.appendChild(text);
+            });
+        }
+ 
+        // 开始抽奖
+        function startLottery() {
+            if (participants.length === 0) {
+                alert('请先添加参与人员！');
+                return;
+            }
+ 
+            if (isSpinning) return;
+ 
+            isSpinning = true;
+            winner = '';
+            winnerPrize = '';
+             
+            // 更新按钮状态
+            const startBtn = document.getElementById('startBtn');
+            const startBtnText = document.getElementById('startBtnText');
+            startBtn.disabled = true;
+            startBtnText.textContent = '抽奖中...';
+             
+            // 隐藏结果显示
+            document.getElementById('resultDisplay').classList.add('hidden');
+ 
+            // 随机动画时长 (8-16秒)
+            const randomDuration = 8000 + Math.random() * 8000;
+ 
+            // 随机选择获奖者
+            const randomIndex = Math.floor(Math.random() * participants.length);
+            const randomParticipant = participants[randomIndex];
+             
+            // 随机选择奖项
+            const availablePrizes = ['一等奖', '二等奖', '三等奖', '参与奖'];
+            const randomPrize = availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
+             
+            // 计算转盘应该停止的角度
+            const sectionAngle = 360 / participants.length;
+            const targetAngle = randomIndex * sectionAngle + sectionAngle / 2;
+             
+            // 随机旋转圈数 (20-30圈)
+            const randomSpins = 20 + Math.random() * 10;
+            const finalRotation = currentRotation + randomSpins * 360 + (360 - targetAngle);
+             
+            currentRotation = finalRotation;
+             
+            // 应用旋转动画
+            const wheelSvg = document.getElementById('wheelSvg');
+            wheelSvg.style.transitionDuration = `${randomDuration}ms`;
+            wheelSvg.style.transform = `rotate(${currentRotation}deg)`;
+ 
+            // 动画结束后显示结果
+            setTimeout(() => {
+                isSpinning = false;
+                winner = randomParticipant;
+                winnerPrize = randomPrize;
+                 
+                // 恢复按钮状态
+                startBtn.disabled = false;
+                startBtnText.textContent = '开始抽奖';
+                 
+                // 显示结果
+                document.getElementById('winnerName').textContent = winner;
+                document.getElementById('winnerPrize').textContent = winnerPrize;
+                document.getElementById('resultDisplay').classList.remove('hidden');
+                 
+                // 更新参与者列表显示
+                updateParticipantList();
+                 
+                // 显示庆祝弹窗
+                showCelebration();
+            }, randomDuration);
+        }
+ 
+        // 重置转盘
+        function resetWheel() {
+            if (isSpinning) return;
+             
+            currentRotation = 0;
+            winner = '';
+            winnerPrize = '';
+             
+            const wheelSvg = document.getElementById('wheelSvg');
+            wheelSvg.style.transitionDuration = '0ms';
+            wheelSvg.style.transform = 'rotate(0deg)';
+             
+            document.getElementById('resultDisplay').classList.add('hidden');
+            updateParticipantList();
+            closeCelebration();
+        }
+ 
+        // 显示庆祝弹窗
+        function showCelebration() {
+            document.getElementById('celebrationWinner').textContent = winner;
+            document.getElementById('celebrationPrize').textContent = winnerPrize;
+            document.getElementById('celebrationModal').classList.remove('hidden');
+        }
+ 
+        // 关闭庆祝弹窗
+        function closeCelebration() {
+            document.getElementById('celebrationModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
