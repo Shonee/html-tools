@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纯前端4字LOGO生成器</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+          text-decoration:none;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 0px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .color-input {
+            display: flex;
+            gap: 10px;
+        }
+        .color-input input[type="color"] {
+            width: 50px;
+            height: 38px;
+            padding: 0;
+        }
+        .color-input input[type="text"] {
+            flex: 1;
+        }
+        button,.download-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .logo-container {
+            text-align: center;
+            margin-top: 0px;
+        }
+        .logo-preview {
+            max-width: 100%;
+            border: 1px dashed #ccc;
+            transition: all 0.3s;
+        }
+        .logo-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            height: 20px;
+        }
+        .download-btn {
+            display: block;
+            margin: 10px auto;
+          text-decoration:none;
+            max-width: 60px;
+        }
+        .download-btn:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>纯前端LOGO生成器</h1>
+         
+        <form id="logo-form">
+            <div class="form-group">
+                <label for="text-input">文字内容 (1个字或4个字):</label>
+                <input type="text" id="text-input" name="text" maxlength="4" placeholder="输入1或4个文字"  value="乾隆重宝" required>
+            </div>
+             
+            <div class="form-group">
+                <label for="font-select">字体:</label>
+                <select id="font-select" name="font">
+                    <option value="Microsoft YaHei">微软雅黑</option>
+                    <option value="SimSun">宋体</option>
+                    <option value="SimHei">黑体</option>
+                    <option value="KaiTi">楷体</option>
+                    <option value="LiSu">隶书</option>
+                </select>
+            </div>
+             
+            <div class="form-group">
+                <label for="padding">内边距 (像素):</label>
+                <input type="number" id="padding" name="padding" min="0" max="100" value="20">
+            </div>
+             
+            <div class="form-group">
+                <label for="corner-radius">圆角半径:<span id="radius-value" style="color:red;">10</span></label>
+                <input type="range" id="corner-radius" name="corner_radius" min="0" max="50" value="10">                
+            </div>
+             
+            <div class="form-group">
+                <label for="color">背景颜色:</label>
+                <div class="color-input">
+                    <input type="color" id="color-picker" value="#4CAF50">
+                    <input type="text" id="color" name="color" value="#4CAF50" placeholder="输入十六进制颜色代码">
+                </div>
+            </div>
+             
+            <button type="submit">生成LOGO</button>
+             
+            <div class="error-message" id="error-message"></div>
+        </form>
+         
+        <div class="logo-container" id="logo-container">
+            <canvas id="logo-canvas" width="400" height="400" style="display: none;"></canvas>
+        </div>
+         
+        <a id="download-btn" class="download-btn" style="display: none;">下载</a>
+    </div>
+  
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const textInput = document.getElementById('text-input');
+            const fontSelect = document.getElementById('font-select');
+            const paddingInput = document.getElementById('padding');
+            const cornerRadius = document.getElementById('corner-radius');
+            const radiusValue = document.getElementById('radius-value');
+            const colorPicker = document.getElementById('color-picker');
+            const colorInput = document.getElementById('color');
+            const errorMessage = document.getElementById('error-message');
+            const logoForm = document.getElementById('logo-form');
+            const logoCanvas = document.getElementById('logo-canvas');
+            const logoContainer = document.getElementById('logo-container');
+            const downloadBtn = document.getElementById('download-btn');
+             
+            // 更新圆角值显示
+            cornerRadius.addEventListener('input', function() {
+                radiusValue.textContent = this.value;
+            });
+             
+            // 颜色选择器和输入框同步
+            colorPicker.addEventListener('input', function() {
+                colorInput.value = this.value;
+            });
+             
+            colorInput.addEventListener('input', function() {
+                if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                    colorPicker.value = this.value;
+                }
+            });
+             
+            // 表单提交
+            logoForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateLogo();
+            });
+             
+            // 初始生成一个LOGO
+            generateLogo();
+             
+            function generateLogo() {
+                const text = textInput.value.trim();
+                const font = fontSelect.value;
+                const padding = parseInt(paddingInput.value);
+                const radius = parseInt(cornerRadius.value);
+                const color = colorInput.value;
+                 
+                // 验证输入
+                if (text.length !== 1 && text.length !== 4) {
+                    errorMessage.textContent = '请输入1个字或4个字';
+                    logoCanvas.style.display = 'none';
+                    downloadBtn.style.display = 'none';
+                    return;
+                } else {
+                    errorMessage.textContent = '';
+                }
+                 
+                const ctx = logoCanvas.getContext('2d');
+                const width = logoCanvas.width;
+                const height = logoCanvas.height;
+                 
+                // 清空画布
+                ctx.clearRect(0, 0, width, height);
+                 
+                // 绘制圆角矩形背景
+                drawRoundedRect(ctx, 0, 0, width, height, radius, color);
+                 
+                // 计算实际内容区域
+                const contentWidth = width - padding * 2;
+                const contentHeight = height - padding * 2;
+                 
+                // 设置文字样式
+                ctx.fillStyle = '#FFFFFF';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                 
+                if (text.length === 1) {
+                    // 单个字 - 居中铺满
+                    const fontSize = calculateFontSize(text, font, contentWidth, contentHeight);
+                    ctx.font = `bold ${fontSize}px ${font}`;
+                     
+                    // 测量文字
+                    const metrics = ctx.measureText(text);
+                    const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+                     
+                    // 计算位置
+                    const x = padding + contentWidth / 2;
+                    const y = padding + contentHeight / 2 + textHeight / 2 - metrics.actualBoundingBoxDescent;
+                     
+                    ctx.fillText(text, x, y);
+                } else {
+                    // 四个字 - 两行两列
+                    const cellWidth = contentWidth / 2;
+                    const cellHeight = contentHeight / 2;
+                     
+                    // 计算适合的字体大小
+                    const sampleChar = text[0];
+                    const fontSize = calculateFontSize(sampleChar, font, cellWidth, cellHeight);
+                    ctx.font = `bold ${fontSize}px ${font}`;
+                     
+                    // 绘制四个字
+                    for (let i = 0; i < 4; i++) {
+                        const char = text[i];
+                        const metrics = ctx.measureText(char);
+                        const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+                         
+                        const row = Math.floor(i / 2);
+                        const col = i % 2;
+                        const x = padding + col * cellWidth + cellWidth / 2;
+                        const y = padding + row * cellHeight + cellHeight / 2 + textHeight / 2 - metrics.actualBoundingBoxDescent;
+                         
+                        ctx.fillText(char, x, y);
+                    }
+                }
+                 
+                // 显示画布
+                logoCanvas.style.display = 'block';
+                 
+                // 设置下载链接
+                logoCanvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    downloadBtn.href = url;
+                    downloadBtn.download = `logo-${text}.png`;
+                    downloadBtn.style.display = 'block';
+                });
+            }
+             
+            // 计算适合的字体大小
+            function calculateFontSize(text, font, maxWidth, maxHeight) {
+                const ctx = logoCanvas.getContext('2d');
+                let fontSize = Math.min(maxWidth, maxHeight);
+                 
+                // 二分查找最佳字体大小
+                let low = 10;
+                let high = fontSize;
+                let bestSize = high;
+                 
+                while (low <= high) {
+                    const mid = Math.floor((low + high) / 2);
+                    ctx.font = `bold ${mid}px ${font}`;
+                    const metrics = ctx.measureText(text);
+                    const textWidth = metrics.width;
+                    const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+                     
+                    if (textWidth <= maxWidth && textHeight <= maxHeight) {
+                        bestSize = mid;
+                        low = mid + 1;
+                    } else {
+                        high = mid - 1;
+                    }
+                }
+                 
+                return bestSize * 0.95; // 留出5%边距
+            }
+             
+            // 绘制圆角矩形
+            function drawRoundedRect(ctx, x, y, width, height, radius, color) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                 
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+        });
+    </script>
+</body>
+</html>
