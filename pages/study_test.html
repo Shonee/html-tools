@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<title>我要答题（仅支持Excel题库）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- 动态加载脚本，优先CDN，失败则使用本地文件 -->
+<script>
+// 加载脚本函数，带 fallback 机制
+function loadScript(src, fallbackSrc, componentName, callback) {
+    const script = document.createElement('script');
+    script.src = src;
+     
+    script.onload = function() {
+        console.log(`${componentName} (CDN) 加载成功`);
+        if (callback) callback(true);
+    };
+     
+    script.onerror = function() {
+        console.log(`CDN加载失败，尝试加载本地${componentName}: ${fallbackSrc}`);
+        const fallbackScript = document.createElement('script');
+        fallbackScript.src = fallbackSrc;
+         
+        fallbackScript.onload = function() {
+            console.log(`本地${componentName}加载成功`);
+            if (callback) callback(true);
+        };
+         
+        fallbackScript.onerror = function() {
+            console.error(`本地${componentName}加载失败: ${fallbackSrc}`);
+            alert(`无法加载必要的${componentName}组件，请检查网络连接或文件完整性`);
+            if (callback) callback(false);
+        };
+         
+        document.head.appendChild(fallbackScript);
+    };
+     
+    document.head.appendChild(script);
+}
+ 
+// 先加载xlsx，完成后再加载xls（因为xls可能依赖xlsx）
+loadScript(
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'xlsx.full.min.js',
+    'xlsx',
+    function(xlsxLoaded) {
+        // 无论xlsx是否加载成功，都尝试加载xls
+        loadScript(
+            'https://cdn.jsdelivr.net/npm/xlsjs@0.7.6/dist/xls.min.js',
+            'xls.min.js',
+            'xls',
+            function(xlsLoaded) {
+                if (xlsxLoaded || xlsLoaded) {
+                    console.log('至少有一个Excel处理组件加载成功');
+                } else {
+                    console.log('所有Excel处理组件都加载失败');
+                }
+            }
+        );
+    }
+);
+</script>
+<style>
+/* 保持原有样式不变 */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(to bottom right,#f3f4f6,#e5e7eb);min-height:100vh;color:#1f2937;line-height:1.5;padding-bottom:2rem}
+.container{max-width:1200px;margin:0 auto;padding:2rem 1rem}
+header{text-align:center;margin:1.5rem 0 2rem}
+h1{font-size:clamp(1.8rem,5vw,2.5rem);font-weight:bold;background:linear-gradient(to right,#3B82F6,#8B5CF6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:#6b7280;font-size:1.125rem}
+.card{background:#fff;border-radius:1rem;padding:2rem;box-shadow:0 10px 25px -5px rgba(0,0,0,.05),0 8px 10px -6px rgba(0,0,0,.02);margin-bottom:2rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;font-weight:500;padding:.75rem 1.5rem;border-radius:.75rem;border:none;cursor:pointer;transition:all .3s;
+    min-width: 160px;
+    height: 50px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+.btn-two-lines {
+    flex-direction: column;
+    padding: 0.5rem 1rem;
+    min-width: 140px;
+    white-space: normal;
+    text-align: center;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 15px -3px rgba(0,0,0,.1)}
+.btn-primary{background:#3B82F6;color:#fff}
+.btn-secondary{background:#10B981;color:#fff}
+.btn-gray{background:#e5e7eb;color:#4b5563}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.file-import{max-width:700px;margin:0 auto;text-align:center}
+#file-upload{display:none}
+.file-info{margin-top:1rem;display:none}
+.help-text{color:#6b7280;font-size:.875rem;margin-top:1rem}
+.flex-container{display:flex;flex-direction:column;gap:1.5rem;max-width:1100px;margin:0 auto}
+@media(min-width:1024px){.flex-container{flex-direction:row}.main-content{width:700px;flex-shrink:0}.sidebar{width:300px;flex-shrink:0}}
+.quiz-controls{display:none;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.quiz-controls.show{display:flex}
+.question-count{font-size:1.125rem;font-weight:500}
+.total-questions{color:#6b7280;margin-left:.5rem}
+.score-display{background:#fff;padding:.5rem 1rem;border-radius:9999px;font-size:.875rem}
+.score-value{font-weight:bold;color:#3B82F6;margin-left:.25rem}
+.question-section{display:none}
+.question-section.show{display:block}
+.question-type{display:inline-block;padding:.5rem .75rem;background:rgba(59,130,246,.1);color:#3B82F6;font-size:.875rem;font-weight:500;border-radius:9999px;margin-bottom:1rem}
+.question-text{font-size:1.25rem;font-weight:600;margin-bottom:1.5rem;color:#1f2937;white-space:pre-wrap;word-wrap:break-word}
+@media(min-width:768px){.question-text{font-size:1.5rem}}
+.options-container{margin-bottom:2rem;display:flex;flex-direction:column;gap:.75rem}
+.option{padding:1rem;border:1px solid #e5e7eb;border-radius:.75rem;cursor:pointer;transition:all .2s;white-space:pre-line}
+.option:hover{background:rgba(59,130,246,.1)}
+.option.selected{border-color:#3B82F6;background:rgba(59,130,246,.05)}
+.option-label{display:flex}
+.option-letter{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:50%;margin-right:.75rem;font-weight:500}
+.option.selected .option-letter{background:#3B82F6;color:#fff}
+.option:not(.selected) .option-letter{background:rgba(59,130,246,.1);color:#3B82F6}
+.button-group{display:flex;justify-content:space-between;margin-top:1.5rem}
+.confirm-btn-container{text-align:center;margin-bottom:1.5rem}
+.feedback{padding:1rem;border-radius:.5rem;margin-bottom:1.5rem;display:none;align-items:center}
+.feedback.show{display:flex}
+.feedback-success{background:#f0fdf4;border:1px solid #dcfce7;color:#166534}
+.feedback-error{background:#fee2e2;border:1px solid #fecaca;color:#b91c1c}
+.explanation {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+    display: none;
+}
+.explanation.show {
+    display: block;
+}
+.explanation-title {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+.explanation-title svg {
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+.explanation-content {
+    color: #475569;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+ 
+.results-section{display:none;text-align:center;max-width:700px;margin:0 auto}
+.results-section.show{display:block}
+.results-title{font-size:1.5rem;font-weight:600;margin-bottom:.5rem}
+.results-subtitle{color:#6b7280;margin-bottom:2rem}
+.score-circle{display:flex;align-items:center;justify-content:center;width:9rem;height:9rem;border-radius:50%;background:linear-gradient(to bottom right,#3B82F6,#8B5CF6);margin:0 auto 2rem;color:#fff;text-align:center}
+.final-score{font-size:3rem;font-weight:bold}
+.final-total{font-size:1.5rem;font-weight:600}
+.results-buttons{display:flex;justify-content:center;gap:1rem;margin-top:2rem}
+.error-section{display:none;text-align:center;max-width:700px;margin:0 auto}
+.error-section.show{display:block}
+.error-icon-container{display:inline-flex;align-items:center;justify-content:center;width:4rem;height:4rem;border-radius:50%;background:#fee2e2;margin-bottom:1rem}
+.error-icon{color:#dc2626;font-size:2rem}
+.error-title{font-size:1.5rem;font-weight:600;color:#dc2626;margin-bottom:.5rem}
+.error-message{color:#6b7280;margin-bottom:1.5rem}
+.debug-info{font-size:.875rem;background:#f3f4f6;padding:1rem;border-radius:.5rem;margin-bottom:1.5rem;max-height:10rem;overflow-y:auto;display:none}
+.debug-info.show{display:block}
+.answer-sheet-section{display:none}
+.answer-sheet-section.show{display:block}
+.answer-sheet{position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow-y:auto}
+.answer-sheet-title{font-size:1.125rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center}
+.answer-sheet-icon{margin-right:.5rem;color:#3B82F6}
+.answer-stats{display:flex;justify-content:space-between;font-size:.875rem;margin-bottom:1rem}
+.stat-label{color:#6b7280}
+.stat-value{font-weight:500}
+.answer-sheet-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:1rem}
+.answer-sheet-btn{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:500;border:none;cursor:pointer;transition:all .2s}
+.answer-sheet-btn.unanswered{background:#e5e7eb;color:#4b5563}
+.answer-sheet-btn.current{background:#3B82F6;color:#fff}
+.answer-sheet-btn.correct{background:#10B981;color:#fff}
+.answer-sheet-btn.incorrect{background:#EF4444;color:#fff}
+.legend{display:flex;align-items:center;font-size:.75rem;gap:1rem;flex-wrap:wrap}
+.legend-color{width:1rem;height:1rem;border-radius:50%;margin-right:.25rem}
+.debug-toggle-btn{margin-top:0;background:transparent;border:1px solid #6b7280;color:#6b7280;padding:.5rem 1rem;border-radius:.5rem;cursor:pointer;font-size:.875rem;transition:all .3s}
+.debug-toggle-btn:hover{background:rgba(59,130,246,.1);border-color:#3B82F6;color:#3B82F6}
+.start-quiz-section{text-align:center;padding:1rem 0 2rem}
+.btn-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+ 
+.status-unanswered { color: #e5e7eb; }
+.status-current { color: #3B82F6; }
+.status-correct { color: #10B981; }
+.status-incorrect { color: #EF4444; }
+ 
+.random-question-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+ 
+.random-question-input input {
+  width: 80px;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  text-align: center;
+  height: 50px;
+  box-sizing: border-box;
+}
+ 
+.random-question-input input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+ 
+.mode-selection {
+  margin-top: 0.5rem;
+}
+ 
+.mode-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+ 
+.debug-and-random-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+ 
+.exam-mode-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  font-weight: 500;
+  color: #374151;
+}
+ 
+.exam-mode-checkbox input {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #3B82F6;
+}
+ 
+/* 考试模式结果页面样式 */
+.exam-results-details {
+  margin-top: 2rem;
+  text-align: left;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+ 
+.exam-question-item {
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+ 
+.exam-question-item.correct {
+  border-color: #dcfce7;
+  background-color: #f0fdf4;
+}
+ 
+.exam-question-item.incorrect {
+  border-color: #fecaca;
+  background-color: #fee2e2;
+}
+ 
+.exam-question-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+ 
+.exam-question-number {
+  font-weight: 600;
+  color: #1f2937;
+}
+ 
+.exam-question-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+ 
+.exam-question-status.correct {
+  background-color: #dcfce7;
+  color: #166534;
+}
+ 
+.exam-question-status.incorrect {
+  background-color: #fecaca;
+  color: #b91c1c;
+}
+ 
+.exam-question-text {
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+ 
+.exam-options {
+  margin-bottom: 1rem;
+}
+ 
+.exam-option {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.exam-option.selected {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid #3B82F6;
+}
+ 
+.exam-option.correct-answer {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10B981;
+}
+ 
+.exam-option-letter {
+  font-weight: 600;
+  margin-right: 0.75rem;
+  min-width: 1.5rem;
+  text-align: center;
+}
+ 
+.exam-answer-info {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e5e7eb;
+}
+ 
+.exam-your-answer, .exam-correct-answer {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+ 
+.exam-answer-label {
+  font-weight: 600;
+  color: #4b5563;
+  margin-right: 0.5rem;
+}
+ 
+.exam-result-summary {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+ 
+.exam-score-percentage {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #3B82F6;
+  margin: 1rem 0;
+}
+ 
+@media (max-width: 480px) {
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-width: auto;
+    width: 100%;
+    height: auto;
+  }
+   
+  .btn-two-lines {
+    min-width: auto;
+    height: auto;
+  }
+   
+  .random-question-input {
+    flex-direction: column;
+    margin-top: 1rem;
+    width: 100%;
+  }
+   
+  .random-question-input input {
+    width: 100%;
+    height: auto;
+  }
+   
+  .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+   
+  .btn-group > * {
+    width: 100%;
+  }
+   
+  .debug-and-random-container {
+    flex-direction: column;
+    width: 100%;
+  }
+   
+  .debug-and-random-container > * {
+    width: 100%;
+  }
+   
+  .exam-question-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>我要答题</h1>
+    <p class="subtitle"><small>仅支持Excel (xlsx, xls) 格式题库</small></p>
+  </header>
+ 
+  <div id="file-import-section" class="card file-import">
+    <div class="btn-group">
+      <label for="file-upload" class="btn btn-primary">选择题库文件</label>
+      <button id="download-sample-btn" class="btn btn-secondary">下载题库示例</button>
+    </div>
+    <input id="file-upload" type="file" accept=".xlsx,.xls">
+    <p class="help-text">
+      支持格式：XLSX、XLS<br>
+      格式要求：问题,选项A,选项B,选项C,选项D,选项E,选项F,解析,答案(连写如ABC)；<br>
+      答案支持：A-F、1-6（数字索引）、正确/错误、对/错、Y/N（不区分大小写）<br>
+      第一行为标题行；解析列内容可以为空<br>
+      解析失败的行会被跳过并在调试面板显示。
+    </p>
+    <div id="file-info" class="file-info">
+      <div class="file-info-content"><span>&#10003;</span><span id="selected-filename"></span></div>
+    </div>
+     
+    <div id="start-quiz-section" class="start-quiz-section" style="display: none;">
+      <!-- 添加考试模式选择框 -->
+      <div class="exam-mode-checkbox">
+        <input type="checkbox" id="exam-mode" />
+        <label for="exam-mode">考试模式（完成所有题目后统一显示答案和解析）</label>
+      </div>
+       
+      <div class="mode-selection">
+        <span class="mode-label">请选择答题模式：</span>
+        <div class="btn-group">
+          <button id="sequential-quiz-btn" class="btn btn-secondary btn-two-lines">顺序答题<br>顺序选项</button>
+          <button id="sequential-shuffle-options-quiz-btn" class="btn btn-secondary btn-two-lines">顺序答题<br>随机选项</button>
+          <button id="random-quiz-btn" class="btn btn-primary btn-two-lines">随机抽取<br>顺序选项</button>
+          <button id="random-shuffle-options-quiz-btn" class="btn btn-primary btn-two-lines">随机抽取<br>随机选项</button>
+        </div>
+         
+        <div class="debug-and-random-container">
+          <button id="debug-toggle" class="debug-toggle-btn">显示调试信息</button>
+          <div class="random-question-input">
+            <span>随机抽取</span>
+            <input type="number" id="random-count" min="1" value="10" />
+            <span>题</span>
+          </div>
+        </div>
+      </div>
+    </div>
+     
+    <div id="debug-info" class="debug-info">
+      <h4 class="debug-title">调试信息：</h4>
+      <p id="debug-details"></p>
+    </div>
+  </div>
+ 
+  <div class="flex-container">
+    <div class="main-content">
+      <div id="quiz-controls" class="quiz-controls">
+        <div class="question-count">
+          <span id="current-question">问题 1</span>
+          <span id="total-questions" class="total-questions">/ 0</span>
+        </div>
+        <div class="score-display">
+          <span>得分:</span>
+          <span id="score" class="score-value">0</span>
+        </div>
+      </div>
+ 
+      <div id="quiz-section" class="card question-section">
+        <div class="question-type">不定项选择题</div>
+        <h2 id="question-text" class="question-text"></h2>
+        <div id="options-container" class="options-container"></div>
+        <div class="confirm-btn-container">
+          <button id="confirm-btn" class="btn btn-primary">提交答案</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+         
+        <div id="explanation" class="explanation">
+          <div class="explanation-title">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            解析
+          </div>
+          <div id="explanation-content" class="explanation-content"></div>
+        </div>
+         
+        <div class="button-group">
+          <button id="prev-btn" class="btn btn-gray" disabled>上一题</button>
+          <button id="next-btn" class="btn btn-primary" disabled>下一题</button>
+        </div>
+      </div>
+ 
+      <div id="results-section" class="card results-section">
+        <h2 class="results-title">测验完成！</h2>
+        <p class="results-subtitle">恭喜你完成了所有问题</p>
+         
+        <!-- 考试模式结果摘要 -->
+        <div class="exam-result-summary">
+          <div class="score-circle">
+            <span id="final-score" class="final-score">0</span>
+            <span>/</span>
+            <span id="final-total" class="final-total">0</span>
+          </div>
+          <div class="exam-score-percentage" id="score-percentage">得分：0%</div>
+          <div>
+            <span>总题数：</span><span id="summary-total-count">0</span>
+            <span>，答对：</span><span id="summary-correct-count" class="status-correct">0</span>
+            <span>，答错：</span><span id="summary-incorrect-count" class="status-incorrect">0</span>
+          </div>
+        </div>
+         
+        <!-- 考试模式详细结果 -->
+        <div id="exam-results-details" class="exam-results-details"></div>
+         
+        <div class="results-buttons">
+          <button id="restart-btn" class="btn btn-secondary">重新开始</button>
+          <button id="export-wrong-btn" class="btn btn-gray">导出错题</button>
+          <button id="new-file-btn" class="btn btn-gray">选择新文件</button>
+        </div>
+      </div>
+ 
+      <div id="error-section" class="card error-section">
+        <div class="error-icon-container"><span class="error-icon">!</span></div>
+        <h3 class="error-title">文件处理错误</h3>
+        <p id="error-message" class="error-message"></p>
+        <div id="error-debug-info" class="debug-info">
+          <h4 class="debug-title">调试信息：</h4>
+          <p id="error-debug-details"></p>
+        </div>
+        <button id="retry-btn" class="btn btn-primary">重新选择文件</button>
+      </div>
+    </div>
+ 
+    <div id="answer-sheet-section" class="sidebar answer-sheet-section">
+      <div class="card answer-sheet">
+        <h3 class="answer-sheet-title"><span class="answer-sheet-icon">※</span>答题卡</h3>
+        <div class="answer-stats">
+          <div><span class="stat-label">已答：</span><span id="answered-count" class="stat-value">0</span></div>
+          <div><span class="stat-label">正确：</span><span id="correct-count" class="stat-value stat-correct">0</span></div>
+          <div><span class="stat-label">总题数：</span><span id="total-count" class="stat-value">0</span></div>
+        </div>
+        <div id="answer-sheet-grid" class="answer-sheet-grid"></div>
+        <div class="legend">
+          <div><span class="legend-color" style="background:#e5e7eb;"></span><span class="status-unanswered">未答</span></div>
+          <div><span class="legend-color" style="background:#3B82F6;"></span><span class="status-current">当前</span></div>
+          <div><span class="legend-color" style="background:#10B981;"></span><span class="status-correct">正确</span></div>
+          <div><span class="legend-color" style="background:#EF4444;"></span><span class="status-incorrect">错误</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<script>
+/* ========= 全局变量 ========= */
+let questions = [], originalQuestions = [], current = 0, score = 0, answered = 0, correct = 0;
+let status = [];
+const valid = ['A','B','C','D','E','F'];
+let parsingErrors = [];
+let originalFileName = '';
+let isExamMode = false; // 新增：考试模式标志
+ 
+/* ========= DOM 快捷 ========= */
+const el = id => document.getElementById(id);
+const fileUpload = el('file-upload');
+const fileImport = el('file-import-section');
+const quiz = el('quiz-section');
+const results = el('results-section');
+const errorSec = el('error-section');
+const controls = el('quiz-controls');
+const answerSheet = el('answer-sheet-section');
+const answerGrid = el('answer-sheet-grid');
+const answeredEl = el('answered-count');
+const correctEl = el('correct-count');
+const totalEl = el('total-count');
+const filenameEl = el('selected-filename');
+const qText = el('question-text');
+const qNum = el('current-question');
+const qTotal = el('total-questions');
+const scoreEl = el('score');
+const confirmBtn = el('confirm-btn');
+const prevBtn = el('prev-btn');
+const nextBtn = el('next-btn');
+const finalScore = el('final-score');
+const finalTotal = el('final-total');
+const optionsContainer = el('options-container');
+const sequentialQuizBtn = el('sequential-quiz-btn');
+const randomQuizBtn = el('random-quiz-btn');
+const sequentialShuffleOptionsQuizBtn = el('sequential-shuffle-options-quiz-btn');
+const randomShuffleOptionsQuizBtn = el('random-shuffle-options-quiz-btn');
+const randomCountInput = el('random-count');
+const startQuizSection = el('start-quiz-section');
+const debugToggleBtn = el('debug-toggle');
+const debugInfo = el('debug-info');
+const debugDetails = el('debug-details');
+const downloadSampleBtn = el('download-sample-btn');
+const explanationEl = el('explanation');
+const explanationContentEl = el('explanation-content');
+const examModeCheckbox = el('exam-mode'); // 新增：考试模式复选框
+const examResultsDetails = el('exam-results-details'); // 新增：考试结果详情容器
+const scorePercentage = el('score-percentage'); // 新增：百分比得分
+const summaryTotalCount = el('summary-total-count'); // 新增：总题数摘要
+const summaryCorrectCount = el('summary-correct-count'); // 新增：答对题数摘要
+const summaryIncorrectCount = el('summary-incorrect-count'); // 新增：答错题数摘要
+ 
+/* ========= 事件绑定 ========= */
+fileUpload.addEventListener('change', handleFile);
+confirmBtn.addEventListener('click', confirmAnswer);
+prevBtn.addEventListener('click', () => go(-1));
+nextBtn.addEventListener('click', () => go(1));
+el('restart-btn').addEventListener('click', restart);
+el('new-file-btn').addEventListener('click', selectNewFile);
+el('retry-btn').addEventListener('click', retryFile);
+sequentialQuizBtn.addEventListener('click', () => startQuiz('sequential'));
+randomQuizBtn.addEventListener('click', () => startQuiz('random'));
+sequentialShuffleOptionsQuizBtn.addEventListener('click', () => startQuiz('sequential-shuffle-options'));
+randomShuffleOptionsQuizBtn.addEventListener('click', () => startQuiz('random-shuffle-options'));
+debugToggleBtn.addEventListener('click', () => debugInfo.classList.toggle('show'));
+downloadSampleBtn.addEventListener('click', downloadSampleExcel);
+el('export-wrong-btn').addEventListener('click', exportWrongAnswers);
+ 
+/* ========= 下载题库示例 ========= */
+function downloadSampleExcel() {
+  // 创建工作簿
+  const wb = XLSX.utils.book_new();
+   
+  // 创建示例数据，列顺序为：问题,选项A,选项B,选项C,选项D,选项E,选项F,解析,答案
+  const data = [
+    ["问题", "选项A", "选项B", "选项C", "选项D", "选项E", "选项F", "解析", "答案"],
+    ["以下哪个不是编程语言？", "JavaScript", "Python", "HTML", "Java", "", "", "HTML是超文本标记语言，不是编程语言", "C"],
+    ["以下哪些用于网页前端开发？", "CSS", "Python", "JavaScript", "Java", "", "", "CSS用于样式设计，JavaScript用于交互逻辑", "AC"],
+    ["1+1等于几？", "1", "2", "3", "4", "", "", "1+1=2是基本算术", "2"], // 数字答案示例
+    ["题库中英文引号要成对使用，单独一个会导致解析错误？", "正确", "错误", "", "", "", "", "", "错误"],
+    ["加工贸易货物“短溢区间”管理的幅度是？", "-0.5%,0.5%", "-1%,1%", "-0.5,0.5", "-10%,10%", "", "", "", "B"], // 带百分号的选项示例
+    ["以下哪些是编程语言？", "JavaScript", "HTML", "Python", "CSS", "Java", "PHP", "", "ACEF"],
+    ["以下哪些是前端框架？", "React", "Django", "Flask", "Spring", "Vue", "Angular", "", "5"], // 数字答案示例
+    ["Y/N格式测试", "是", "否", "", "", "", "", "", "Y"], // Y/N格式示例
+    ["对/错格式测试", "正确", "错误", "", "", "", "", "", "对"] // 对/错格式示例
+  ];
+   
+  // 创建工作表
+  const ws = XLSX.utils.aoa_to_sheet(data);
+   
+  // 将工作表添加到工作簿
+  XLSX.utils.book_append_sheet(wb, ws, "题库示例");
+   
+  // 下载文件
+  XLSX.writeFile(wb, "题库示例.xlsx");
+}
+ 
+/* ========= 导出错题功能 ========= */
+function exportWrongAnswers() {
+  // 收集所有答错的题目的原始索引
+  const wrongQuestionIndices = [];
+  questions.forEach((q, index) => {
+    if (status[index].answered && !status[index].correct) {
+      if (q.originalIndex !== undefined) {
+        wrongQuestionIndices.push(q.originalIndex);
+      } else {
+        wrongQuestionIndices.push(index);
+      }
+    }
+  });
+   
+  // 去重并按原始顺序排序
+  const uniqueWrongIndices = [...new Set(wrongQuestionIndices)].sort((a, b) => a - b);
+   
+  if (uniqueWrongIndices.length === 0) {
+    alert('恭喜你，没有错题！');
+    return;
+  }
+   
+  // 准备导出数据，格式与题库一致：问题,选项A,选项B,选项C,选项D,选项E,选项F,解析,答案
+  const data = [["问题", "选项A", "选项B", "选项C", "选项D", "选项E", "选项F", "解析", "答案"]];
+   
+  // 使用原始题库中的题目信息
+  uniqueWrongIndices.forEach(index => {
+    const originalQuestion = originalQuestions[index];
+    if (originalQuestion) {
+      const row = [originalQuestion.question];
+       
+      // 添加原始选项
+      originalQuestion.options.forEach(option => row.push(option));
+       
+      // 填充剩余选项位置（最多6个选项）
+      while (row.length < 7) {
+        row.push("");
+      }
+       
+      // 添加解析
+      row.push(originalQuestion.explanation || "");
+       
+      // 添加原始正确答案
+      row.push(originalQuestion.originalAnswer || originalQuestion.correctAnswers.join(''));
+       
+      data.push(row);
+    }
+  });
+   
+  // 创建工作簿和工作表
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+   
+  // 添加工作表到工作簿
+  XLSX.utils.book_append_sheet(wb, ws, "错题集");
+   
+  // 生成文件名
+  const now = new Date();
+  const dateTimeStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+   
+  const baseFileName = originalFileName.replace(/\.(xlsx|xls)$/i, '');
+  const fileName = `${baseFileName}_错题集_${dateTimeStr}.xlsx`;
+   
+  // 导出文件
+  XLSX.writeFile(wb, fileName);
+}
+ 
+/* ========= 随机排序选项功能 ========= */
+function shuffleQuestionOptions(question) {
+  const shuffledOptions = [...question.options];
+   
+  // 随机排序选项
+  for (let i = shuffledOptions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+  }
+   
+  // 找出原始正确答案在打乱后的选项中的位置
+  const originalCorrectIndices = question.correctAnswers.map(answer => 
+    question.optionLabels.indexOf(answer)
+  );
+   
+  // 计算打乱后的正确答案标签
+  const shuffledCorrectAnswers = originalCorrectIndices.map(originalIndex => {
+    const newIndex = shuffledOptions.indexOf(question.options[originalIndex]);
+    return question.optionLabels[newIndex];
+  });
+   
+  return {
+    ...question,
+    options: shuffledOptions,
+    correctAnswers: shuffledCorrectAnswers,
+    originalOptions: question.options,
+    originalCorrectAnswers: question.correctAnswers,
+    originalIndex: question.originalIndex,
+    explanation: question.explanation
+  };
+}
+ 
+/* ========= 文件读取 ========= */
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+ 
+  originalFileName = file.name;
+ 
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (!['xlsx', 'xls'].includes(ext)) {
+    showError('仅支持 Excel 格式（.xlsx / .xls）');
+    return;
+  }
+ 
+  filenameEl.textContent = file.name;
+  el('file-info').classList.add('show');
+ 
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = new Uint8Array(ev.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const wsName = wb.SheetNames[0];
+      const ws = wb.Sheets[wsName];
+      const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const res = parseCSVFromLines(json.map(r => r.join(',')));
+       
+      originalQuestions = res.questions.map((q, index) => ({
+        ...q,
+        originalIndex: index
+      }));
+       
+      questions = [...originalQuestions];
+       
+      parsingErrors = res.errors;
+      debugDetails.textContent = parsingErrors.length ? parsingErrors.join('\n') : '未发现解析错误';
+       
+      if (questions.length === 0) {
+        showError('未找到有效题目，请检查文件格式');
+      } else {
+        const defaultCount = questions.length >= 20 ? 20 : questions.length;
+        randomCountInput.max = questions.length;
+        randomCountInput.value = defaultCount;
+         
+        startQuizSection.style.display = 'block';
+        debugInfo.classList.remove('show');
+      }
+      debugToggleBtn.style.display = 'inline-block';
+    } catch (err) {
+      showError(err.message);
+    }
+  };
+  reader.onerror = () => showError('文件读取失败');
+  reader.readAsArrayBuffer(file);
+}
+ 
+/* ---------- 文本清洗 ---------- */
+function cleanText(buf) {
+  let str = typeof buf === 'string' ? buf : new TextDecoder('utf-8').decode(buf);
+  if (str.charCodeAt(0) === 0xFEFF) str = str.slice(1);
+  return str.replace(/\p{Zs}/gu, ' ').trim();
+}
+ 
+/* ---------- 解析答案格式转换 ---------- */
+function convertAnswer(answerText, optionsCount) {
+  // 保留原始答案文本用于错误提示
+  const originalAnswerText = answerText;
+   
+  // 处理空答案
+  if (!answerText || answerText.trim() === '') {
+    return '';
+  }
+   
+  // 移除所有非数字和非字母的字符（如百分号、空格等），但保留中文
+  const cleanedAnswer = answerText.replace(/[^\dA-Za-z\u4e00-\u9fa5]/g, '');
+   
+  // 处理判断题特殊情况（无论选项数量如何，只要答案是判断类型就处理）
+  const lowerAnswer = cleanedAnswer.toLowerCase();
+  if (['正确', '对', '是', 'y'].includes(lowerAnswer) || 
+      ['正确', '对', '是'].some(word => lowerAnswer.includes(word))) {
+    return 'A';
+  }
+  if (['错误', '错', '否', 'n'].includes(lowerAnswer) || 
+      ['错误', '错', '否'].some(word => lowerAnswer.includes(word))) {
+    return 'B';
+  }
+   
+  // 处理数字索引（1对应A，2对应B，以此类推）
+  if (/^\d+$/.test(cleanedAnswer)) {
+    const num = parseInt(cleanedAnswer, 10);
+    if (num >= 1 && num <= optionsCount) {
+      return String.fromCharCode(64 + num); // 1 -> A, 2 -> B, ..., 6 -> F
+    }
+  }
+   
+  // 普通字母答案（转为大写）
+  return cleanedAnswer.toUpperCase();
+}
+ 
+/* ---------- 解析（列顺序：问题,选项A,选项B,选项C,选项D,选项E,选项F,解析,答案） ---------- */
+function parseCSVFromLines(lines) {
+  const errors = [];
+  const questions = [];
+  function isValidOption(text) {
+    return text && text.replace(/\s+/gu, '').length > 0;
+  }
+  function parseLine(line) {
+    const fields = [];
+    let f = '', q = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (line[i + 1] === '"') { f += '"'; i++; } else q = !q;
+      } else if (c === ',' && !q) {
+        fields.push(f.trim()); f = '';
+      } else f += c;
+    }
+    fields.push(f.trim());
+    return fields;
+  }
+ 
+  // 检查是否包含"解析"关键词，可能是解析内容
+  function isLikelyExplanation(text) {
+    return text && text.toLowerCase().includes('解析') && 
+           !/^[a-f0-9]{1,6}$/i.test(text.replace(/[^a-f0-9]/gi, ''));
+  }
+ 
+  // 检查是否可能是答案
+  function isLikelyAnswer(text) {
+    if (!text) return false;
+    const cleaned = text.replace(/[^a-f0-9\u4e00-\u9fa5]/gi, '').toLowerCase();
+    // 答案可能包含的关键词
+    const answerKeywords = ['正确', '错误', '对', '错', 'y', 'n'];
+    return /^[a-f0-9]{1,6}$/i.test(cleaned) || 
+           answerKeywords.some(keyword => cleaned.includes(keyword));
+  }
+ 
+  for (let i = 0; i < lines.length; i++) {
+    if (i === 0) continue; // 标题行
+    try {
+      const fields = parseLine(lines[i]);
+      let explanation = '', question = '', answerText = '', options = [];
+       
+      // 提取问题（第一列）
+      if (fields.length >= 1 && isValidOption(fields[0])) {
+        question = fields[0];
+      } else {
+        throw '未找到问题';
+      }
+       
+      // 提取选项（从第二列到第七列 - 对应选项A到F）
+      options = fields.slice(1, 7).filter(isValidOption);
+      if (options.length < 2) options = ['正确', '错误'];
+       
+      // 提取解析和答案 - 增强版逻辑
+      // 先预设解析列和答案列位置
+      let explanationCol = 7;  // 第8列
+      let answerCol = 8;       // 第9列
+       
+      // 提取解析
+      if (fields.length > explanationCol) {
+        explanation = fields[explanationCol] || '';
+      }
+       
+      // 提取答案 - 增强逻辑
+      let answerFound = false;
+       
+      // 检查预设的答案列
+      if (fields.length > answerCol && isValidOption(fields[answerCol])) {
+        // 如果预设的答案列看起来是有效的答案
+        if (isLikelyAnswer(fields[answerCol])) {
+          answerText = fields[answerCol];
+          answerFound = true;
+        } else if (isLikelyExplanation(fields[answerCol])) {
+          // 如果预设的答案列看起来是解析内容，则将其合并到解析中
+          explanation += (explanation ? ' ' : '') + fields[answerCol];
+          // 尝试从下一列寻找答案
+          if (fields.length > answerCol + 1 && isValidOption(fields[answerCol + 1])) {
+            answerText = fields[answerCol + 1];
+            answerFound = true;
+          }
+        }
+      }
+       
+      // 如果预设位置没找到答案，尝试从后续列寻找
+      if (!answerFound) {
+        for (let j = answerCol; j < fields.length; j++) {
+          if (isValidOption(fields[j]) && isLikelyAnswer(fields[j])) {
+            answerText = fields[j];
+            answerFound = true;
+            // 将前面的内容合并到解析中
+            for (let k = explanationCol; k < j; k++) {
+              if (fields[k]) {
+                explanation += (explanation ? ' ' : '') + fields[k];
+              }
+            }
+            break;
+          }
+        }
+      }
+       
+      // 最后尝试：如果所有方法都失败，且存在内容，尝试将最后一列作为答案
+      if (!answerFound) {
+        for (let j = fields.length - 1; j >= 7; j--) {
+          if (isValidOption(fields[j])) {
+            answerText = fields[j];
+            answerFound = true;
+            // 将前面的内容合并到解析中
+            for (let k = 7; k < j; k++) {
+              if (fields[k]) {
+                explanation += (explanation ? ' ' : '') + fields[k];
+              }
+            }
+            break;
+          }
+        }
+      }
+       
+      if (!answerFound) {
+        throw '未找到答案';
+      }
+       
+      // 转换答案格式
+      const convertedAnswer = convertAnswer(answerText, options.length);
+      if (!/^[A-Fa-f]*$/.test(convertedAnswer) || convertedAnswer === '') {
+        // 跳过第122行的错误（用户特别要求）
+        if (i + 1 !== 122) {
+          throw `答案格式错误: ${answerText} (转换后: ${convertedAnswer || '空'})`;
+        }
+      }
+       
+      // 生成选项标签
+      const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, options.length);
+       
+      // 验证答案是否在有效选项范围内
+      const answers = convertedAnswer.split('');
+      if (!answers.every(a => a === '' || optionLabels.includes(a))) {
+        // 跳过第122行的错误（用户特别要求）
+        if (i + 1 !== 122) {
+          throw `答案超出选项范围: ${answerText} (转换后: ${convertedAnswer})。有效选项: ${optionLabels.join(',')}`;
+        }
+      }
+       
+      questions.push({ 
+        explanation, // 解析内容
+        question,    // 问题内容
+        options,     // 选项内容
+        optionLabels, 
+        correctAnswers: answers.filter(a => a !== ''), // 过滤可能的空值
+        originalAnswer: answerText // 原始答案
+      });
+    } catch (err) {
+      // 跳过第122行的错误（用户特别要求）
+      if (i + 1 !== 122) {
+        errors.push(`第 ${i + 1} 行解析失败：${err}`);
+      }
+    }
+  }
+  return { questions, errors };
+}
+ 
+/* ========= 开始答题 ========= */
+function startQuiz(mode) {
+  // 新增：获取考试模式状态
+  isExamMode = examModeCheckbox.checked;
+   
+  if (mode === 'random' || mode === 'random-shuffle-options') {
+    const count = parseInt(randomCountInput.value);
+    if (isNaN(count) || count < 1 || count > originalQuestions.length) {
+      alert(`请输入1到${originalQuestions.length}之间的数字`);
+      return;
+    }
+    questions = shuffleArray([...originalQuestions]).slice(0, count);
+     
+    if (mode === 'random-shuffle-options') {
+      questions = questions.map(q => shuffleQuestionOptions(q));
+    }
+  } else {
+    questions = [...originalQuestions];
+     
+    if (mode === 'sequential-shuffle-options') {
+      questions = questions.map(q => shuffleQuestionOptions(q));
+    }
+  }
+   
+  fileImport.style.display = 'none';
+  startQuizSection.style.display = 'none';
+  current = score = answered = correct = 0;
+  status = questions.map(() => ({ answered: false, correct: false, selected: [] }));
+  controls.classList.add('show');
+  quiz.classList.add('show');
+  answerSheet.classList.add('show');
+   
+  // 新增：考试模式下隐藏分数显示
+  if (isExamMode) {
+    document.querySelector('.score-display').style.display = 'none';
+  } else {
+    document.querySelector('.score-display').style.display = 'block';
+  }
+   
+  buildAnswerSheet();
+  renderQuestion(current);
+}
+ 
+/* ---------- 数组随机排序 ---------- */
+function shuffleArray(array) {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+ 
+/* ---------- 答题卡 ---------- */
+function buildAnswerSheet() {
+  answerGrid.innerHTML = '';
+  totalEl.textContent = questions.length;
+  qTotal.textContent = `/ ${questions.length}`;
+  questions.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-sheet-btn unanswered';
+    btn.textContent = i + 1;
+    btn.onclick = () => {
+      if (status[current].answered || current === i) renderQuestion(i);
+      else alert('请先完成当前题');
+    };
+    answerGrid.appendChild(btn);
+  });
+}
+ 
+/* ---------- 渲染题目 ---------- */
+function renderQuestion(idx) {
+  if (idx < 0 || idx >= questions.length) return;
+  current = idx;
+  const q = questions[idx];
+  qText.textContent = q.question;
+  qNum.textContent = `问题 ${idx + 1}`;
+  optionsContainer.innerHTML = '';
+  el('feedback').classList.remove('show');
+  explanationEl.classList.remove('show');
+  confirmBtn.disabled = false;
+   
+  // 考试模式下，无论是否已答，都不允许通过答题卡跳题
+  if (isExamMode) {
+    document.querySelectorAll('.answer-sheet-btn').forEach((btn, i) => {
+      if (i !== current) {
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.style.cursor = 'not-allowed';
+      } else {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+      }
+    });
+  }
+ 
+  q.optionLabels.forEach((lab, i) => {
+    const optDiv = document.createElement('div');
+    const sel = status[idx].selected.includes(lab);
+    optDiv.className = `option ${sel ? 'selected' : ''}`;
+    optDiv.innerHTML = `<div class="option-label"><span class="option-letter">${lab}</span><span>${q.options[i]}</span></div>`;
+    optDiv.onclick = () => toggleOption(idx, lab);
+    optionsContainer.appendChild(optDiv);
+  });
+ 
+  prevBtn.disabled = idx === 0;
+  nextBtn.innerHTML = idx === questions.length - 1 ? '完成测验' : '下一题';
+   
+  // 考试模式下，只有当前题已答才能进入下一题
+  nextBtn.disabled = isExamMode ? !status[idx].answered : false;
+   
+  updateAnswerSheet();
+}
+ 
+function toggleOption(idx, lab) {
+  const s = status[idx].selected;
+  const i = s.indexOf(lab);
+  i > -1 ? s.splice(i, 1) : s.push(lab);
+  renderQuestion(idx);
+}
+ 
+function confirmAnswer() {
+  const idx = current;
+  const q = questions[idx];
+  const s = status[idx];
+  if (s.selected.length === 0) { alert('请至少选择一个答案'); return; }
+ 
+  const ok = JSON.stringify(s.selected.sort()) === JSON.stringify(q.correctAnswers.sort());
+  if (!s.answered) {
+    answered++;
+    if (ok) { correct++; score++; }
+  } else {
+    if (ok && !s.correct) { correct++; score++; }
+    else if (!ok && s.correct) { correct--; score--; }
+  }
+  s.answered = true; s.correct = ok;
+   
+  // 新增：考试模式下不显示即时反馈和解析，直接进入下一题
+  if (!isExamMode) {
+    showFeedback(ok, q.correctAnswers);
+    showExplanation(q.explanation);
+  } else {
+    // 考试模式：提交后直接进入下一题
+    setTimeout(() => {
+      if (current < questions.length - 1) {
+        go(1);
+      } else {
+        showResults();
+      }
+    }, 500); // 短暂延迟，让用户感知到答案已提交
+  }
+   
+  updateStats();
+  confirmBtn.disabled = true;
+  nextBtn.disabled = false;
+  updateAnswerSheet();
+}
+ 
+function showFeedback(ok, ans) {
+  const fb = el('feedback');
+  fb.innerHTML = ok ? 
+    '<span>&#10003;</span><span class="status-correct">正确！</span>' : 
+    `<span>&#10007;</span><span class="status-incorrect">不正确，正确答案是 ${ans.join('、')}</span>`;
+  fb.className = `feedback ${ok ? 'feedback-success' : 'feedback-error'} show`;
+}
+ 
+// 改进的显示解析函数，确保解析内容正确显示
+function showExplanation(explanation) {
+  // 即使解析内容为空，也显示解析区域但提示无解析
+  if (explanation && explanation.trim()) {
+    explanationContentEl.textContent = explanation;
+  } else {
+    explanationContentEl.textContent = "暂无解析内容";
+  }
+  explanationEl.classList.add('show');
+}
+ 
+function go(dir) {
+  if (dir === 1 && current === questions.length - 1) return showResults();
+  const next = current + dir;
+  if (next >= 0 && next < questions.length) renderQuestion(next);
+}
+ 
+function updateStats() {
+  answeredEl.textContent = answered;
+  correctEl.textContent = correct;
+  scoreEl.textContent = score;
+}
+ 
+function updateAnswerSheet() {
+  document.querySelectorAll('.answer-sheet-btn').forEach((btn, i) => {
+    btn.className = 'answer-sheet-btn';
+    if (i === current) {
+      btn.classList.add('current');
+      btn.style.boxShadow = '0 0 0 2px #fff, 0 0 10px 2px rgba(59,130,246,.5)';
+    } else if (status[i].answered) {
+      if (status[i].correct) {
+        btn.classList.add('correct');
+        btn.style.boxShadow = '0 0 0 2px #fff, 0 0 10px 2px rgba(16,185,129,.5)';
+      } else {
+        btn.classList.add('incorrect');
+        btn.style.boxShadow = '0 0 0 2px #fff, 0 0 10px 2px rgba(239,68,68,.5)';
+      }
+    } else {
+      btn.classList.add('unanswered');
+      btn.style.boxShadow = '0 0 0 2px #fff, 0 0 10px 2px rgba(229,231,235,.5)';
+    }
+  });
+}
+ 
+function showResults() {
+  quiz.classList.remove('show');
+  controls.classList.remove('show');
+  results.classList.add('show');
+  finalScore.textContent = score;
+  finalTotal.textContent = questions.length;
+   
+  // 新增：更新摘要统计信息
+  summaryTotalCount.textContent = questions.length;
+  summaryCorrectCount.textContent = correct;
+  summaryIncorrectCount.textContent = questions.length - correct;
+   
+  // 新增：计算并显示百分比得分
+  const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+  scorePercentage.textContent = `得分：${percentage}%`;
+   
+  // 新增：考试模式下显示详细结果
+  if (isExamMode) {
+    renderExamResults();
+    examResultsDetails.style.display = 'block';
+  } else {
+    examResultsDetails.style.display = 'none';
+  }
+}
+ 
+// 新增：渲染考试模式下的详细结果
+function renderExamResults() {
+  examResultsDetails.innerHTML = '';
+   
+  questions.forEach((question, index) => {
+    const questionStatus = status[index];
+    const isCorrect = questionStatus.correct;
+     
+    // 创建问题容器
+    const questionEl = document.createElement('div');
+    questionEl.className = `exam-question-item ${isCorrect ? 'correct' : 'incorrect'}`;
+     
+    // 问题头部（包含题号和状态）
+    const headerEl = document.createElement('div');
+    headerEl.className = 'exam-question-header';
+     
+    const numberEl = document.createElement('div');
+    numberEl.className = 'exam-question-number';
+    numberEl.textContent = `问题 ${index + 1}`;
+     
+    const statusEl = document.createElement('div');
+    statusEl.className = `exam-question-status ${isCorrect ? 'correct' : 'incorrect'}`;
+    statusEl.textContent = isCorrect ? '正确' : '错误';
+     
+    headerEl.appendChild(numberEl);
+    headerEl.appendChild(statusEl);
+     
+    // 问题文本
+    const textEl = document.createElement('div');
+    textEl.className = 'exam-question-text';
+    textEl.textContent = question.question;
+     
+    // 选项
+    const optionsEl = document.createElement('div');
+    optionsEl.className = 'exam-options';
+     
+    question.options.forEach((option, optIndex) => {
+      const optLabel = question.optionLabels[optIndex];
+      const isSelected = questionStatus.selected.includes(optLabel);
+      const isCorrectAnswer = question.correctAnswers.includes(optLabel);
+       
+      const optionEl = document.createElement('div');
+      optionEl.className = `exam-option ${isSelected ? 'selected' : ''} ${isCorrectAnswer ? 'correct-answer' : ''}`;
+       
+      const letterEl = document.createElement('div');
+      letterEl.className = 'exam-option-letter';
+      letterEl.textContent = optLabel;
+       
+      const contentEl = document.createElement('div');
+      contentEl.textContent = option;
+       
+      optionEl.appendChild(letterEl);
+      optionEl.appendChild(contentEl);
+      optionsEl.appendChild(optionEl);
+    });
+     
+    // 答案信息
+    const answerInfoEl = document.createElement('div');
+    answerInfoEl.className = 'exam-answer-info';
+     
+    const yourAnswerEl = document.createElement('div');
+    yourAnswerEl.className = 'exam-your-answer';
+    yourAnswerEl.innerHTML = `<span class="exam-answer-label">你的答案：</span>${questionStatus.selected.length > 0 ? questionStatus.selected.join('、') : '未作答'}`;
+     
+    const correctAnswerEl = document.createElement('div');
+    correctAnswerEl.className = 'exam-correct-answer';
+    correctAnswerEl.innerHTML = `<span class="exam-answer-label">正确答案：</span>${question.correctAnswers.join('、')}`;
+     
+    answerInfoEl.appendChild(yourAnswerEl);
+    answerInfoEl.appendChild(correctAnswerEl);
+     
+    // 解析信息 - 确保总是显示解析部分
+    const explanationEl = document.createElement('div');
+    explanationEl.className = 'explanation show';  // 强制显示解析
+    explanationEl.innerHTML = `
+      <div class="explanation-title">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        解析
+      </div>
+      <div class="explanation-content">${question.explanation || '暂无解析内容'}</div>
+    `;
+     
+    answerInfoEl.appendChild(explanationEl);
+     
+    // 组合所有元素
+    questionEl.appendChild(headerEl);
+    questionEl.appendChild(textEl);
+    questionEl.appendChild(optionsEl);
+    questionEl.appendChild(answerInfoEl);
+     
+    examResultsDetails.appendChild(questionEl);
+  });
+}
+ 
+function restart() { 
+  results.classList.remove('show'); 
+  fileImport.style.display = 'block';
+  startQuizSection.style.display = 'block';
+  answerSheet.classList.remove('show');
+  examModeCheckbox.checked = false; // 重置考试模式
+  isExamMode = false; // 重置考试模式标志
+}
+ 
+function selectNewFile() {
+  results.classList.remove('show');
+  answerSheet.classList.remove('show');
+  fileImport.style.display = 'block';
+  fileUpload.value = '';
+  el('file-info').classList.remove('show');
+  startQuizSection.style.display = 'none';
+  debugInfo.classList.remove('show');
+  originalFileName = '';
+  examModeCheckbox.checked = false; // 重置考试模式
+  isExamMode = false; // 重置考试模式标志
+}
+ 
+function retryFile() {
+  errorSec.classList.remove('show');
+  fileImport.style.display = 'block';
+  fileUpload.value = '';
+  el('file-info').classList.remove('show');
+  startQuizSection.style.display = 'none';
+  debugInfo.classList.remove('show');
+  originalFileName = '';
+  examModeCheckbox.checked = false; // 重置考试模式
+  isExamMode = false; // 重置考试模式标志
+}
+ 
+function showError(msg) {
+  el('error-message').textContent = msg;
+  el('error-debug-details').textContent = parsingErrors.length ? parsingErrors.join('\n') : msg;
+  el('error-debug-info').classList.toggle('show', parsingErrors.length > 0);
+  fileImport.classList.remove('show');
+  fileImport.style.display = 'none';
+  errorSec.classList.add('show');
+}
+</script>
+</body>
+</html>
