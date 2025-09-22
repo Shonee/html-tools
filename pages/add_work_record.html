@@ -1,0 +1,685 @@
+<!DOCTYPE <strong><font color="#FF0000">html</font></strong>>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>加班时长记录器（多条目 - 修正）</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg-1:#f5f8ff; --bg-2:#eef6ff;
+      --card:#ffffff; --muted:#9aa4b2; --text:#0f1724;
+      --primary:#2563eb; --vac:#d1fae5;
+      --shadow:0 8px 22px rgba(16,24,40,.06);
+      --glass:rgba(255,255,255,0.92);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+      background:radial-gradient(circle at 10% 10%, rgba(37,99,235,.06), transparent 18%),
+                 linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 60%, #f7fafc 100%);
+      color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+ 
+ 
+    .wrap{max-width:1100px;margin:28px auto;padding:0 18px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    h1{margin:0;font-size:26px;letter-spacing:.3px;color:#05204a}
+ 
+ 
+    .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:var(--shadow);
+      border:1px solid rgba(15,23,36,.04);overflow:hidden;transition:transform .12s ease}
+    .card:hover{transform:translateY(-3px)}
+ 
+ 
+    .cal-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(245,250,255,.95));border:1px solid rgba(15,23,36,.04);
+      margin-bottom:10px}
+    .month-label{font-weight:700;font-size:16px}
+    .nav{display:flex;gap:8px}
+    .btn-nav{background:#fff;border:1px solid rgba(15,23,36,.06);padding:8px 12px;border-radius:10px;cursor:pointer;
+      font-weight:700;color:var(--text);transition:transform .08s ease,background .08s ease}
+    .btn-nav:hover{transform:translateY(-2px);background:linear-gradient(90deg, rgba(37,99,235,.05), transparent)}
+ 
+ 
+    .grid-wrap{overflow:hidden;border-radius:12px}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:10px;align-items:start}
+    .day-name{font-size:12px;font-weight:700;text-align:center;color:var(--muted);padding:6px 0}
+    .calendar-cell{
+      background:var(--glass);border:1px solid rgba(37,99,235,.06);height:84px;padding:8px;border-radius:10px;
+      display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .06s ease,box-shadow .06s ease,opacity .06s ease,filter .06s ease;
+      color:var(--text); position:relative;
+    }
+    .calendar-cell:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,.06)}
+    .calendar-cell.muted{
+      opacity:0.9;
+      filter:grayscale(.15) saturate(.85);
+      background:#fbfcfe;
+      pointer-events: auto;
+    }
+    .calendar-cell.today{
+      background:linear-gradient(180deg,#eaf4ff,#f3fbff);border:1px solid rgba(37,99,235,.14);
+      box-shadow:inset 0 0 0 2px rgba(37,99,235,.06);
+      transform:scale(1.01);
+    }
+    .daynum{font-weight:800;font-size:13px;color:var(--text)}
+    /* 上下月的日期数字颜色淡一点 */
+    .calendar-cell.muted .daynum{ color: rgba(15,23,36,0.28); }
+ 
+    /* badge 容器及小尺寸样式，避免超出格子 */
+    .badges { display:flex; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
+    .badge{
+      align-self:flex-end;background:var(--primary);color:#fff;padding:3px 7px;border-radius:999px;font-size:11px;border:1px solid rgba(37,99,235,.6);
+      transform-origin:center;animation:badge-pop .12s ease; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .badge.vac{background:var(--vac);color:rgb(6,95,70);border:1px solid rgba(182,245,208,.7)}
+    .calendar-cell.muted .badge{opacity:0.6;filter:grayscale(.2)}
+    .calendar-cell.muted .badge.vac{opacity:0.6;filter:grayscale(.2)}
+ 
+ 
+    @keyframes badge-pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+ 
+ 
+    .summary{margin-top:14px;padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid rgba(15,23,36,.04)}
+    .metrics-grid{display:grid;grid-template-columns:1fr 360px;gap:12px;width:100%}
+    .metrics-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:10px}
+    .metric{background:linear-gradient(180deg,#fff,#fcfdff);border:1px solid rgba(15,23,36,.04);border-radius:10px;padding:12px;min-height:64px;display:flex;flex-direction:column;justify-content:center}
+    .metric .label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .metric .value{font-weight:800;font-size:18px;color:#06243a;line-height:1}
+ 
+ 
+    .chart-card{background:linear-gradient(180deg,#fff,#fcfdff);border-radius:10px;padding:10px;border:1px solid rgba(15,23,36,.04);display:flex;flex-direction:column;gap:6px;align-items:stretch}
+    .chart-title{font-size:13px;color:var(--muted);font-weight:700}
+    .chart-wrap{width:100%;height:140px;display:flex;align-items:center;justify-content:center}
+    svg.axis-chart{width:100%;height:140px;display:block}
+ 
+ 
+    .modal{display:none;position:fixed;inset:0;background:linear-gradient(180deg,rgba(2,6,23,.28),rgba(2,6,23,.36));align-items:center;justify-content:center;z-index:9999}
+    .modal.show{display:flex}
+    .modal-box{width:640px;max-width:calc(100% - 24px);background:linear-gradient(180deg,#fff,#fbfdff);border-radius:12px;padding:18px;box-shadow:0 18px 50px rgba(2,6,23,.36);border:1px solid rgba(2,6,23,.06);
+      transform:translateY(8px) scale(.99);opacity:0;transition:transform .12s cubic-bezier(.16,.84,.24,1),opacity .08s ease}
+    .modal.show .modal-box{transform:translateY(0) scale(1);opacity:1}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .modal-title{font-weight:800;font-size:16px}
+    .modal-sub{font-size:13px;color:var(--muted);text-align:right}
+    .modal-body{display:flex;align-items:center;justify-content:center;padding:12px 0}
+    .hours-input{width:120px;padding:10px;border-radius:10px;border:1px solid rgba(2,6,23,.08);font-size:16px;text-align:center}
+    .chips{display:flex;gap:8px;overflow:auto;padding:8px 2px}
+    .chip{white-space:nowrap;padding:6px 10px;border-radius:999px;border:1px solid rgba(2,6,23,.06);cursor:pointer;background:#fff;font-weight:700;font-size:13px}
+    .chip:hover{background:linear-gradient(90deg, rgba(37,99,235,.04), transparent)}
+    .chip.active{background:linear-gradient(90deg, rgba(37,99,235,.12), rgba(99,102,241,.06));border-color:rgba(37,99,235,.18);color:var(--primary)}
+    .modal-actions{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+    .left-actions{display:flex;gap:8px;align-items:center}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(2,6,23,.06);background:white;cursor:pointer;font-weight:700}
+    .btn.ghost{background:transparent;border:1px solid rgba(2,6,23,.05);color:var(--text)}
+    .btn.danger{background:#ffefef;border-color:rgba(248,113,113,.18);color:#b91c1c}
+    .btn.primary{background:var(--primary);color:#fff;border:none;box-shadow:0 8px 24px rgba(37,99,235,.12)}
+    .btn:active{transform:translateY(1px)}
+ 
+ 
+    .muted-small{font-size:12px;color:var(--muted)}
+    .selected-summary{font-size:13px;color:var(--muted);margin-top:8px}
+    .input-row{display:flex;gap:8px;align-items:center}
+    [url=home.php?mod=space&uid=945662]@media[/url] (max-width:880px){
+      .modal-box{width:92%}
+      .chart-wrap{height:120px}
+      .metrics-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>加班时长记录器</h1>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="muted-small">支持多条目（可同时记录加班和休假），点击日期可编辑</div>
+      </div>
+    </header>
+ 
+ 
+    <section class="card" id="calendarCard">
+      <div class="cal-head">
+        <div class="nav">
+          <button class="btn-nav" id="prevMonth" aria-label="上一月">&#8249;</button>
+        </div>
+        <div class="month-label" id="monthLabel" aria-live="polite"></div>
+        <div class="nav" style="justify-self:end">
+          <button class="btn-nav" id="nextMonth" aria-label="下一月">&#8250;</button>
+        </div>
+      </div>
+ 
+ 
+      <div class="grid-wrap">
+        <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="日历">
+          <!-- Monday-first headers -->
+          <div class="day-name">一</div>
+          <div class="day-name">二</div>
+          <div class="day-name">三</div>
+          <div class="day-name">四</div>
+          <div class="day-name">五</div>
+          <div class="day-name">六</div>
+          <div class="day-name">日</div>
+        </div>
+      </div>
+ 
+ 
+      <div class="summary" style="margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="margin:0">总览</h3>
+          <div class="muted-small">当前月统计</div>
+        </div>
+ 
+ 
+        <div class="metrics-grid">
+          <div>
+            <div class="metrics-row">
+              <div class="metric">
+                <div class="label">本月加班净时长</div>
+                <div class="value" id="metricMonthTotal">0.0</div>
+              </div>
+              <div class="metric">
+                <div class="label">单日加班最猛时长（正合计）</div>
+                <div class="value" id="metricMax">0.0</div>
+              </div>
+            </div>
+ 
+ 
+            <div class="metrics-row" style="margin-top:4px">
+              <div class="metric">
+                <div class="label">加班天数</div>
+                <div class="value" id="metricDays">0</div>
+              </div>
+              <div class="metric">
+                <div class="label">休假天数</div>
+                <div class="value" id="metricVacationDays">0</div>
+              </div>
+            </div>
+          </div>
+ 
+ 
+          <div class="chart-card" aria-hidden="false">
+            <div class="chart-title">最近7天趋势（净值，含正负）</div>
+            <div class="chart-wrap">
+              <svg class="axis-chart" id="axisChart" viewBox="0 0 360 140" preserveAspectRatio="none" role="img" aria-label="最近七天加班趋势"></svg>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted)">
+              <div>单位：小时（净值）</div>
+              <div>最近 7 天</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+ 
+ 
+  <!-- Modal -->
+  <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-label="输入加班时长">
+    <div class="modal-box" role="document">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">输入加班时长</div>
+        <div class="modal-sub" id="modalSub">可多选：正数表示加班，负数表示休假。</div>
+      </div>
+ 
+ 
+      <div class="modal-body">
+        <div style="width:100%">
+          <div style="display:flex;justify-content:center;margin-bottom:8px">
+            <div class="input-row">
+              <input id="hoursInput" class="hours-input" type="number" step="0.5" min="-8" max="8" />
+              <button id="addBtn" class="btn">添加</button>
+              <button id="clearSelectionBtn" class="btn ghost" title="清除选择">清除</button>
+            </div>
+          </div>
+ 
+          <div class="chips" id="chips" aria-hidden="false"></div>
+ 
+          <div class="selected-summary" id="selectedSummary">已选：无</div>
+        </div>
+      </div>
+ 
+ 
+      <div class="modal-actions">
+        <div class="left-actions">
+          <button id="deleteBtn" class="btn danger" title="删除当天记录">删除</button>
+        </div>
+ 
+ 
+        <div style="display:flex;gap:8px">
+          <button id="cancelBtn" class="btn ghost">取消</button>
+          <button id="saveBtn" class="btn primary">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+ 
+  <script>
+    // Data and state
+    let overtimeData = {}; // {"YYYY-MM-DD": [number, number, ...]}
+    let currentYear, currentMonth;
+    let modalKey = null;
+    let modalSelected = []; // array of numbers selected in modal
+ 
+    function toKey(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+    function fmtModalDate(key) {
+      const [y,m,d] = key.split('-');
+      return `${y}/${parseInt(m,10)}/${parseInt(d,10)}`;
+    }
+ 
+    function load() {
+      try {
+        const raw = localStorage.getItem('overtimeData');
+        const parsed = raw ? JSON.parse(raw) : {};
+        overtimeData = {};
+        // 兼容旧格式（单一数字），迁移为数组
+        for (const k in parsed) {
+          const v = parsed[k];
+          if (Array.isArray(v)) {
+            overtimeData[k] = v.map(x => Number(x)).filter(x => !isNaN(x));
+          } else {
+            const n = Number(v);
+            overtimeData[k] = isNaN(n) ? [] : [n];
+          }
+        }
+      } catch (e) { overtimeData = {}; }
+    }
+    function save() {
+      localStorage.setItem('overtimeData', JSON.stringify(overtimeData));
+    }
+ 
+function buildChips() {
+  const container = document.getElementById('chips');
+  container.innerHTML = '';
+ 
+  // 生成正数部分：0.5到8，步长0.5
+  for (let v = 0.5; v <= 8; v += 0.5) {
+    const val = Math.round(v * 100) / 100;
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = `加班 ${Number.isInteger(val) ? String(val) : val.toFixed(1)}H`;
+    chip.dataset.value = String(val);
+    chip.addEventListener('click', () => toggleModalValue(Number(chip.dataset.value)));
+    container.appendChild(chip);
+  }
+ 
+  // 生成负数部分：-0.5到-8，步长-0.5
+  for (let v = -0.5; v >= -8; v -= 0.5) {
+    const val = Math.round(v * 100) / 100;
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    const absVal = Math.abs(val);
+    chip.textContent = `休假 ${Number.isInteger(absVal) ? String(absVal) : absVal.toFixed(1)}H`;
+    chip.dataset.value = String(val);
+    chip.addEventListener('click', () => toggleModalValue(Number(chip.dataset.value)));
+    container.appendChild(chip);
+  }
+}
+ 
+function toggleModalValue(num) {
+  const idx = modalSelected.findIndex(x => Math.abs(x - num) < 1e-8);
+  if (idx >= 0) {
+    modalSelected.splice(idx, 1);
+  } else {
+    modalSelected.push(num);
+  }
+  updateModalUI();
+}
+ 
+function updateModalUI() {
+  // 更新 chips 的 active 状态
+  const container = document.getElementById('chips');
+  container.querySelectorAll('.chip').forEach(chip => {
+    const val = Number(chip.dataset.value);
+    const found = modalSelected.some(x => Math.abs(x - val) < 1e-8);
+    if (found) chip.classList.add('active'); else chip.classList.remove('active');
+  });
+ 
+  // 更新已选 Summary
+  const s = modalSelected.length === 0 ? '已选：无' :
+    '已选：' + modalSelected.map(v => (v > 0 ? `+${(Number.isInteger(v)?v:v.toFixed(1))}h` : `${(Number.isInteger(Math.abs(v))?Math.abs(v):Math.abs(v).toFixed(1))}h（休）`)).join('，');
+  document.getElementById('selectedSummary').textContent = s;
+ 
+  // 更新删除按钮状态
+  document.getElementById('deleteBtn').disabled = !(modalKey && Array.isArray(overtimeData[modalKey]) && overtimeData[modalKey].length > 0);
+}
+ 
+    function renderCalendar() {
+      const monthLabel = document.getElementById('monthLabel');
+      monthLabel.textContent = `${currentYear}年${currentMonth + 1}月`;
+ 
+      const grid = document.getElementById('calendarGrid');
+      grid.querySelectorAll('[data-date]').forEach(el => el.remove());
+ 
+      const first = new Date(currentYear, currentMonth, 1);
+      const start = (first.getDay() + 6) % 7; // Monday-first
+      const todayKey = toKey(new Date());
+ 
+      for (let i = 0; i < 42; i++) {
+        const d = new Date(currentYear, currentMonth, i - start + 1);
+        const key = toKey(d);
+        const inMonth = d.getMonth() === currentMonth;
+ 
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell' + (inMonth ? '' : ' muted');
+        if (inMonth && key === todayKey) cell.classList.add('today');
+        cell.setAttribute('data-date', key);
+ 
+        // daynum 区域
+        const topRow = document.createElement('div');
+        topRow.style.display = 'flex';
+        topRow.style.justifyContent = 'space-between';
+        topRow.style.alignItems = 'flex-start';
+        const daynum = document.createElement('div');
+        daynum.className = 'daynum';
+        daynum.textContent = d.getDate();
+        topRow.appendChild(daynum);
+        cell.appendChild(topRow);
+ 
+        // badges container（放在底部）
+        const badgesWrap = document.createElement('div');
+        badgesWrap.className = 'badges';
+ 
+        // 展示多条目合计：正合计 & 负合计（绝对值）
+        const entries = Array.isArray(overtimeData[key]) ? overtimeData[key].slice() : [];
+        if (entries.length > 0) {
+          const posSum = entries.filter(x => x > 0).reduce((a,b) => a + b, 0);
+          const negSum = entries.filter(x => x < 0).reduce((a,b) => a + Math.abs(b), 0);
+          if (posSum > 0) {
+            const b = document.createElement('span');
+            b.className = 'badge';
+            const display = Number.isInteger(posSum) ? String(posSum) : posSum.toFixed(1);
+            b.textContent = `加班 ${display} h`;
+            badgesWrap.appendChild(b);
+          }
+          if (negSum > 0) {
+            const b2 = document.createElement('span');
+            b2.className = 'badge vac';
+            const display2 = Number.isInteger(negSum) ? String(negSum) : negSum.toFixed(1);
+            b2.textContent = `休假 ${display2} h`;
+            badgesWrap.appendChild(b2);
+          }
+        }
+ 
+        cell.appendChild(badgesWrap);
+ 
+        cell.style.opacity = 0;
+        grid.appendChild(cell);
+        setTimeout(() => { cell.style.opacity = 1; }, 8 * i);
+ 
+        cell.addEventListener('click', () => openModal(key));
+      }
+ 
+      updateSummary();
+      drawAxisChart();
+    }
+ 
+    function updateSummary() {
+      const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2,'0')}-`;
+      let total = 0, plusDays = 0, vacDays = 0, maxDay = -Infinity;
+      for (const k in overtimeData) {
+        if (!k.startsWith(prefix)) continue;
+        const arr = Array.isArray(overtimeData[k]) ? overtimeData[k] : [];
+        if (arr.length === 0) continue;
+        const sumAll = arr.reduce((a,b) => a + Number(b), 0);
+        total += sumAll;
+        const posSum = arr.filter(x => x > 0).reduce((a,b)=>a+b,0);
+        const negSum = arr.filter(x => x < 0).reduce((a,b)=>a+Math.abs(b),0);
+        if (posSum > 0) plusDays++;
+        if (negSum > 0) vacDays++;
+        if (posSum > maxDay) maxDay = posSum;
+      }
+      document.getElementById('metricMonthTotal').textContent = (Number.isFinite(total) ? total.toFixed(1) : '0.0');
+      document.getElementById('metricMax').textContent = (maxDay === -Infinity ? '0.0' : maxDay.toFixed(1));
+      document.getElementById('metricDays').textContent = plusDays;
+      document.getElementById('metricVacationDays').textContent = vacDays;
+    }
+ 
+    function openModal(key) {
+      modalKey = key;
+      const modal = document.getElementById('modal');
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+ 
+      document.getElementById('modalTitle').textContent = `输入加班时长 - ${fmtModalDate(key)}`;
+      document.getElementById('modalSub').textContent = '可多选：正数表示加班，负数表示休假。';
+ 
+      const input = document.getElementById('hoursInput');
+      const curArr = Array.isArray(overtimeData[key]) ? overtimeData[key].slice() : [];
+      modalSelected = curArr.slice(); // 复制到 modal 选择状态
+      input.value = 1;
+      updateModalUI();
+      input.focus();
+      document.addEventListener('keydown', escClose);
+    }
+ 
+    function closeModal() {
+      modalKey = null;
+      modalSelected = [];
+      const modal = document.getElementById('modal');
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      document.removeEventListener('keydown', escClose);
+    }
+    function escClose(e) { if (e.key === 'Escape') closeModal(); }
+ 
+    function saveModal() {
+      if (!modalKey) return;
+      // normalize values to steps of 0.5 and clamp [-8,8]
+      const normalized = modalSelected.map(v => {
+        let n = Number(v) || 0;
+        n = Math.max(-8, Math.min(8, Math.round(n * 2) / 2));
+        return n;
+      }).filter(v => Math.abs(v) > 1e-8); // 去掉 0
+      if (normalized.length > 0) {
+        overtimeData[modalKey] = normalized;
+      } else {
+        // 若无条目则删除该键
+        delete overtimeData[modalKey];
+      }
+      save();
+      closeModal();
+      renderCalendar();
+    }
+ 
+    function deleteModal() {
+      if (!modalKey) return;
+      if (!Object.prototype.hasOwnProperty.call(overtimeData, modalKey)) { closeModal(); return; }
+      if (!confirm(`确认删除 ${modalKey} 的所有记录？`)) return;
+      delete overtimeData[modalKey];
+      save();
+      closeModal();
+      renderCalendar();
+    }
+ 
+    function drawAxisChart() {
+      const svg = document.getElementById('axisChart');
+      const w = 360, h = 140, padL = 36, padB = 28, padT = 16, padR = 12;
+      svg.innerHTML = '';
+ 
+      const now = new Date();
+      const days = [], labels = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const k = toKey(d);
+        const arr = Array.isArray(overtimeData[k]) ? overtimeData[k] : [];
+        // 最近 7 天趋势（净值）使用 sum of signed values（多条目）
+        const v = arr.reduce((a,b) => a + Number(b || 0), 0);
+        days.push(v);
+        labels.push(String(d.getDate()));
+      }
+ 
+      // compute min/max including zero baseline
+      const yMin = Math.min(0, ...days);
+      const yMax = Math.max(0, ...days);
+      let range = yMax - yMin;
+      if (Math.abs(range) < 1e-6) {
+        // flat -> provide small range
+        range = 1;
+      }
+ 
+      // choose ticks [min, 0, max] and format to 1 decimal (trim .0)
+      const fmt = v => {
+        return (Math.abs(Math.round(v*10) - Math.round(v*10)) < 1e-8) ? (Math.round(v*10)/10).toFixed(1) : v.toFixed(1);
+      };
+      const yTicks = [yMin, 0, yMax];
+ 
+      for (let i = 0; i < yTicks.length; i++) {
+        const val = yTicks[i];
+        const y = padT + ((1 - ((val - yMin) / range)) * (h - padT - padB));
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', padL); line.setAttribute('x2', w - padR);
+        line.setAttribute('y1', y); line.setAttribute('y2', y);
+        line.setAttribute('stroke', 'rgba(15,23,36,.06)'); line.setAttribute('stroke-width', '1');
+        svg.appendChild(line);
+        const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+        tx.setAttribute('x', Math.max(2, padL - 6)); tx.setAttribute('y', y + 4);
+        tx.setAttribute('font-size','11'); tx.setAttribute('fill','rgba(7,11,27,.55)');
+        tx.setAttribute('text-anchor','end'); tx.textContent = fmt(val);
+        svg.appendChild(tx);
+      }
+ 
+      const plotW = w - padL - padR;
+      const stepX = plotW / (days.length - 1);
+ 
+      for (let i = 0; i < days.length; i++) {
+        const x = padL + i * stepX;
+        const tick = document.createElementNS('http://www.w3.org/2000/svg','line');
+        tick.setAttribute('x1', x); tick.setAttribute('x2', x);
+        tick.setAttribute('y1', h - padB); tick.setAttribute('y2', h - padB + 6);
+        tick.setAttribute('stroke','rgba(15,23,36,.06)');
+        svg.appendChild(tick);
+        const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+        tx.setAttribute('x', x); tx.setAttribute('y', h - 6);
+        tx.setAttribute('font-size','11'); tx.setAttribute('fill','rgba(7,11,27,.45)');
+        tx.setAttribute('text-anchor','middle'); tx.textContent = labels[i];
+        svg.appendChild(tx);
+      }
+ 
+      const ptsArray = days.map((v,i) => {
+        const x = padL + i * stepX;
+        const y = padT + (1 - ((v - yMin) / range)) * (h - padT - padB);
+        return { x, y, v };
+      });
+ 
+      const ptsString = ptsArray.map(p => `${p.x},${p.y}`).join(' ');
+      // gradient
+      const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+      grad.setAttribute('id','g1'); grad.setAttribute('x1','0'); grad.setAttribute('x2','1');
+      const stop1 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+      stop1.setAttribute('offset','0%'); stop1.setAttribute('stop-color','#60a5fa'); stop1.setAttribute('stop-opacity','1');
+      const stop2 = document.createElementNS('http://www.w3.org/2000/svg','stop');
+      stop2.setAttribute('offset','100%'); stop2.setAttribute('stop-color','#1e3a8a'); stop2.setAttribute('stop-opacity','1');
+      grad.appendChild(stop1); grad.appendChild(stop2); defs.appendChild(grad); svg.appendChild(defs);
+ 
+      // baseline (0) y position
+      const yZero = padT + (1 - ((0 - yMin) / range)) * (h - padT - padB);
+ 
+      // area: use baseline yZero
+      if (ptsArray.length > 0) {
+        const last = ptsArray[ptsArray.length - 1];
+        const firstPt = ptsArray[0];
+        const areaPts = ptsString + ` ${last.x},${yZero} ${firstPt.x},${yZero}`;
+        const polyArea = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        polyArea.setAttribute('points', areaPts);
+        polyArea.setAttribute('fill','rgba(37,99,235,.06)');
+        svg.appendChild(polyArea);
+      }
+ 
+      const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      poly.setAttribute('points', ptsString);
+      poly.setAttribute('fill','none');
+      poly.setAttribute('stroke','url(#g1)');
+      poly.setAttribute('stroke-width','3');
+      poly.setAttribute('stroke-linecap','round');
+      poly.setAttribute('stroke-linejoin','round');
+      poly.setAttribute('opacity','0.95');
+      svg.appendChild(poly);
+ 
+      // draw zero line emphasized
+      const zeroLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+      zeroLine.setAttribute('x1', padL); zeroLine.setAttribute('x2', w - padR);
+      zeroLine.setAttribute('y1', yZero); zeroLine.setAttribute('y2', yZero);
+      zeroLine.setAttribute('stroke', 'rgba(15,23,36,.12)'); zeroLine.setAttribute('stroke-width', '1.5');
+      svg.appendChild(zeroLine);
+ 
+      // points colored by sign
+      ptsArray.forEach(p => {
+        const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 3.2);
+        c.setAttribute('fill', p.v >= 0 ? '#1e40af' : '#b91c1c');
+        c.setAttribute('opacity', '0.98');
+        svg.appendChild(c);
+      });
+    }
+ 
+    (function init(){
+      load();
+      buildChips();
+ 
+      const today = new Date();
+      currentYear = today.getFullYear();
+      currentMonth = today.getMonth();
+ 
+      renderCalendar();
+ 
+      document.getElementById('prevMonth').addEventListener('click', ()=>{
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+        renderCalendar();
+      });
+      document.getElementById('nextMonth').addEventListener('click', ()=>{
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        renderCalendar();
+      });
+ 
+      document.getElementById('saveBtn').addEventListener('click', saveModal);
+      document.getElementById('cancelBtn').addEventListener('click', () => { closeModal(); renderCalendar(); });
+      document.getElementById('deleteBtn').addEventListener('click', deleteModal);
+ 
+      document.getElementById('modal').addEventListener('click', (e)=>{
+        if (e.target.id === 'modal') closeModal();
+      });
+ 
+      // Add custom value
+      document.getElementById('addBtn').addEventListener('click', ()=>{
+        const raw = document.getElementById('hoursInput').value;
+        let val = parseFloat(raw);
+        if (isNaN(val)) return alert('请输入有效数字（支持半小时步长）');
+        // clamp and snap to 0.5
+        val = Math.max(-8, Math.min(8, Math.round(val * 2) / 2));
+        if (Math.abs(val) < 1e-8) return alert('不能添加 0');
+        // add
+        const exists = modalSelected.some(x => Math.abs(x - val) < 1e-8);
+        if (!exists) modalSelected.push(val);
+        updateModalUI();
+      });
+ 
+      document.getElementById('clearSelectionBtn').addEventListener('click', ()=>{
+        modalSelected = [];
+        updateModalUI();
+      });
+ 
+      window.addEventListener('keydown', (e)=>{
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          save();
+          const tip = document.createElement('div');
+          tip.textContent = '已保存';
+          tip.style.position='fixed'; tip.style.left='50%'; tip.style.bottom='22px';
+          tip.style.transform='translateX(-50%)'; tip.style.padding='8px 12px'; tip.style.borderRadius='8px';
+          tip.style.background='rgba(2,6,23,.9)'; tip.style.color='white'; tip.style.zIndex=9999;
+          document.body.appendChild(tip);
+          setTimeout(()=> tip.remove(),1200);
+        }
+      });
+ 
+      window.addEventListener('beforeunload', save);
+    })();
+  </script>
+</body>
+</html>
