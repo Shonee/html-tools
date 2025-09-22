@@ -1,0 +1,448 @@
+<!DOCTYPE <strong><font color="#FF0000">html</font></strong>>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九九乘法表消消乐</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-image: url('https://pica.zhimg.com/v2-40bb36eb0b6fbcd3a4973fad3109ad32_1440w.jpg'); /* 可爱背景图片 */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+  }
+  h1 {
+    color: #ff6f61;
+    font-size: 36px;
+    animation: bounce 2s infinite; /* 弹跳动画 */
+  }
+  @keyframes bounce { /* 定义弹跳动画 */
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);} /* 初始和结束位置 */
+    40% {transform: translateY(-30px);} /* 最高点 */
+    60% {transform: translateY(-15px);} /* 中间点 */
+  }
+  .difficulty-buttons button {
+    padding: 15px 30px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 50px;
+    background-color: #ffcc5c;
+    color: white;
+    font-size: 18px;
+    transition: background-color 0.3s, transform 0.3s; /* 鼠标悬停时的过渡效果 */
+  }
+  .difficulty-buttons button:hover {
+    background-color: #ff9966;
+    transform: scale(1.1); /* 放大按钮 */
+  }
+  .start-button {
+    margin-top: 20px;
+    padding: 15px 30px;
+    cursor: pointer;
+    border: none;
+    border-radius: 50px;
+    background-color: #ff6f61;
+    color: white;
+    font-size: 18px;
+    transition: background-color 0.3s, transform 0.3s; /* 鼠标悬停时的过渡效果 */
+  }
+  .start-button:hover {
+    background-color: #ff4d4d;
+    transform: scale(1.1); /* 放大按钮 */
+  }
+  .timer {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #ff6f61;
+    animation: glow 2s infinite alternate; /* 闪烁动画 */
+  }
+  @keyframes glow { /* 定义闪烁动画 */
+    from {text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff6f61, 0 0 20px #ff6f61, 0 0 25px #ff6f61, 0 0 30px #ff6f61, 0 0 35px #ff6f61;} /* 开始状态 */
+    to {text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff6f61, 0 0 40px #ff6f61, 0 0 50px #ff6f61, 0 0 60px #ff6f61, 0 0 70px #ff6f61;} /* 结束状态 */
+  }
+  .game-board {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* 自适应列数 */
+    gap: 10px;
+  }
+  .cell {
+    width: 90px; /* 固定宽度 */
+    height: 40px; /* 调整高度 */
+    border: 2px solid #ffc3a0;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    line-height: normal; /* 使用正常行高 */
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #90EE90; /* 浅绿色背景 */
+    transition: transform 0.2s, box-shadow 0.2s; /* 鼠标悬停时的过渡效果 */
+    position: relative;
+    background-image: url('https://img.alicdn.com/tfs/TB1kWZKQXXXXXcuaXXXXXXXXXXX-64-64.png'); /* 卡通兔子图标 */
+    background-size: 24px 24px; /* 缩小背景图片大小 */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-blend-mode: multiply;
+  }
+  .cell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    opacity: 0.2;
+    border-radius: 15px;
+  }
+  .cell span {
+    font-weight: bold;
+    color: #2F4F4F; /* 深灰色字体 */
+    font-size: 24px; /* 增加字号以适应较大的卡片 */
+  }
+  .cell:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* 鼠标悬停时放大并添加阴影 */
+  }
+  .matched {
+    background-color: #c8e6c9 !important;
+    color: #2e7d32;
+    pointer-events: none;
+    animation: disappear 0.5s forwards; /* 匹配后消失动画 */
+  }
+  @keyframes disappear { /* 定义匹配后消失动画 */
+    to { opacity: 0; transform: scale(0); } /* 最终状态 */
+  }
+  .selected {
+    background-color: #bbdefb;
+  }
+  .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    text-align: center;
+    animation: fadeIn 0.5s;
+  }
+  @keyframes fadeIn { /* 定义弹出框淡入动画 */
+    from { opacity: 0; transform: scale(0.9); } /* 开始状态 */
+    to { opacity: 1; transform: scale(1); } /* 结束状态 */
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 999;
+  }
+  .close-popup {
+    margin-top: 10px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    background-color: #ff6f61;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s; /* 鼠标悬停时的过渡效果 */
+  }
+  .close-popup:hover {
+    background-color: #ff4d4d;
+    transform: scale(1.1); /* 放大按钮 */
+  }
+  .fireworks-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .firework {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: white;
+    opacity: 0;
+    animation: firework-animation 2s ease-in-out forwards; /* 烟花动画 */
+  }
+  @keyframes firework-animation { /* 定义烟花动画 */
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: translateY(-200px) scale(2);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-400px) scale(4);
+    }
+  }
+  .cartoon-images {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  .cartoon-images img {
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>九九乘法表消消乐</h1>
+  <div class="difficulty-buttons">
+    <button>简单</button>
+    <button>中等</button>
+    <button>困难</button>
+  </div>
+  <button class="start-button">开始游戏</button>
+  <div id="timer" class="timer">时间: 0秒</div>
+  <div id="gameBoard" class="game-board"></div>
+  <div class="cartoon-images">
+    <img src="https://pic2.zhimg.com/v2-07c97fa3ba54f3ce990c20fc7a581ea1_1440w.jpg" alt="Cartoon Rabbit">
+    <img src="https://pic4.zhimg.com/v2-b83555addd7f83cf5bcfd512ee24ca4f_1440w.jpg" alt="Cartoon Rabbit">
+    <img src="https://picx.zhimg.com/v2-d494b3774d3b654f67f01a1e7bbd900d_1440w.jpg" alt="Cartoon Rabbit">
+  </div>
+</div>
+ 
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="popup">
+  <p id="popupMessage"></p>
+  <button class="close-popup">确定</button>
+</div>
+ 
+<div class="fireworks-container" id="fireworksContainer"></div>
+<audio id="backgroundMusic" src="https://downsc.chinaz.net/Files/DownLoad/sound1/201610/7906.mp3" autoplay loop></audio>
+<audio id="correctSound" src="https://downsc.chinaz.net/Files/DownLoad/sound1/201812/10917.mp3"></audio>
+<audio id="correctSound2" src="https://downsc.chinaz.net/Files/DownLoad/sound1/201512/6731.mp3"></audio>
+<audio id="wrongSound" src="https://downsc.chinaz.net/Files/DownLoad/sound1/201206/1583.mp3"></audio>
+<audio id="fireworkSound" src="https://downsc.chinaz.net/Files/DownLoad/sound1/202202/15324.mp3"></audio>
+ 
+<script>
+  console.log("Script started"); // 控制台输出脚本启动信息
+ 
+  let difficulty = 'easy'; // 默认难度为简单
+  let cells = []; // 存储所有卡片数据
+  let selectedCells = []; // 存储已选中的卡片
+  let startTime; // 游戏开始时间
+  let endTime; // 游戏结束时间
+  let timerInterval; // 计时器间隔
+  let consecutiveMatches = 0; // 连续匹配计数器
+ 
+  function setDifficulty(newDifficulty) {
+    difficulty = newDifficulty; // 设置新的难度
+    console.log(`Difficulty set to ${difficulty}`); // 控制台输出当前难度
+  }
+ 
+  function startGame() {
+    const gameBoard = document.getElementById('gameBoard');
+    gameBoard.innerHTML = ''; // 清空游戏板
+    clearInterval(timerInterval); // 清除计时器
+    cells = generateCells(difficulty); // 生成卡片
+    shuffle(cells); // 打乱卡片顺序
+    cells.forEach(cell => {
+      const cellElement = document.createElement('div');
+      cellElement.className = 'cell';
+      const cellText = document.createElement('span');
+      cellText.textContent = cell.displayValue;
+      cellElement.appendChild(cellText);
+      cellElement.onclick = () => selectCell(cellElement, cell.value);
+      gameBoard.appendChild(cellElement);
+    });
+    console.log("Game started"); // 控制台输出游戏开始信息
+    startTime = new Date().getTime(); // 记录游戏开始时间
+    resetFireworks(); // 重置烟花效果
+    updateTimer(); // 更新计时器显示
+    timerInterval = setInterval(updateTimer, 1000); // 启动计时器
+    consecutiveMatches = 0; // 重置连续匹配计数器
+  }
+ 
+  function generateCells(difficulty) {
+    const maxProduct = difficulty === 'easy' ? 36 : difficulty === 'medium' ? 81 : 100; // 根据难度设置最大乘积
+    const cells = [];
+    while (cells.length < 36) { // 生成36个卡片
+      const randomI = Math.floor(Math.random() * 10) + 1;
+      const randomJ = Math.floor(Math.random() * 10) + 1;
+      const value = randomI * randomJ;
+      if (value <= maxProduct) {
+        cells.push({ displayValue: `${randomI} x ${randomJ}`, value: value }); // 添加乘法表达式卡片
+        cells.push({ displayValue: value, value: value }); // 添加结果卡片
+      }
+    }
+    return cells.slice(0, 36); // 返回前36个卡片
+  }
+ 
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]]; // 打乱数组元素
+    }
+  }
+ 
+  function selectCell(element, value) {
+    if (element.classList.contains('matched') || element.classList.contains('selected')) return; // 如果卡片已匹配或已选中则返回
+    element.classList.add('selected'); // 添加选中样式
+    selectedCells.push({ element, value }); // 将卡片加入选中列表
+ 
+    if (selectedCells.length === 2) {
+      setTimeout(() => {
+        checkMatch();
+      }, 500); // 延迟检查匹配
+    }
+    console.log(`Selected cell with value ${value}`); // 控制台输出选中卡片值
+  }
+ 
+  function checkMatch() {
+    const [first, second] = selectedCells;
+    if (first.value === second.value) {
+      first.element.classList.remove('selected', 'cell');
+      second.element.classList.remove('selected', 'cell');
+      first.element.classList.add('matched');
+      second.element.classList.add('matched');
+      playCorrectSound(consecutiveMatches); // 播放正确音效
+      consecutiveMatches++; // 增加连续匹配计数器
+ 
+      // Check if all cells are matched
+      const unmatchedCells = document.querySelectorAll('.cell:not(.matched)');
+      if (unmatchedCells.length === 0) {
+        endTime = new Date().getTime(); // 记录游戏结束时间
+        const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // 计算用时
+        showCompletionPopup(timeTaken); // 显示完成弹窗
+        launchFireworks(); // 启动烟花效果
+        clearInterval(timerInterval); // 停止计时器
+      }
+    } else {
+      first.element.classList.remove('selected');
+      second.element.classList.remove('selected');
+      showPopup('很遗憾，再试一次吧！'); // 显示错误提示
+      playSound('wrongSound'); // 播放错误音效
+      consecutiveMatches = 0; // 重置连续匹配计数器
+    }
+    selectedCells = []; // 清空选中列表
+    console.log("Checked match"); // 控制台输出检查匹配信息
+  }
+ 
+  function updateTimer() {
+    const currentTime = new Date().getTime();
+    const elapsedTime = Math.floor((currentTime - startTime) / 1000); // 计算经过的时间
+    document.getElementById('timer').textContent = `时间: ${elapsedTime}秒`; // 更新计时器显示
+  }
+ 
+  function showPopup(message) {
+    const popup = document.getElementById('popup');
+    const overlay = document.getElementById('overlay');
+    const popupMessage = document.getElementById('popupMessage');
+    popupMessage.textContent = message; // 设置弹窗消息
+    popup.style.display = 'block'; // 显示弹窗
+    overlay.style.display = 'block'; // 显示遮罩层
+    console.log(`Popup shown with message: ${message}`); // 控制台输出弹窗消息
+  }
+ 
+  function closePopup() {
+    const popup = document.getElementById('popup');
+    const overlay = document.getElementById('overlay');
+    popup.style.display = 'none'; // 隐藏弹窗
+    overlay.style.display = 'none'; // 隐藏遮罩层
+    console.log("Popup closed"); // 控制台输出关闭弹窗信息
+  }
+ 
+  function playSound(soundId) {
+    const sound = document.getElementById(soundId);
+    if (sound) {
+      sound.currentTime = 0; // 重置音频播放位置
+      sound.play(); // 播放音频
+    }
+  }
+ 
+  function playCorrectSound(matchCount) {
+    if (matchCount >= 1) {
+      playSound('correctSound2'); // 播放第二个正确音效
+    } else {
+      playSound('correctSound'); // 播放第一个正确音效
+    }
+  }
+ 
+  function showCompletionPopup(timeTaken) {
+    const popup = document.getElementById('popup');
+    const overlay = document.getElementById('overlay');
+    const popupMessage = document.getElementById('popupMessage');
+    popupMessage.textContent = `恭喜你完成了游戏！\n用时: ${timeTaken} 秒`; // 设置完成消息
+    popup.style.display = 'block'; // 显示弹窗
+    overlay.style.display = 'block'; // 显示遮罩层
+    console.log(`Completion Popup shown with time taken: ${timeTaken}`); // 控制台输出完成消息
+  }
+ 
+  function launchFireworks() {
+    const fireworksContainer = document.getElementById('fireworksContainer');
+    fireworksContainer.innerHTML = ''; // 清空烟花容器
+ 
+    for (let i = 0; i < 50; i++) {
+      const firework = document.createElement('div');
+      firework.className = 'firework';
+      firework.style.left = `${Math.random() * 100}%`; // 随机水平位置
+      firework.style.top = `${Math.random() * 100}%`; // 随机垂直位置
+      firework.style.backgroundColor = getRandomColor(); // 随机颜色
+      fireworksContainer.appendChild(firework);
+ 
+      // Add a small delay to stagger the animations
+      setTimeout(() => {
+        firework.style.animationDelay = `${Math.random() * 2}s`; // 随机延迟
+        playSound('fireworkSound'); // 播放烟花音效
+      }, i * 50);
+    }
+  }
+ 
+  function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)]; // 随机生成颜色码
+    }
+    return color;
+  }
+ 
+  function resetFireworks() {
+    const fireworksContainer = document.getElementById('fireworksContainer');
+    fireworksContainer.innerHTML = ''; // 清空烟花容器
+  }
+</script>
+</body>
+</html>
