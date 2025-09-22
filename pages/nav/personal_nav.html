@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全能导航 | 时钟+计算器+番茄钟</title>
+    <!-- 引入Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入Google字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --lighter: #ffffff;
+            --gray: #94a3b8;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+          
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+          
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+          
+        body::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(79, 70, 229, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: rotate 120s linear infinite;
+        }
+          
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+          
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+          
+        /* 每日一言模块 */
+        .daily-quote {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+          
+        .daily-quote:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .quote-title {
+            font-size: 1.3rem;
+            font-weight: 6 00;
+            margin-bottom: 15px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+          
+        .quote-title i {
+            margin-right: 12px;
+            color: var(--accent);
+        }
+          
+        .quote-content {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-style: italic;
+            color: var(--dark);
+        }
+          
+        .quote-author {
+            text-align: right;
+            font-weight: 500;
+            color: var(--primary);
+        }
+          
+        .quote-controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+          
+        .quote-edit-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+          
+        .quote-edit-btn:hover {
+            background: rgba(79, 70, 229, 0.2);
+        }
+          
+        .quote-refresh-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+          
+        .quote-refresh-btn:hover {
+            background: rgba(16, 185, 129, 0.2);
+        }
+          
+        .quote-edit-area {
+            display: none;
+            width: 100%;
+            margin-top: 15px;
+        }
+          
+        .quote-edit-textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 100px;
+        }
+          
+        .quote-edit-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+          
+        .quote-save-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+          
+        .quote-save-btn:hover {
+            background: var(--primary-dark);
+        }
+          
+        .quote-cancel-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+          
+        .quote-cancel-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+          
+        /* 工具区域 */
+        .tools-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+          
+        /* 时钟模块 */
+        .clock-widget {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+          
+        .clock-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .clock-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+          
+        .clock-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+          
+        .clock-display {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+          
+        .date-display {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+          
+        .world-clocks {
+            width: 100%;
+            margin-top: 20px;
+        }
+          
+        .world-clock {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+          
+        .world-clock:last-child {
+            border-bottom: none;
+        }
+          
+        .world-clock-name {
+            font-weight: 500;
+        }
+          
+        .world-clock-time {
+            color: var(--primary);
+            font-weight: 500;
+        }
+          
+        /* 计算器模块 */
+        .calculator-widget {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+        }
+          
+        .calculator-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .calculator-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+          
+        .calculator-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+          
+        .calculator-display {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.8rem;
+            text-align: right;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+          
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+          
+        .calc-btn {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            background: var(--lighter);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+          
+        .calc-btn:hover {
+            background: rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+        }
+          
+        .calc-btn.operator {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+          
+        .calc-btn.equals {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+          
+        .calc-btn.clear {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+          
+        /* 番茄时钟模块 */
+        .pomodoro-widget {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+          
+        .pomodoro-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .pomodoro-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+          
+        .pomodoro-title i {
+            margin-right: 12px;
+            color: var(--danger);
+        }
+          
+        .pomodoro-display {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+            color: var(--danger);
+            text-align: center;
+            min-height: 72px;
+        }
+          
+        .pomodoro-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+          
+        .pomodoro-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+          
+        .pomodoro-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+          
+        .pomodoro-btn.secondary {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+          
+        .pomodoro-btn.secondary:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+          
+        .pomodoro-settings {
+            width: 100%;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+          
+        .pomodoro-setting {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+          
+        .pomodoro-setting label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+          
+        .pomodoro-setting input {
+            width: 60px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-weight: 600;
+        }
+          
+        .pomodoro-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+          
+        .pomodoro-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 1s linear;
+        }
+          
+        .pomodoro-status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-align: center;
+        }
+          
+        /* 倒计时模块 */
+        .countdown-widget {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+          
+        .countdown-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .countdown-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+          
+        .countdown-title i {
+            margin-right: 12px;
+            color: var(--accent);
+        }
+          
+        .countdown-display {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 15px 0;
+            color: var(--accent);
+            text-align: center;
+            min-height: 72px;
+        }
+          
+        .countdown-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+          
+        .countdown-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items:  center;
+            justify-content: center;
+            gap: 8px;
+        }
+          
+        .countdown-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+          
+        .countdown-btn.secondary {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+        }
+          
+        .countdown-btn.secondary:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+          
+        .countdown-inputs {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+          
+        .countdown-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+          
+        .countdown-input-group label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+          
+        .countdown-input-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+          
+        .countdown-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+          
+        .countdown-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--danger));
+            width: 0%;
+            transition: width 1s linear;
+        }
+          
+        /* 头部区域 */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+          
+        .greeting {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+          
+        .greeting::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+          
+        /* 快速访问区域 */
+        .quick-access {
+            margin-bottom: 50px;
+        }
+          
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-left: 15px;
+        }
+          
+        .section-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 70%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 5px;
+        }
+          
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+          
+        .quick-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--dark);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px 15px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+          
+        .quick-link::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: var(--transition);
+        }
+          
+        .quick-link:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .quick-link:hover::before {
+            opacity: 1;
+        }
+          
+        .quick-link-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: white;
+            font-size: 1.4rem;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+            transition: var(--transition);
+        }
+          
+        .quick-link:hover .quick-link-icon {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+        }
+          
+        .quick-link-text {
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+          
+        /* 网站分类区域 */
+        .website-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+          
+        .category {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: var(--transition);
+        }
+          
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+          
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--darker);
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+          
+        .category-title i {
+            margin-right: 12px;
+            color: var(--primary);
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+          
+        .websites {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+          
+        .website {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--dark);
+            padding: 15px 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+            position: relative;
+        }
+          
+        .website:hover {
+            background: rgba(79, 70, 229, 0.08);
+            transform: translateY(-3px);
+}
+          
+        .website-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            object-fit: cover;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+          
+        .website:hover .website-icon {
+            transform: scale(1.1);
+            box-shadow: var(--shadow);
+        }
+          
+        .website-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+        }
+          
+        /* 底部区域 */
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+          
+        /* 响应式设计 */
+        [url=home.php?mod=space&uid=945662]@media[/url] (max-width: 1024px) {
+            .greeting {
+                font-size: 2.4rem;
+            }
+              
+            .quick-links {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+              
+            .tools-section {
+                grid-template-columns: 1fr;
+            }
+        }
+          
+        [url=home.php?mod=space&uid=945662]@media[/url] (max-width: 768px) {
+            .container {
+                padding: 30px 15px;
+            }
+              
+            .greeting {
+                font-size: 2rem;
+            }
+              
+            .website-categories {
+                grid-template-columns: 1fr;
+            }
+              
+            .quick-link {
+                padding: 20px 10px;
+            }
+        }
+          
+        @media (max-width: 480px) {
+            .greeting {
+                font-size: 1.8rem;
+            }
+              
+            .section-title {
+                font-size: 1.2rem;
+            }
+              
+            .category-title {
+                font-size: 1.1rem;
+            }
+              
+            .quick-links {
+                grid-template-columns: repeat(3, 1fr);
+            }
+              
+            .clock-display {
+                font-size: 2.5rem;
+            }
+              
+            .date-display {
+                font-size: 1rem;
+            }
+              
+            .pomodoro-display,
+            .countdown-display {
+                font-size: 2.5rem;
+            }
+              
+            .pomodoro-btn,
+            .countdown-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部区域 -->
+        <div class="header">
+            <h1 class="greeting" id="greeting">下午好，朋友</h1>
+        </div>
+          
+        <!-- 每日一言模块 -->
+        <div class="daily-quote">
+            <h3 class="quote-title">
+                <i class="fas fa-quote-left"></i> 每日一言
+            </h3>
+            <div class="quote-content" id="quote-content">
+                生活就像骑自行车，要想保持平衡，就必须不断前进。
+            </div>
+            <div class="quote-author" id="quote-author">- 爱因斯坦</div>
+              
+            <div class="quote-controls">
+                <button class="quote-edit-btn" id="quote-edit-btn">
+                    <i class="fas fa-edit"></i> 编辑内容
+                </button>
+                <button class="quote-refresh-btn" id="quote-refresh-btn">
+                    <i class="fas fa-sync-alt"></i> 随机名言
+                </button>
+            </div>
+              
+            <div class="quote-edit-area" id="quote-edit-area">
+                <textarea class="quote-edit-textarea" id="quote-edit-textarea" placeholder="输入自定义名言..."></textarea>
+                <div class="quote-edit-buttons">
+                    <button class="quote-cancel-btn" id="quote-cancel-btn">取消</button>
+                    <button class="quote-save-btn" id="quote-save-btn">保存</button>
+                </div>
+            </div>
+        </div>
+          
+        <!-- 工具区域 -->
+        <div class="tools-section">
+            <!-- 时钟模块 -->
+            <div class="clock-widget">
+                <h3 class="clock-title">
+                    <i class="fas fa-clock"></i> 世界时钟
+                </h3>
+                <div class="clock-display" id="digital-clock">14:30:25</div>
+                <div class="date-display" id="current-date">2023年11月15日 星期三</div>
+                  
+                <div class="world-clocks">
+                    <div class="world-clock">
+                        <span class="world-clock-name">纽约</span>
+                        <span class="world-clock-time" id="new-york-time">02:30 AM</span>
+                    </div>
+                    <div class="world-clock">
+                        <span class="world-clock-name">伦敦</span>
+                        <span class="world-clock-time" id="london-time">07:30 AM</span>
+                    </div>
+                    <div class="world-clock">
+                        <span class="world-clock-name">东京</span>
+                        <span class="world-clock-time" id="tokyo-time">03:30 PM</span>
+                    </div>
+                    <div class="world-clock">
+                        <span class="world-clock-name">悉尼</span>
+                        <span class="world-clock-time" id="sydney-time">05:30 PM</span>
+                    </div>
+                </div>
+            </div>
+              
+            <!-- 计算器模块 -->
+            <div class="calculator-widget">
+                <h3 class="calculator-title">
+                    <i class="fas fa-calculator"></i> 计算器
+                </h3>
+                <input type="text" class="calculator-display" id="calc-display" readonly>
+                <div class="calculator-buttons">
+                    <button class="calc-btn clear">C</button>
+                    <button class="calc-btn operator">(</button>
+                    <button class="calc-btn operator">)</button>
+                    <button class="calc-btn operator">/</button>
+                      
+                    <button class="calc-btn">7</button>
+                    <button class="calc-btn">8</button>
+                    <button class="calc-btn">9</button>
+                    <button class="calc-btn operator">×</button>
+                      
+                    <button class="calc-btn">4</button>
+                    <button class="calc-btn">5</button>
+                    <button class="calc-btn">6</button>
+                    <button class="calc-btn operator">-</button>
+                      
+                    <button class="calc-btn">1</button>
+                    <button class="calc-btn">2</button>
+                    <button class="calc-btn">3</button>
+                    <button class="calc-btn operator">+</button>
+                      
+                    <button class="calc-btn">0</button>
+                    <button class="calc-btn">.</button>
+                    <button class="calc-btn clear">&#9003;</button>
+                    <button class="calc-btn equals">=</button>
+                </div>
+            </div>
+              
+            <!-- 番茄时钟模块 -->
+            <div class="pomodoro-widget">
+                <h3 class="pomodoro-title">
+                    <i class="fas fa-hourglass-half"></i> 番茄时钟
+                </h3>
+                <div class="pomodoro-display" id="pomodoro-time">25:00</div>
+                <div class="pomodoro-progress">
+                    <div class="pomodoro-progress-bar" id="pomodoro-progress"></div>
+                </div>
+                <div class="pomodoro-status" id="pomodoro-status">准备开始工作</div>
+                <div class="pomodoro-controls">
+                    <button class="pomodoro-btn" id="pomodoro-start">
+                        <i class="fas fa-play"></i> 开始
+                    </button>
+                    <button class="pomodoro-btn secondary" id="pomodoro-reset">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+                <div class="pomodoro-settings">
+                    <div class="pomodoro-setting">
+                        <label for="pomodoro-work">工作时间 (分钟):</label>
+                        <input type="number" id="pomodoro-work" min="1" max="60" value="25">
+                    </div>
+                    <div class="pomodoro-setting">
+                        <label for="pomodoro-break">休息时间 (分钟):</label>
+                        <input type="number" id="pomodoro-break" min="1" max="30" value="5">
+                    </div>
+                </div>
+            </div>
+              
+            <!-- 倒计时模块 -->
+            <div class="countdown-widget">
+                <h3 class="countdown-title">
+                    <i class="fas fa-stopwatch"></i> 倒计时
+                </h3>
+                <div class="countdown-display" id="countdown-time">00:00:00</div>
+                <div class="countdown-progress">
+                    <div class="countdown-progress-bar" id="countdown-progress"></div>
+                </div>
+                <div class="countdown-inputs">
+                    <div class="countdown-input-group">
+                        <label>小时</label>
+                        <input type="number" id="countdown-hours" min="0" max="23" value="0">
+                    </div>
+                    <div class="countdown-input-group">
+                        <label>分钟</label>
+                        <input type="number" id="countdown-minutes" min="0" max="59" value="0">
+                    </div>
+                    <div class="countdown-input-group">
+                        <label>秒</label>
+                        <input type="number" id="countdown-seconds" min="0" max="59" value="0">
+                    </div>
+                </div>
+                <div class="countdown-controls">
+                    <button class="countdown-btn" id="countdown-start">
+                        <i class="fas fa-play"></i> 开始
+                    </button>
+                    <button class="countdown-btn secondary" id="countdown-reset">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+          
+        <!-- 快速访问 -->
+        <div class="quick-access">
+            <h2 class="section-title">
+                <i class="fas fa-bolt"></i> 快捷工具
+            </h2>
+            <div class="quick-links">
+                <a href="https://mail.google.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="quick-link-text">Gmail</div>
+                </a>
+                <a href="https://calendar.google.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="quick-link-text">日历</div>
+                </a>
+                <a href="https://drive.google.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <div class="quick-link-text">云盘</div>
+                </a>
+                <a href="https://music.youtube.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="quick-link-text">音乐</div>
+                </a>
+                <a href="https://www.youtube.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="quick-link-text">视频</div>
+                </a>
+                <a href="https://www.notion.so" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <div class="quick-link-text">笔记</div>
+                </a>
+                <a href="https://github.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="quick-link-text">GitHub</div>
+                </a>
+                <a href="https://twitter.com" class="quick-link" target="_blank">
+                    <div class="quick-link-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <div class="quick-link-text">Twitter</div>
+                </a>
+            </div>
+        </div>
+          
+        <!-- 网站分类 -->
+        <div class="website-categories">
+            <!-- 工作学习 -->
+            <div class="category">
+                <h3 class="category-title">
+                    <i class="fas fa-laptop-code"></i> 工作学习
+                </h3>
+                <div class="websites">
+                    <a href="https://www.google.com" class="website" target="_blank">
+                        <img src="https://www.google.com/favicon.ico" class="website-icon" alt="Google">
+                        <div class="website-text">Google</div>
+                    </a>
+                    <a href="https://github.com" class="website" target="_blank">
+                        <img src="https://github.githubassets.com/favicons/favicon.png" class="website-icon" alt="GitHub">
+                        <div class="website-text">GitHub</div>
+                    </a>
+                    <a href="https://stackoverflow.com" class="website" target="_blank">
+                        <img src="https://stackoverflow.com/favicon.ico" class="website-icon" alt="Stack Overflow">
+                        <div class="website-text">Stack Overflow</div>
+                    </a>
+                    <a href="https://www.figma.com" class="website" target="_blank">
+                        <img src="https://www.figma.com/favicon.ico" class="website-icon" alt="Figma">
+                        <div class="website-text">Figma</div>
+                    </a>
+                    <a href="https://www.notion.so" class="website" target="_blank">
+                        <img src="https://www.notion.so/favicon.ico" class="website-icon" alt="Notion">
+                        <div class="website-text">Notion</div>
+                    </a>
+                    <a href="https://leetcode.com" class="website" target="_blank">
+                        <img src="https://leetcode.com/favicon.ico" class="website-icon" alt="LeetCode">
+                        <div class="website-text">LeetCode</div>
+                    </a>
+                </div>
+            </div>
+              
+            <!-- 社交媒体 -->
+            <div class="category">
+                <h3 class="category-title">
+                    <i class="fas fa-share-alt"></i> 社交媒体
+                </h3>
+                <div class="websites">
+                    <a href="https://www.weibo.com" class="website" target="_blank">
+                        <img src="https://www.weibo.com/favicon.ico" class="website-icon" alt="微博">
+                        <div class="website-text">微博</div>
+                    </a>
+                    <a href="https://www.zhihu.com" class="website" target="_blank">
+                        <img src="https://www.zhihu.com/favicon.ico" class="website-icon" alt="知乎">
+                        <div class="website-text">知乎</div>
+                    </a>
+                    <a href="https://www.douban.com" class="website" target="_blank">
+                        <img src="https://www.douban.com/favicon.ico" class="website-icon" alt="豆瓣">
+                        <div class="website-text">豆瓣</div>
+                    </a>
+                    <a href="https://www.bilibili.com" class="website" target="_blank">
+                        <img src="https://www.bilibili.com/favicon.ico" class="website-icon" alt="B站">
+                        <div class="website-text">B站</div>
+                    </a>
+                    <a href="https://twitter.com" class="website" target="_blank">
+                        <img src="https://twitter.com/favicon.ico" class="website-icon" alt="Twitter">
+                        <div class="website-text">Twitter</div>
+                    </a>
+                    <a href="https://www.instagram.com" class="website" target="_blank">
+                        <img src="https://www.instagram.com/favicon.ico" class="website-icon" alt="Instagram">
+                        <div class="website-text">Instagram</div>
+                    </a>
+                </div>
+            </div>
+              
+            <!-- 娱乐休闲 -->
+            <div class="category">
+                <h3 class="category-title">
+                    <i class="fas fa-gamepad"></i> 娱乐休闲
+                </h3>
+                <div class="websites">
+                    <a href="https://www.youtube.com" class="website" target="_blank">
+                        <img src="https://www.youtube.com/favicon.ico" class="website-icon" alt="YouTube">
+                        <div class="website-text">YouTube</div>
+                    </a>
+                    <a href="https://www.netflix.com" class="website" target="_blank">
+                        <img src="https://www.netflix.com/favicon.ico" class="website-icon" alt="Netflix">
+                        <div class="website-text">Netflix</div>
+                    </a>
+                    <a href="https://open.spotify.com" class="website" target="_blank">
+                        <img src="https://open.spotify.com/favicon.ico" class="website-icon" alt="Spotify">
+                        <div class="website-text">Spotify</div>
+                    </a>
+                    <a href="https://www.twitch.tv" class="website" target="_blank">
+                        <img src="https://www.twitch.tv/favicon.ico" class="website-icon" alt="Twitch">
+                        <div class="website-text">Twitch</div>
+                    </a>
+                    <a href="https://store.steampowered.com" class="website" target="_blank">
+                        <img src="https://store.steampowered.com/favicon.ico" class="website-icon" alt="Steam">
+                        <div class="website-text">Steam</div>
+                    </a>
+                    <a href="https://www.douyu.com" class="website" target="_blank">
+                        <img src="https://www.douyu.com/favicon.ico" class="website-icon" alt="斗鱼">
+                        <div class="website-text">斗鱼</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+          
+        <!-- 底部区域 -->
+        <div class="footer">
+            <p>&#169; 2023 全能导航 | 按 <kbd>Ctrl</kbd> + <kbd>D</kbd> 收藏本页</p>
+        </div>
+    </div>
+  
+    <script>
+        // 每日一言功能
+        const quotes = [
+            { content: "生活就像骑自行车，要想保持平衡，就必须不断前进。", author: "爱因斯坦" },
+            { content: "成功不是将来才有的，而是从决定去做的那一刻起，持续累积而成。", author: "佚名" },
+            { content: "不要等待机会，而要创造机会。", author: "佚名" },
+            { content: "时间就像海绵里的水，只要愿挤，总还是有的。", author: "鲁迅" },
+            { content: "世上无难事，只要肯登攀。", author: "毛泽东" },
+            { content: "知识就是力量。", author: "培根" },
+            { content: "天行健，君子以自强不息。", author: "《周易》" },
+            { content: "千里之行，始于足下。", author: "老子" },
+            { content: "学而不思则罔，思而不学则殆。", author: "孔子" },
+            { content: "生活不止眼前的苟且，还有诗和远方。", author: "高晓松" }
+        ];
+          
+        // 从本地存储加载自定义名言
+        function loadCustomQuote() {
+            const savedQuote = localStorage.getItem('dailyQuote');
+            if (savedQuote) {
+                try {
+                    const quoteObj = JSON.parse(savedQuote);
+                    document.getElementById('quote-content').textContent = quoteObj.content;
+                    document.getElementById('quote-author').textContent = `- ${quoteObj.author}`;
+                    return true;
+                } catch (e) {
+                    console.error('解析保存的名言失败:', e);
+                }
+            }
+            return false;
+        }
+          
+        // 显示随机名言
+        function showRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            const randomQuote = quotes[randomIndex];
+            document.getElementById('quote-content').textContent = randomQuote.content;
+            document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
+        }
+          
+        // 初始化名言
+        if (!loadCustomQuote()) {
+            showRandomQuote();
+        }
+          
+        // 名言编辑功能
+        document.getElementById('quote-edit-btn').addEventListener('click', function() {
+            const content = document.getElementById('quote-content').textContent;
+            const author = document.getElementById('quote-author').textContent.replace(/^- /, '');
+              
+            document.getElementById('quote-edit-textarea').value = `${content}\n\n——${author}`;
+            document.getElementById('quote-edit-area').style.display = 'block';
+        });
+          
+        document.getElementById('quote-cancel-btn').addEventListener('click', function() {
+            document.getElementById('quote-edit-area').style.display = 'none';
+        });
+          
+        document.getElementById('quote-save-btn').addEventListener('click', function() {
+            const text = document.getElementById('quote-edit-textarea').value.trim();
+            const parts = text.split(/\n+/);
+              
+            if (parts.length >= 1) {
+                let content = parts[0].trim();
+                let author = "佚名";
+                  
+                // 尝试从文本中提取作者
+                if (parts.length >= 2) {
+                    const lastLine = parts[parts.length - 1].trim();
+                    if (lastLine.startsWith("——")) {
+                        author = lastLine.substring(1).trim();
+                    }
+                }
+                  
+                // 保存到本地存储
+                const quoteObj = { content, author };
+                localStorage.setItem('dailyQuote', JSON.stringify(quoteObj));
+                  
+                // 更新显示
+                document.getElementById('quote-content').textContent = content;
+                document.getElementById('quote-author').textContent = `- ${author}`;
+                document.getElementById('quote-edit-area').style.display = 'none';
+            }
+        });
+          
+        document.getElementById('quote-refresh-btn').addEventListener('click', function() {
+            showRandomQuote();
+        });
+          
+        // 更新时间显示
+        function updateDateTime() {
+            const now = new Date();
+              
+            // 本地时间 - 使用设备本地时间
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('digital-clock').textContent = `${hours}:${minutes}:${seconds}`;
+              
+            const localDate = now.toLocaleDateString('zh-CN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                weekday: 'long'
+            });
+            document.getElementById('current-date').textContent = localDate;
+              
+            // 世界时钟 - 使用设备本地时间计算时区差异
+            const timeZones = [
+                { id: 'new-york-time', offset: -5 }, // 纽约UTC-5
+                { id: 'london-time', offset: 0 },    // 伦敦UTC+0
+                { id: 'tokyo-time', offset: 9 },     // 东京UTC+9
+                { id: 'sydney-time', offset: 10 }    // 悉尼UTC+10
+            ];
+              
+            timeZones.forEach(tz => {
+                const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const cityTime = new Date(utcTime + (tz.offset * 3600000));
+                  
+                const options = {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                };
+                const timeStr = cityTime.toLocaleTimeString('en-US', options);
+                document.getElementById(tz.id).textContent = timeStr;
+            });
+        }
+          
+        // 更新问候语
+        function updateGreeting() {
+            const now = new Date();
+            const hour = now.getHours();
+            let greeting;
+              
+            if (hour < 5) {
+                greeting = "夜深了";
+            } else if (hour < 11) {
+                greeting = "早上好";
+            } else if (hour < 13) {
+                greeting = "中午好";
+            } else if (hour < 18) {
+                greeting = "下午好";
+            } else {
+                greeting = "晚上好";
+            }
+              
+            document.getElementById('greeting').textContent = `${greeting}，朋友`;
+        }
+          
+        // 计算器功能
+        let currentInput = '';
+          
+        function appendToDisplay(value) {
+            currentInput += value;
+            document.getElementById('calc-display').value = currentInput;
+        }
+          
+        function clearDisplay() {
+            currentInput = '';
+            document.getElementById('calc-display').value = '';
+        }
+          
+        function backspace() {
+            currentInput = currentInput.slice(0, -1);
+            document.getElementById('calc-display').value = currentInput;
+        }
+          
+        function calculate() {
+            try {
+                // 替换×为*，÷为/
+                let expression = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
+                // 使用Function构造函数更安全地计算表达式
+                const result = new Function('return ' + expression)();
+                document.getElementById('calc-display').value = result;
+                currentInput = result.toString();
+            } catch (error) {
+                document.getElementById('calc-display').value = '错误';
+                currentInput = '';
+            }
+        }
+          
+        // 番茄时钟功能
+        let pomodoroInterval;
+        let pomodoroTimeLeft = 25 * 60; // 25分钟
+        let pomodoroIsRunning = false;
+        let pomodoroIsBreak = false;
+        const pomodoroAudio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+          
+        function updatePomodoroDisplay() {
+            const minutes = Math.floor(pomodoroTimeLeft / 60);
+            const seconds = pomodoroTimeLeft % 60;
+            document.getElementById('pomodoro-time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+              
+            // 更新进度条
+            const workTime = parseInt(document.getElementById('pomodoro-work').value) * 60;
+            const breakTime = parseInt(document.getElementById('pomodoro-break').value) * 60;
+            const totalTime = pomodoroIsBreak ? breakTime : workTime;
+            const progress = ((totalTime - pomodoroTimeLeft) / totalTime) * 100;
+            document.getElementById('pomodoro-progress').style.width = `${progress}%`;
+        }
+          
+        function startPomodoro() {
+            if (pomodoroIsRunning) return;
+              
+            pomodoroIsRunning = true;
+            document.getElementById('pomodoro-start').innerHTML = '<i class="fas fa-pause"></i> 暂停';
+            document.getElementById('pomodoro-status').textContent = 
+                pomodoroIsBreak ? '休息时间' : '工作时间';
+              
+            pomodoroInterval = setInterval(() => {
+                pomodoroTimeLeft--;
+                updatePomodoroDisplay();
+                  
+                if (pomodoroTimeLeft <= 0) {
+                    pomodoroAudio.play();
+                    clearInterval(pomodoroInterval);
+                    pomodoroIsRunning = false;
+                    pomodoroIsBreak = !pomodoroIsBreak;
+                      
+                    if (pomodoroIsBreak) {
+                        pomodoroTimeLeft = parseInt(document.getElementById('pomodoro-break').value) * 60;
+                        document.getElementById('pomodoro-status').textContent = '休息时间到！';
+                    } else {
+                        pomodoroTimeLeft = parseInt(document.getElementById('pomodoro-work').value) * 60;
+                        document.getElementById('pomodoro-status').textContent = '工作时间到！';
+                    }
+                      
+                    document.getElementById('pomodoro-start').innerHTML = '<i class="fas fa-play"></i> 开始';
+                    updatePomodoroDisplay();
+                }
+            }, 1000);
+        }
+          
+        function pausePomodoro() {
+            clearInterval(pomodoroInterval);
+            pomodoroIsRunning = false;
+            document.getElementById('pomodoro-start').innerHTML = '<i class="fas fa-play"></i> 开始';
+        }
+          
+        function resetPomodoro() {
+            clearInterval(pomodoroInterval);
+            pomodoroIsRunning = false;
+            pomodoroIsBreak = false;
+            pomodoroTimeLeft = parseInt(document.getElementById('pomodoro-work').value) * 60;
+            document.getElementById('pomodoro-start').innerHTML = '<i class="fas fa-play"></i> 开始';
+            document.getElementById('pomodoro-status').textContent = '准备开始工作';
+            updatePomodoroDisplay();
+        }
+          
+        document.getElementById('pomodoro-start').addEventListener('click', function() {
+            if (pomodoroIsRunning) {
+                pausePomodoro();
+            } else {
+                startPomodoro();
+            }
+        });
+          
+        document.getElementById('pomodoro-reset').addEventListener('click', resetPomodoro);
+          
+        // 监听设置变化
+        document.getElementById('pomodoro-work').addEventListener('change', function() {
+            if (!pomodoroIsRunning && !pomodoroIsBreak) {
+                pomodoroTimeLeft = parseInt(this.value) * 60;
+                updatePomodoroDisplay();
+            }
+        });
+          
+        document.getElementById('pomodoro-break').addEventListener('change', function() {
+            if (pomodoroIsBreak && !pomodoroIsRunning) {
+                pomodoroTimeLeft = parseInt(this.value) * 60;
+                updatePomodoroDisplay();
+            }
+        });
+          
+        // 倒计时功能
+        let countdownInterval;
+        let countdownTimeLeft = 0;
+        let countdownIsRunning = false;
+        const countdownAudio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+          
+        function updateCountdownDisplay() {
+            const hours = Math.floor(countdownTimeLeft / 3600);
+            const minutes = Math.floor((countdownTimeLeft % 3600) / 60);
+            const seconds = countdownTimeLeft % 60;
+              
+            document.getElementById('countdown-time').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+              
+            // 计算总秒数
+            const inputHours = parseInt(document.getElementById('countdown-hours').value) || 0;
+            const inputMinutes = parseInt(document.getElementById('countdown-minutes').value) || 0;
+            const inputSeconds = parseInt(document.getElementById('countdown-seconds').value) || 0;
+            const totalSeconds = inputHours * 3600 + inputMinutes * 60 + inputSeconds;
+              
+            // 更新进度条
+            if (totalSeconds > 0) {
+                const progress = ((totalSeconds - countdownTimeLeft) / totalSeconds) * 100;
+                document.getElementById('countdown-progress').style.width = `${progress}%`;
+            } else {
+                document.getElementById('countdown-progress').style.width = '0%';
+            }
+        }
+          
+        function startCountdown() {
+            if (countdownIsRunning) return;
+              
+            // 如果倒计时未设置或已结束，从输入框获取新时间
+            if (countdownTimeLeft <= 0) {
+                const hours = parseInt(document.getElementById('countdown-hours').value) || 0;
+                const minutes = parseInt(document.getElementById('countdown-minutes').value) || 0;
+                const seconds = parseInt(document.getElementById('countdown-seconds').value) || 0;
+                countdownTimeLeft = hours * 3600 + minutes * 60 + seconds;
+                  
+                if (countdownTimeLeft <= 0) return; // 无效时间
+            }
+              
+            countdownIsRunning = true;
+            document.getElementById('countdown-start').innerHTML = '<i class="fas fa-pause"></i> 暂停';
+              
+            countdownInterval = setInterval(() => {
+                countdownTimeLeft--;
+                updateCountdownDisplay();
+                  
+                if (countdownTimeLeft <= 0) {
+                    countdownAudio.play();
+                    clearInterval(countdownInterval);
+                    countdownIsRunning = false;
+                    document.getElementById('countdown-start').innerHTML = '<i class="fas fa-play"></i> 开始';
+                }
+            }, 1000);
+        }
+          
+        function pauseCountdown() {
+            clearInterval(countdownInterval);
+            countdownIsRunning = false;
+            document.getElementById('countdown-start').innerHTML = '<i class="fas fa-play"></i> 开始';
+        }
+          
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            countdownIsRunning = false;
+            countdownTimeLeft = 0;
+            document.getElementById('countdown-start').innerHTML = '<i class="fas fa-play"></i> 开始';
+            updateCountdownDisplay();
+        }
+          
+        document.getElementById('countdown-start').addEventListener('click', function() {
+            if (countdownIsRunning) {
+                pauseCountdown();
+            } else {
+                startCountdown();
+            }
+        });
+          
+        document.getElementById('countdown-reset').addEventListener('click', resetCountdown);
+          
+        // 初始化
+        updateDateTime();
+        updateGreeting();
+        setInterval(updateDateTime, 1000); // 每秒更新时间
+        updatePomodoroDisplay();
+        updateCountdownDisplay();
+    </script>
+</body>
+</html>
