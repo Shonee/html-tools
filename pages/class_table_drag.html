@@ -1,0 +1,649 @@
+<!DOCTYPE <strong><font color="#FF0000">html</font></strong>>
+<html lang="zh-CN">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拖拽定制课程表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+ 
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+ 
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+ 
+        .subject-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+ 
+        .subject-item {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: move;
+            user-select: none;
+        }
+ 
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+ 
+        .timetable th,
+        .timetable td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+ 
+        .timetable th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+ 
+        .timetable td {
+            min-height: 60px;
+            height: 60px;
+            vertical-align: middle;
+        }
+ 
+        .time-cell {
+            font-size: 1.2rem;
+            width: 180px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+ 
+        .section-time {
+            font-size: 1.4rem;
+            width: 60px;
+            background-color: #f0f0f0;
+            font-weight: bold;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+        }
+ 
+        .timetable-cell {
+            background-color: #fff;
+            position: relative;
+        }
+ 
+        .timetable-cell.dragover {
+            background-color: #e6f7ff;
+        }
+ 
+        .subject-in-cell {
+            font-size: 1.4rem;
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            margin: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+ 
+        .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: none;
+        }
+ 
+        .subject-in-cell:hover .remove-btn {
+            display: block;
+        }
+ 
+        .add-subject {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+ 
+        .add-subject input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+ 
+        .add-subject button {
+            padding: 8px 15px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+ 
+        .download-btns {
+            display: flex;
+            gap: 10px;
+        }
+ 
+        .download-btns button {
+            padding: 8px 15px;
+            background-color: #607d8b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+ 
+        [url=home.php?mod=space&uid=945662]@media[/url] print {
+            body * {
+                visibility: hidden;
+            }
+            .timetable, .timetable th, .timetable td {
+                visibility: visible;
+            }
+            .timetable {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .timetable th,
+            .timetable td {
+                border: 1px solid #000; /* 保留表格边框 */
+                background-color: transparent;
+            }
+            .subject-in-cell {
+                background-color: transparent !important;
+                border: none !important;
+                color: #000 !important;
+                font-weight: bold; /* 黑白版本中科目文字加粗 */
+            }
+            .remove-btn {
+                display: none !important;
+            }
+        }
+ 
+        .bw-version {
+            filter: grayscale(100%) contrast(120%);
+        }
+ 
+        .bw-version .timetable th,
+        .bw-version .timetable td {
+            background-color: transparent;
+            border-color: #000; /* 黑白版本中边框颜色改为黑色 */
+        }
+ 
+        .bw-version .subject-in-cell {
+            background-color: transparent !important;
+            border: none !important;
+            color: #000 !important;
+            font-weight: bold; /* 黑白版本中科目文字加粗 */
+        }
+    </style>
+</head>
+ 
+<body>
+    <h1>拖拽定制课程表</h1>
+ 
+    <div class="controls">
+        <div class="add-subject">
+            <input type="text" id="newSubject" placeholder="输入新科目">
+            <button id="addSubjectBtn">添加科目</button>
+        </div>
+         
+        <div class="download-btns">
+            <button id="resetBtn">重置课程表</button>
+            <button id="downloadColorBtn">下载彩色课程表</button>
+            <button id="downloadBWBtn">下载黑白课程表</button>
+        </div>
+    </div>
+ 
+    <div class="subject-list" id="subjectList">
+        <div class="subject-item" draggable="true">语文</div>
+        <div class="subject-item" draggable="true">数学</div>
+        <div class="subject-item" draggable="true">英语</div>
+        <div class="subject-item" draggable="true">物理</div>
+        <div class="subject-item" draggable="true">化学</div>
+        <div class="subject-item" draggable="true">生物</div>
+        <div class="subject-item" draggable="true">历史</div>
+        <div class="subject-item" draggable="true">地理</div>
+        <div class="subject-item" draggable="true">政治</div>
+        <div class="subject-item" draggable="true">体育</div>
+        <div class="subject-item" draggable="true">音乐</div>
+        <div class="subject-item" draggable="true">美术</div>
+        <div class="subject-item" draggable="true">电脑</div>
+    </div>
+ 
+    <table class="timetable" id="timetable">
+        <thead>
+            <tr>
+                <th colspan="9" style="font-size:1.6rem; text-align: center;">课程表</th>
+            </tr>
+            <tr>
+                <th style="font-size:1.4rem; text-align: center;">时间</th>
+                <th style="font-size:1.4rem; text-align: center;">课时</th>
+                <th style="font-size:1.4rem; text-align: center;">星期一</th>
+                <th style="font-size:1.4rem; text-align: center;">星期二</th>
+                <th style="font-size:1.4rem; text-align: center;">星期三</th>
+                <th style="font-size:1.4rem; text-align: center;">星期四</th>
+                <th style="font-size:1.4rem; text-align: center;">星期五</th>
+                <th style="font-size:1.4rem; text-align: center;">星期六</th>
+                <th style="font-size:1.4rem; text-align: center;">星期日</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="section-time" rowspan="6">上　午</td>
+                <td class="time-cell" contenteditable="true">早自习<br>7:00-7:30</td>
+                <td class="timetable-cell" data-time="morning1" data-day="mon"></td>
+                <td class="timetable-cell" data-time="morning1" data-day="tue"></td>
+                <td class="timetable-cell" data-time="morning1" data-day="wed"></td>
+                <td class="timetable-cell" data-time="morning1" data-day="thu"></td>
+                <td class="timetable-cell" data-time="morning1" data-day="fri"></td>
+                <td class="timetable-cell" data-time="morning1" data-day="sat"></td>
+                <td class="timetable-cell" data-time="morning1" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第一节<br>7:40-8:20</td>
+                <td class="timetable-cell" data-time="morning2" data-day="mon"></td>
+                <td class="timetable-cell" data-time="morning2" data-day="tue"></td>
+                <td class="timetable-cell" data-time="morning2" data-day="wed"></td>
+                <td class="timetable-cell" data-time="morning2" data-day="thu"></td>
+                <td class="timetable-cell" data-time="morning2" data-day="fri"></td>
+                <td class="timetable-cell" data-time="morning2" data-day="sat"></td>
+                <td class="timetable-cell" data-time="morning2" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第二节<br>8:30-9:10</td>
+                <td class="timetable-cell" data-time="morning3" data-day="mon"></td>
+                <td class="timetable-cell" data-time="morning3" data-day="tue"></td>
+                <td class="timetable-cell" data-time="morning3" data-day="wed"></td>
+                <td class="timetable-cell" data-time="morning3" data-day="thu"></td>
+                <td class="timetable-cell" data-time="morning3" data-day="fri"></td>
+                <td class="timetable-cell" data-time="morning3" data-day="sat"></td>
+                <td class="timetable-cell" data-time="morning3" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第三节<br>9:20-10:00</td>
+                <td class="timetable-cell" data-time="morning4" data-day="mon"></td>
+                <td class="timetable-cell" data-time="morning4" data-day="tue"></td>
+                <td class="timetable-cell" data-time="morning4" data-day="wed"></td>
+                <td class="timetable-cell" data-time="morning4" data-day="thu"></td>
+                <td class="timetable-cell" data-time="morning4" data-day="fri"></td>
+                <td class="timetable-cell" data-time="morning4" data-day="sat"></td>
+                <td class="timetable-cell" data-time="morning4" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第四节<br>10:10-10:50</td>
+                <td class="timetable-cell" data-time="morning5" data-day="mon"></td>
+                <td class="timetable-cell" data-time="morning5" data-day="tue"></td>
+                <td class="timetable-cell" data-time="morning5" data-day="wed"></td>
+                <td class="timetable-cell" data-time="morning5" data-day="thu"></td>
+                <td class="timetable-cell" data-time="morning5" data-day="fri"></td>
+                <td class="timetable-cell" data-time="morning5" data-day="sat"></td>
+                <td class="timetable-cell" data-time="morning5" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第五节<br>11:00-11:40</td>
+                <td class="timetable-cell" data-time="morning6" data-day="mon"></td>
+                <td class="timetable-cell" data-time="morning6" data-day="tue"></td>
+                <td class="timetable-cell" data-time="morning6" data-day="wed"></td>
+                <td class="timetable-cell" data-time="morning6" data-day="thu"></td>
+                <td class="timetable-cell" data-time="morning6" data-day="fri"></td>
+                <td class="timetable-cell" data-time="morning6" data-day="sat"></td>
+                <td class="timetable-cell" data-time="morning6" data-day="sun"></td>
+            </tr>
+ 
+            <tr>
+                <td class="section-time" rowspan="4">下　午</td>
+                <td class="time-cell" contenteditable="true">第一节<br>14:00-14:40</td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="mon"></td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="tue"></td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="wed"></td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="thu"></td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="fri"></td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="sat"></td>
+                <td class="timetable-cell" data-time="afternoon1" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第二节<br>14:50-15:30</td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="mon"></td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="tue"></td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="wed"></td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="thu"></td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="fri"></td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="sat"></td>
+                <td class="timetable-cell" data-time="afternoon2" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第三节<br>15:40-16:20</td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="mon"></td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="tue"></td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="wed"></td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="thu"></td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="fri"></td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="sat"></td>
+                <td class="timetable-cell" data-time="afternoon3" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">第四节<br>16:30-17:10</td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="mon"></td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="tue"></td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="wed"></td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="thu"></td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="fri"></td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="sat"></td>
+                <td class="timetable-cell" data-time="afternoon4" data-day="sun"></td>
+            </tr>
+ 
+            <tr>
+                <td class="section-time" rowspan="2">晚　上</td>
+                <td class="time-cell" contenteditable="true">晚自习1<br>19:00-19:50</td>
+                <td class="timetable-cell" data-time="evening1" data-day="mon"></td>
+                <td class="timetable-cell" data-time="evening1" data-day="tue"></td>
+                <td class="timetable-cell" data-time="evening1" data-day="wed"></td>
+                <td class="timetable-cell" data-time="evening1" data-day="thu"></td>
+                <td class="timetable-cell" data-time="evening1" data-day="fri"></td>
+                <td class="timetable-cell" data-time="evening1" data-day="sat"></td>
+                <td class="timetable-cell" data-time="evening1" data-day="sun"></td>
+            </tr>
+            <tr>
+                <td class="time-cell" contenteditable="true">晚自习2<br>20:00-20:50</td>
+                <td class="timetable-cell" data-time="evening2" data-day="mon"></td>
+                <td class="timetable-cell" data-time="evening2" data-day="tue"></td>
+                <td class="timetable-cell" data-time="evening2" data-day="wed"></td>
+                <td class="timetable-cell" data-time="evening2" data-day="thu"></td>
+                <td class="timetable-cell" data-time="evening2" data-day="fri"></td>
+                <td class="timetable-cell" data-time="evening2" data-day="sat"></td>
+                <td class="timetable-cell" data-time="evening2" data-day="sun"></td>
+            </tr>
+        </tbody>
+    </table>
+ 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const subjectList = document.getElementById('subjectList');
+            const timetable = document.getElementById('timetable');
+            const addSubjectBtn = document.getElementById('addSubjectBtn');
+            const newSubjectInput = document.getElementById('newSubject');
+            const resetBtn = document.getElementById('resetBtn');
+            const downloadColorBtn = document.getElementById('downloadColorBtn');
+            const downloadBWBtn = document.getElementById('downloadBWBtn');
+ 
+            loadTimetable();
+ 
+            // 为科目列表中的每个科目添加拖拽事件
+            document.querySelectorAll('.subject-item').forEach(item => {
+                setupDragEvents(item);
+            });
+ 
+            // 为课程表中的每个单元格添加拖拽事件
+            document.querySelectorAll('.timetable-cell').forEach(cell => {
+                setupCellEvents(cell);
+            });
+ 
+            // 添加新科目
+            addSubjectBtn.addEventListener('click', function () {
+                const subjectName = newSubjectInput.value.trim();
+                if (subjectName) {
+                    const newSubject = document.createElement('div');
+                    newSubject.className = 'subject-item';
+                    newSubject.textContent = subjectName;
+                    newSubject.setAttribute('draggable', 'true');
+                    setupDragEvents(newSubject);
+                    subjectList.appendChild(newSubject);
+                    newSubjectInput.value = '';
+                }
+            });
+ 
+            // 回车键添加科目
+            newSubjectInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    addSubjectBtn.click();
+                }
+            });
+ 
+            // 重置课程表
+            resetBtn.addEventListener('click', function () {
+                if (confirm('确定要重置整个课程表吗？所有课程安排将被清除。')) {
+                    document.querySelectorAll('.timetable-cell').forEach(cell => {
+                        cell.innerHTML = '';
+                    });
+                    localStorage.removeItem('timetableData');
+                    localStorage.removeItem('timeData');
+                }
+            });
+ 
+            // 保存时间修改
+            document.querySelectorAll('.time-cell').forEach(cell => {
+                cell.addEventListener('blur', saveTimeData);
+            });
+ 
+            // 彩色版本下载
+            downloadColorBtn.addEventListener('click', function () {
+                downloadTimetable(false);
+            });
+ 
+            // 黑白版本下载
+            downloadBWBtn.addEventListener('click', function () {
+                downloadTimetable(true);
+            });
+ 
+            // 设置拖拽事件
+            function setupDragEvents(item) {
+                item.addEventListener('dragstart', function (e) {
+                    e.dataTransfer.setData('text/plain', this.textContent);
+                    e.dataTransfer.effectAllowed = 'copy';
+                    this.style.opacity = '0.5';
+                });
+ 
+                item.addEventListener('dragend', function () {
+                    this.style.opacity = '1';
+                });
+            }
+ 
+            // 设置单元格事件
+            function setupCellEvents(cell) {
+                cell.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                    this.classList.add('dragover');
+                });
+ 
+                cell.addEventListener('dragleave', function () {
+                    this.classList.remove('dragover');
+                });
+ 
+                cell.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+ 
+                    const subjectName = e.dataTransfer.getData('text/plain');
+                    if (subjectName) {
+                        addSubjectToCell(this, subjectName);
+                        saveTimetable();
+                    }
+                });
+            }
+ 
+            // 添加科目到单元格
+            function addSubjectToCell(cell, subjectName) {
+                // 检查是否已存在相同科目
+                const existingSubjects = cell.querySelectorAll('.subject-in-cell');
+                for (let i = 0; i < existingSubjects.length; i++) {
+                    if (existingSubjects[i].textContent.replace('×', '').trim() === subjectName) {
+                        return; // 如果已存在相同科目，则不添加
+                    }
+                }
+ 
+                const subjectDiv = document.createElement('div');
+                subjectDiv.className = 'subject-in-cell';
+                subjectDiv.textContent = subjectName;
+ 
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.textContent = '×';
+                removeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    cell.removeChild(subjectDiv);
+                    saveTimetable();
+                });
+ 
+                subjectDiv.appendChild(removeBtn);
+                subjectDiv.style.backgroundColor = getRandomColor();
+                cell.appendChild(subjectDiv);
+            }
+ 
+            // 保存课程表数据到本地存储
+            function saveTimetable() {
+                const timetableData = {};
+ 
+                document.querySelectorAll('.timetable-cell').forEach(cell => {
+                    const time = cell.getAttribute('data-time');
+                    const day = cell.getAttribute('data-day');
+                    const subjects = [];
+ 
+                    cell.querySelectorAll('.subject-in-cell').forEach(subjectDiv => {
+                        subjects.push(subjectDiv.textContent.replace('×', '').trim());
+                    });
+ 
+                    if (!timetableData[day]) {
+                        timetableData[day] = {};
+                    }
+ 
+                    timetableData[day][time] = subjects;
+                });
+ 
+                localStorage.setItem('timetableData', JSON.stringify(timetableData));
+            }
+ 
+            // 从本地存储加载课程表数据
+            function loadTimetable() {
+                const savedData = localStorage.getItem('timetableData');
+                const savedTimeData = localStorage.getItem('timeData');
+ 
+                if (savedData) {
+                    const timetableData = JSON.parse(savedData);
+ 
+                    for (const day in timetableData) {
+                        for (const time in timetableData[day]) {
+                            const cell = document.querySelector(`.timetable-cell[data-day="${day}"][data-time="${time}"]`);
+                            if (cell) {
+                                timetableData[day][time].forEach(subject => {
+                                    addSubjectToCell(cell, subject);
+                                });
+                            }
+                        }
+                    }
+                }
+ 
+                if (savedTimeData) {
+                    const timeData = JSON.parse(savedTimeData);
+                    const timeCells = document.querySelectorAll('.time-cell');
+ 
+                    timeData.forEach((timeText, index) => {
+                        if (timeCells[index]) {
+                            timeCells[index].innerHTML = timeText;
+                        }
+                    });
+                }
+            }
+ 
+            // 保存时间数据
+            function saveTimeData() {
+                const timeCells = document.querySelectorAll('.time-cell');
+                const timeData = Array.from(timeCells).map(cell => cell.innerHTML);
+                localStorage.setItem('timeData', JSON.stringify(timeData));
+            }
+ 
+            // 点击单元格时显示删除按钮
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('timetable-cell')) {
+                    e.target.querySelectorAll('.remove-btn').forEach(btn => {
+                        btn.style.display = 'block';
+                        setTimeout(() => {
+                            btn.style.display = 'none';
+                        }, 2000);
+                    });
+                }
+            });
+ 
+            /// 实现下载课程表函数
+            function downloadTimetable(isBW) {
+                const timetable = document.getElementById('timetable');
+                if (isBW) {
+                    timetable.classList.add('bw-version');
+                    // 动态移除科目块背景色和边框
+                    const subjectInCells = timetable.querySelectorAll('.subject-in-cell');
+                    subjectInCells.forEach(cell => {
+                        cell.style.backgroundColor = 'transparent';
+                        cell.style.border = 'none';
+                    });
+                    // 移除表格单元格背景色，但保留边框
+                    const tableCells = timetable.querySelectorAll('th, td');
+                    tableCells.forEach(cell => {
+                        cell.style.backgroundColor = 'transparent';
+                    });
+                }
+ 
+                // 使用 html2canvas 库将表格转换为图片
+                html2canvas(timetable, { useCORS: true }).then(canvas => {
+                    if (isBW) {
+                        // 下载完成后移除 bw-version 类
+                        timetable.classList.remove('bw-version');
+                        // 恢复科目块背景色和边框
+                        const subjectInCells = timetable.querySelectorAll('.subject-in-cell');
+                        subjectInCells.forEach(cell => {
+                            cell.style.backgroundColor = '';
+                            cell.style.border = '';
+                        });
+                        // 恢复表格单元格背景色
+                        const tableCells = timetable.querySelectorAll('th, td');
+                        tableCells.forEach(cell => {
+                            cell.style.backgroundColor = '';
+                        });
+                    }
+ 
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.download = isBW ? '黑白课程表.png' : '彩色课程表.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            }
+ 
+            // 生成随机颜色
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+        });
+    </script>
+    <script src="html2canvas.min.js"></script>
+</body>
+ 
+</html>
