@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WPS文件报送管理系统</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #e3f2fd 0%, #c8e6c9 100%);
+    color: #2c3e50;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+    color: white;
+    padding: 25px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(30deg);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-icon {
+    font-size: 2.8rem;
+}
+
+.title h1 {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+}
+
+.title p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.wps-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.main-content {
+    display: flex;
+    min-height: 700px;
+}
+
+.calendar-section {
+    width: 50%;
+    background: #f8f9fa;
+    padding: 25px;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.calendar-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1a73e8;
+}
+
+.calendar-nav button {
+    background: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.calendar-nav button:hover {
+    background: #0d47a1;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 71, 161, 0.2);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    flex: 1;
+}
+
+.calendar-day-header {
+    text-align: center;
+    padding: 15px 0;
+    background: #e3f2fd;
+    font-weight: 600;
+    color: #1a73e8;
+    border-radius: 8px;
+}
+
+.calendar-day {
+    height: 120px;
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    overflow-y: auto;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-day:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: #1a73e8;
+}
+
+.day-number {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.today .day-number {
+    background: #1a73e8;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 50%;
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    text-align: center;
+    line-height: 24px;
+}
+
+.event {
+    background: #1a73e8;
+    color: white;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event.urgent {
+    background: #e53935;
+}
+
+.event.warning {
+    background: #ff9800;
+}
+
+.event.normal {
+    background: #4caf50;
+}
+
+.calendar-events {
+    margin-top: 15px;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    flex: 1;
+}
+
+.calendar-events h3 {
+    color: #1a73e8;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.event-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.event-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.event-item:last-child {
+    border-bottom: none;
+}
+
+.event-info {
+    flex: 1;
+}
+
+.event-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.event-details {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    gap: 15px;
+}
+
+.event-priority {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.priority-urgent {
+    background: #e53935;
+}
+
+.priority-warning {
+    background: #ff9800;
+}
+
+.priority-normal {
+    background: #4caf50;
+}
+
+.task-section {
+    width: 50%;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-list-container {
+    margin-bottom: 25px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.task-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.task-list-header h2 {
+    color: #1a73e8;
+}
+
+.btn-download {
+    background: #ff9800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-download:hover {
+    background: #f57c00;
+}
+
+.task-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+.filter-btn.active {
+    background: #1a73e8;
+    color: white;
+    border-color: #1a73e8;
+}
+
+.task-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+}
+
+.task-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover {
+    background: #e3f2fd;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.task-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.task-priority {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.priority-high {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.priority-medium {
+    background: #fff8e1;
+    color: #f57f17;
+}
+
+.priority-low {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.task-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.task-detail {
+    display: flex;
+    gap: 8px;
+}
+
+.task-detail i {
+    color: #1a73e8;
+    min-width: 20px;
+}
+
+.task-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+}
+
+.task-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    background: #fffde7;
+    color: #f9a825;
+}
+
+.status-completed {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+.task-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.edit-btn {
+    background: #e3f2fd;
+    color: #1a73e8;
+    border: 1px solid #bbdefb;
+}
+
+.edit-btn:hover {
+    background: #bbdefb;
+}
+
+.delete-btn {
+    background: #ffebee;
+    color: #e53935;
+    border: 1px solid #ffcdd2;
+}
+
+.delete-btn:hover {
+    background: #ffcdd2;
+}
+
+.task-form {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.task-form h2 {
+    color: #1a73e8;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 25px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: #0d47a1;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(13, 71, 161, 0.3);
+}
+
+.btn-add {
+    background: #4caf50;
+    width: 100%;
+    justify-content: center;
+    padding: 16px;
+}
+
+.btn-add:hover {
+    background: #388e3c;
+}
+
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 25px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: #1a73e8;
+    margin-bottom: 15px;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a73e8;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #7f8c8d;
+    font-size: 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .calendar-section, .task-section {
+        width: 100%;
+    }
+
+    .calendar-section {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 新增编辑模态框样式 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    transform: scale(0.8);
+    transition: transform 0.3s;
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: #1a73e8;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s;
+}
+
+.close-modal:hover {
+    color: #2c3e50;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.btn-cancel {
+    background: #e0e0e0;
+    color: #2c3e50;
+}
+
+.btn-cancel:hover {
+    background: #d0d0d0;
+    transform: translateY(0);
+    box-shadow: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="logo">
+<div class="logo-icon">📋</div>
+<div class="title">
+<h1>文件报送管理系统</h1>
+<p>高效管理报送任务，确保按时完成</p>
+</div>
+</div>
+<div class="wps-badge">
+<i class="fas fa-check-circle"></i>
+<span>linking</span>
+</div>
+</header>
+<div class="main-content">
+    <div class="calendar-section">
+        <div class="calendar-header">
+            <div class="calendar-title" id="current-month">2025年6月</div>
+            <div class="calendar-nav">
+                <button id="prev-month"><i class="fas fa-chevron-left"></i> 上个月</button>
+                <button id="today-btn">今天</button>
+                <button id="next-month">下个月 <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+
+        <div class="calendar-grid" id="calendar">
+            <!-- 日历将由JavaScript生成 -->
+        </div>
+
+        <div class="calendar-events">
+            <h3>今日报送任务</h3>
+            <div class="event-list" id="today-events">
+                <!-- 今日任务将由JavaScript生成 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="task-section">
+        <div class="task-list-container">
+            <div class="task-list-header">
+                <h2><i class="fas fa-tasks"></i> 代办列表</h2>
+                <button class="btn btn-download" id="download-btn">
+                    <i class="fas fa-download"></i> 导出Excel
+                </button>
+            </div>
+
+            <div class="task-filters">
+                <button class="filter-btn active" data-filter="all">全部任务</button>
+                <button class="filter-btn" data-filter="pending">待提交任务</button>
+                <button class="filter-btn" data-filter="completed">已完成任务</button>
+            </div>
+
+            <div class="task-list" id="task-list">
+                <!-- 任务列表将由JavaScript生成 -->
+            </div>
+        </div>
+
+        <div class="task-form">
+            <h2><i class="fas fa-plus-circle"></i> 添加报送任务</h2>
+            <form id="task-form">
+                <div class="form-group">
+                    <label for="task-name"><i class="fas fa-file-alt"></i> 文件名称</label>
+                    <input type="text" id="task-name" class="form-control" placeholder="例如：月度财务报告" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sender"><i class="fas fa-paper-plane"></i> 发文单位</label>
+                        <input type="text" id="sender" class="form-control" placeholder="发文部门" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sender-date"><i class="fas fa-calendar-day"></i> 发文日期</label>
+                        <input type="date" id="sender-date" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="receiver"><i class="fas fa-inbox"></i> 收文单位</label>
+                        <input type="text" id="receiver" class="form-control" placeholder="收文部门" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="due-date"><i class="fas fa-calendar-day"></i> 截止日期</label>
+                        <input type="date" id="due-date" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="priority"><i class="fas fa-flag"></i> 优先级</label>
+                        <select id="priority" class="form-control">
+                            <option value="high">高（紧急）</option>
+                            <option value="medium" selected>中（重要）</option>
+                            <option value="low">低（普通）</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status"><i class="fas fa-tasks"></i> 状态</label>
+                        <select id="status" class="form-control">
+                            <option value="pending">待提交</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-add">
+                    <i class="fas fa-plus"></i> 添加报送任务
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="stats-section">
+    <div class="stat-card" data-filter="all">
+        <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+        <div class="stat-value" id="total-tasks">0</div>
+        <div class="stat-label">总任务数</div>
+    </div>
+
+    <div class="stat-card" data-filter="pending">
+        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-value" id="pending-tasks">0</div>
+        <div class="stat-label">待提交任务</div>
+    </div>
+
+    <div class="stat-card" data-filter="completed">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-value" id="completed-tasks">0</div>
+        <div class="stat-label">已完成任务</div>
+    </div>
+</div>
+
+<footer>
+    <p>© 青月 文件报送管理系统 | 专为办公室职员设计的报送任务解决方案</p>
+    <p style="margin-top: 10px; font-size: 0.9rem;">技术支持: ma5635@163.com | 版本: 2.0.2</p>
+</footer>
+</div>
+
+<!-- 编辑任务模态框 -->
+<div class="modal" id="edit-modal">
+<div class="modal-content">
+<div class="modal-header">
+<h3><i class="fas fa-edit"></i> 编辑报送任务</h3>
+<div class="close-modal" id="close-modal">×</div>
+</div>
+<div class="modal-body">
+<form id="edit-form">
+<input type="hidden" id="edit-id">
+            <div class="form-group">
+                <label for="edit-task-name"><i class="fas fa-file-alt"></i> 文件名称</label>
+                <input type="text" id="edit-task-name" class="form-control" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-sender"><i class="fas fa-paper-plane"></i> 发文单位</label>
+                    <input type="text" id="edit-sender" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-sender-date"><i class="fas fa-calendar-day"></i> 发文日期</label>
+                    <input type="date" id="edit-sender-date" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-receiver"><i class="fas fa-inbox"></i> 收文单位</label>
+                    <input type="text" id="edit-receiver" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-due-date"><i class="fas fa-calendar-day"></i> 截止日期</label>
+                    <input type="date" id="edit-due-date" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-priority"><i class="fas fa-flag"></i> 优先级</label>
+                    <select id="edit-priority" class="form-control">
+                        <option value="high">高（紧急）</option>
+                        <option value="medium">中（重要）</option>
+                        <option value="low">低（普通）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-status"><i class="fas fa-tasks"></i> 状态</label>
+                    <select id="edit-status" class="form-control">
+                        <option value="pending">待提交</option>
+                        <option value="completed">已完成</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-cancel" id="cancel-edit">取消</button>
+        <button class="btn" id="save-edit">保存修改</button>
+    </div>
+</div>
+</div>
+
+<script>
+// 从localStorage加载任务数据
+let tasks = JSON.parse(localStorage.getItem('baosong_tasks')) || [
+{
+id: 1,
+name: "季度财务报告",
+sender: "财务部",
+senderDate: "2025-06-01",
+receiver: "总经理办公室",
+dueDate: "2025-06-15",
+priority: "high",
+status: "pending"
+},
+{
+id: 2,
+name: "员工绩效考核汇总",
+sender: "人力资源部",
+senderDate: "2025-06-05",
+receiver: "各部门主管",
+dueDate: "2025-06-20",
+priority: "medium",
+status: "pending"
+},
+{
+id: 3,
+name: "项目进度月报",
+sender: "项目部",
+senderDate: "2025-06-03",
+receiver: "项目管理委员会",
+dueDate: "2025-06-25",
+priority: "high",
+status: "pending"
+},
+{
+id: 4,
+name: "采购审批文件",
+sender: "行政部",
+senderDate: "2025-05-28",
+receiver: "财务部",
+dueDate: "2025-06-10",
+priority: "low",
+status: "completed"
+}
+];
+// 保存任务数据到localStorage
+function saveTasks() {
+    localStorage.setItem('baosong_tasks', JSON.stringify(tasks));
+}
+
+// 当前筛选状态
+let currentFilter = 'all';
+
+// 初始化日历和任务
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarEl = document.getElementById('calendar');
+    const currentMonthEl = document.getElementById('current-month');
+    const prevMonthBtn = document.getElementById('prev-month');
+    const nextMonthBtn = document.getElementById('next-month');
+    const todayBtn = document.getElementById('today-btn');
+    const taskForm = document.getElementById('task-form');
+    const taskListEl = document.getElementById('task-list');
+    const downloadBtn = document.getElementById('download-btn');
+    const todayEventsEl = document.getElementById('today-events');
+    const editModal = document.getElementById('edit-modal');
+    const closeModal = document.getElementById('close-modal');
+    const cancelEdit = document.getElementById('cancel-edit');
+    const saveEdit = document.getElementById('save-edit');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const statCards = document.querySelectorAll('.stat-card');
+
+    let currentDate = new Date();
+
+    // 生成日历
+    function generateCalendar() {
+        calendarEl.innerHTML = '';
+
+        // 添加星期标题
+        const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        days.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'calendar-day-header';
+            dayHeader.textContent = day;
+            calendarEl.appendChild(dayHeader);
+        });
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        currentMonthEl.textContent = `${year}年${month + 1}月`;
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        // 获取月份第一天是星期几
+        const firstDayOfWeek = firstDay.getDay();
+
+        // 获取月份的天数
+        const daysInMonth = lastDay.getDate();
+
+        // 在月份第一天前添加空白单元格
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            const emptyDay = document.createElement('div');
+            emptyDay.className = 'calendar-day empty';
+            calendarEl.appendChild(emptyDay);
+        }
+
+        // 为月份的每一天添加单元格
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const day = document.createElement('div');
+            day.className = 'calendar-day';
+
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const dateObj = new Date(year, month, i);
+
+            // 标记今天
+            if (dateObj.getTime() === today.getTime()) {
+                day.classList.add('today');
+            }
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = i;
+            day.appendChild(dayNumber);
+
+            // 添加当天的任务
+            const dayTasks = tasks.filter(task => task.dueDate === dateStr);
+            dayTasks.forEach(task => {
+                const event = document.createElement('div');
+                event.className = `event ${task.priority === 'high' ? 'urgent' : task.priority === 'medium' ? 'warning' : 'normal'}`;
+                event.textContent = task.name;
+                event.setAttribute('data-id', task.id);
+                day.appendChild(event);
+            });
+
+            calendarEl.appendChild(day);
+        }
+
+        updateTodayEvents();
+        updateTaskList();
+        updateStats();
+    }
+
+    // 更新今日任务
+    function updateTodayEvents() {
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        const todayTasks = tasks.filter(task => task.dueDate === todayStr);
+
+        todayEventsEl.innerHTML = '';
+
+        if (todayTasks.length === 0) {
+            todayEventsEl.innerHTML = '<div class="event-item" style="justify-content: center; color: #666; padding: 20px;">今日无报送任务</div>';
+            return;
+        }
+
+        todayTasks.forEach(task => {
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+
+            const priorityClass = task.priority === 'high' ? 'priority-high' : task.priority === 'medium' ? 'priority-medium' : 'priority-low';
+            const priorityText = task.priority === 'high' ? '紧急' : task.priority === 'medium' ? '重要' : '普通';
+
+            eventItem.innerHTML = `
+                <div class="event-info">
+                    <div class="event-name">${task.name}</div>
+                    <div class="event-details">
+                        <span><i class="fas fa-building"></i> ${task.sender}</span>
+                        <span><i class="fas fa-flag"></i> ${priorityText}优先级</span>
+                    </div>
+                </div>
+                <div class="task-priority ${priorityClass}">${priorityText}</div>
+            `;
+
+            todayEventsEl.appendChild(eventItem);
+        });
+    }
+
+    // 更新任务列表
+    function updateTaskList() {
+        taskListEl.innerHTML = '';
+
+        // 根据当前筛选条件过滤任务
+        let filteredTasks = tasks;
+        if (currentFilter === 'pending') {
+            filteredTasks = tasks.filter(task => task.status === 'pending');
+        } else if (currentFilter === 'completed') {
+            filteredTasks = tasks.filter(task => task.status === 'completed');
+        }
+
+        if (filteredTasks.length === 0) {
+            taskListEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">没有找到匹配的任务</div>';
+            return;
+        }
+
+        filteredTasks.forEach(task => {
+            const priorityClass = task.priority === 'high' ? 'priority-high' : task.priority === 'medium' ? 'priority-medium' : 'priority-low';
+            const priorityText = task.priority === 'high' ? '高优先级' : task.priority === 'medium' ? '中优先级' : '低优先级';
+            const statusClass = task.status === 'pending' ? 'status-pending' : 'status-completed';
+            const statusText = task.status === 'pending' ? '待提交' : '已完成';
+
+            const taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            taskItem.innerHTML = `
+                <div class="task-header">
+                    <div class="task-name">${task.name}</div>
+                    <div class="task-priority ${priorityClass}">${priorityText}</div>
+                </div>
+                <div class="task-details">
+                    <div class="task-detail">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>发文：${task.sender}</span>
+                    </div>
+                    <div class="task-detail">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>发文日期：${task.senderDate}</span>
+                    </div>
+                    <div class="task-detail">
+                        <i class="fas fa-inbox"></i>
+                        <span>收文：${task.receiver}</span>
+                    </div>
+                    <div class="task-detail">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>截止：${task.dueDate}</span>
+                    </div>
+                </div>
+                <div class="task-footer">
+                    <div class="task-status ${statusClass}">${statusText}</div>
+                    <div class="task-actions">
+                        <div class="action-btn edit-btn" data-id="${task.id}">
+                            <i class="fas fa-edit"></i> 编辑
+                        </div>
+                        <div class="action-btn delete-btn" data-id="${task.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            taskListEl.appendChild(taskItem);
+        });
+
+        // 添加编辑和删除按钮事件监听器
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const taskId = parseInt(this.getAttribute('data-id'));
+                editTask(taskId);
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const taskId = parseInt(this.getAttribute('data-id'));
+                deleteTask(taskId);
+            });
+        });
+    }
+
+    // 编辑任务
+    function editTask(taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        // 填充表单
+        document.getElementById('edit-id').value = task.id;
+        document.getElementById('edit-task-name').value = task.name;
+        document.getElementById('edit-sender').value = task.sender;
+        document.getElementById('edit-sender-date').value = task.senderDate;
+        document.getElementById('edit-receiver').value = task.receiver;
+        document.getElementById('edit-due-date').value = task.dueDate;
+        document.getElementById('edit-priority').value = task.priority;
+        document.getElementById('edit-status').value = task.status;
+
+        // 显示模态框
+        editModal.classList.add('active');
+    }
+
+    // 保存编辑
+    function saveEditedTask() {
+        const taskId = parseInt(document.getElementById('edit-id').value);
+        const taskIndex = tasks.findIndex(t => t.id === taskId);
+
+        if (taskIndex === -1) return;
+
+        // 更新任务数据
+        tasks[taskIndex] = {
+            id: taskId,
+            name: document.getElementById('edit-task-name').value,
+            sender: document.getElementById('edit-sender').value,
+            senderDate: document.getElementById('edit-sender-date').value,
+            receiver: document.getElementById('edit-receiver').value,
+            dueDate: document.getElementById('edit-due-date').value,
+            priority: document.getElementById('edit-priority').value,
+            status: document.getElementById('edit-status').value
+        };
+
+        // 保存到localStorage
+        saveTasks();
+
+        // 关闭模态框
+        editModal.classList.remove('active');
+
+        // 更新UI
+        updateTaskList();
+        generateCalendar();
+        updateStats();
+
+        alert('报送任务已成功更新！');
+    }
+
+    // 删除任务
+    function deleteTask(taskId) {
+        if (confirm('确定要删除此任务吗？')) {
+            tasks = tasks.filter(task => task.id !== taskId);
+
+            // 保存到localStorage
+            saveTasks();
+
+            // 更新UI
+            updateTaskList();
+            generateCalendar();
+            updateStats();
+        }
+    }
+
+    // 更新统计数据
+    function updateStats() {
+        const totalTasks = tasks.length;
+        const pendingTasks = tasks.filter(task => task.status === 'pending').length;
+        const completedTasks = totalTasks - pendingTasks;
+
+        document.getElementById('total-tasks').textContent = totalTasks;
+        document.getElementById('pending-tasks').textContent = pendingTasks;
+        document.getElementById('completed-tasks').textContent = completedTasks;
+    }
+
+    // 初始化日期选择器为今天
+    const today = new Date();
+    const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    document.getElementById('due-date').value = formattedDate;
+    document.getElementById('sender-date').value = formattedDate;
+
+    // 生成初始日历
+    generateCalendar();
+
+    // 事件监听器
+    prevMonthBtn.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        generateCalendar();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        generateCalendar();
+    });
+
+    todayBtn.addEventListener('click', () => {
+        currentDate = new Date();
+        generateCalendar();
+    });
+
+    taskForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const taskName = document.getElementById('task-name').value;
+        const sender = document.getElementById('sender').value;
+        const senderDate = document.getElementById('sender-date').value;
+        const receiver = document.getElementById('receiver').value;
+        const dueDate = document.getElementById('due-date').value;
+        const priority = document.getElementById('priority').value;
+        const status = document.getElementById('status').value;
+
+        // 创建新任务
+        const newTask = {
+            id: tasks.length > 0 ? Math.max(...tasks.map(task => task.id)) + 1 : 1,
+            name: taskName,
+            sender: sender,
+            senderDate: senderDate,
+            receiver: receiver,
+            dueDate: dueDate,
+            priority: priority,
+            status: status
+        };
+
+        tasks.push(newTask);
+
+        // 保存到localStorage
+        saveTasks();
+
+        // 重置表单
+        taskForm.reset();
+        document.getElementById('due-date').value = formattedDate;
+        document.getElementById('sender-date').value = formattedDate;
+        document.getElementById('priority').value = 'medium';
+        document.getElementById('status').value = 'pending';
+
+        // 更新UI
+        generateCalendar();
+        updateTaskList();
+        updateStats();
+
+        alert('报送任务已成功添加！');
+    });
+
+    // 下载Excel
+    downloadBtn.addEventListener('click', function() {
+        // 创建Excel工作簿
+        const wb = XLSX.utils.book_new();
+
+        // 准备数据
+        const excelData = [
+            ['任务ID', '文件名称', '发文单位', '发文日期', '收文单位', '截止日期', '优先级', '状态']
+        ];
+
+        tasks.forEach(task => {
+            const priorityText = task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低';
+            const statusText = task.status === 'pending' ? '待提交' : '已完成';
+
+            excelData.push([
+                task.id,
+                task.name,
+                task.sender,
+                task.senderDate,
+                task.receiver,
+                task.dueDate,
+                priorityText,
+                statusText
+            ]);
+        });
+
+        // 创建工作表
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+        // 将工作表添加到工作簿
+        XLSX.utils.book_append_sheet(wb, ws, '报送任务');
+
+        // 生成Excel文件
+        const wbout = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
+
+        function s2ab(s) {
+            const buf = new ArrayBuffer(s.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+        }
+
+        // 保存文件
+        saveAs(new Blob([s2ab(wbout)], {type:"application/octet-stream"}), 
+            `报送任务_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+        alert('报送任务已成功导出为Excel文件！');
+    });
+
+    // 编辑模态框事件
+    closeModal.addEventListener('click', () => {
+        editModal.classList.remove('active');
+    });
+
+    cancelEdit.addEventListener('click', () => {
+        editModal.classList.remove('active');
+    });
+
+    saveEdit.addEventListener('click', saveEditedTask);
+
+    // 筛选按钮事件
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            setFilter(filter);
+        });
+    });
+
+    // 统计卡片点击事件
+    statCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            setFilter(filter);
+        });
+    });
+
+    // 设置筛选条件
+    function setFilter(filter) {
+        currentFilter = filter;
+
+        // 更新按钮状态
+        filterBtns.forEach(btn => {
+            if (btn.getAttribute('data-filter') === filter) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // 更新任务列表
+        updateTaskList();
+    }
+});
+</script>
+</body>
+</html>
