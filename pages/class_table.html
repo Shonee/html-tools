@@ -1,0 +1,1260 @@
+<!DOCTYPE <strong><font color="#FF0000">html</font></strong>>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定期存取款记录管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+     
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        success: '#00B42A',
+                        neutral: {
+                            100: '#F2F3F5',
+                            200: '#E5E6EB',
+                            300: '#C9CDD4',
+                            400: '#86909C',
+                            500: '#4E5969',
+                            600: '#272E3B',
+                            700: '#1D2129',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+     
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .shadow-soft {
+                box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(22, 93, 255, 0.1);
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none;
+            }
+            .btn-primary {
+                @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg;
+            }
+            .btn-secondary {
+                @apply bg-white text-neutral-600 border border-neutral-200 px-4 py-2 rounded-lg hover:bg-neutral-100 transition-all duration-200;
+            }
+            .btn-danger {
+                @apply bg-danger text-white px-4 py-2 rounded-lg hover:bg-danger/90 transition-all duration-200;
+            }
+            .badge {
+                @apply px-2 py-1 rounded-full text-xs font-medium;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral-100 font-sans text-neutral-700 min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-3 md:mb-0">
+                <i class="fa fa-university text-primary text-2xl mr-3"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-neutral-700">定期存取款记录管理系统</h1>
+            </div>
+             
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button id="addDepositBtn" class="btn-primary flex items-center">
+                    <i class="fa fa-plus mr-2"></i>添加存款
+                </button>
+                <button id="exportDataBtn" class="btn-secondary flex items-center">
+                    <i class="fa fa-download mr-2"></i>导出数据
+                </button>
+                <label for="importData" class="btn-secondary flex items-center cursor-pointer">
+                    <i class="fa fa-upload mr-2"></i>导入数据
+                    <input type="file" id="importData" accept=".json" class="hidden">
+                </label>
+            </div>
+        </div>
+    </header>
+ 
+    <!-- 主内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        <!-- 总览面板 -->
+        <section class="mb-8">
+            <h2 class="text-lg font-semibold mb-4 text-neutral-700 flex items-center">
+                <i class="fa fa-dashboard text-primary mr-2"></i>账户总览
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 总存款金额 -->
+                <div class="bg-white rounded-xl p-5 shadow-soft card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-neutral-400 text-sm">总存款金额</p>
+                            <h3 id="totalAmount" class="text-2xl font-bold mt-1 text-neutral-700">&#165;0.00</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-money"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-xs text-neutral-400">
+                        <i class="fa fa-info-circle mr-1"></i> 所有有效存款的本金总和
+                    </div>
+                </div>
+                 
+                <!-- 总预计利息 -->
+                <div class="bg-white rounded-xl p-5 shadow-soft card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-neutral-400 text-sm">总预计利息</p>
+                            <h3 id="totalInterest" class="text-2xl font-bold mt-1 text-success">&#165;0.00</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
+                            <i class="fa fa-line-chart"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-between text-xs">
+                        <span class="text-neutral-400"><i class="fa fa-clock-o mr-1"></i> 待结算: <span id="pendingInterest">&#165;0.00</span></span>
+                        <span class="text-neutral-400"><i class="fa fa-check-circle mr-1"></i> 已结算: <span id="settledInterest">&#165;0.00</span></span>
+                    </div>
+                </div>
+                 
+                <!-- 即将到期存款 -->
+                <div class="bg-white rounded-xl p-5 shadow-soft card-hover">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-neutral-400 text-sm">即将到期存款</p>
+                            <h3 id="soonExpireCount" class="text-2xl font-bold mt-1 text-warning">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                            <i class="fa fa-bell"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-xs text-neutral-400">
+                        <i class="fa fa-calendar mr-1"></i> 未来7天内到期的存款数量
+                    </div>
+                </div>
+            </div>
+        </section>
+         
+        <!-- 图表分析 -->
+        <section class="mb-8">
+            <h2 class="text-lg font-semibold mb-4 text-neutral-700 flex items-center">
+                <i class="fa fa-pie-chart text-primary mr-2"></i>存款分析
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-4 shadow-soft">
+                    <h3 class="text-sm font-medium text-neutral-500 mb-3">各银行存款占比</h3>
+                    <div class="h-64">
+                        <canvas id="bankChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-soft">
+                    <h3 class="text-sm font-medium text-neutral-500 mb-3">存款周期分布</h3>
+                    <div class="h-64">
+                        <canvas id="periodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+         
+        <!-- 存款记录列表 -->
+        <section>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                <h2 class="text-lg font-semibold text-neutral-700 flex items-center mb-3 md:mb-0">
+                    <i class="fa fa-list-alt text-primary mr-2"></i>存款记录
+                </h2>
+                 
+                <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                    <div class="relative">
+                        <select id="sortSelect" class="appearance-none bg-white border border-neutral-200 rounded-lg pl-3 pr-8 py-2 input-focus text-sm w-full md:w-auto">
+                            <option value="id">按序号排序</option>
+                            <option value="bank">按银行排序</option>
+                            <option value="amount">按金额排序</option>
+                            <option value="maturityDate">按到期日排序</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                     
+                    <div class="relative">
+                        <select id="filterBank" class="appearance-none bg-white border border-neutral-200 rounded-lg pl-3 pr-8 py-2 input-focus text-sm w-full md:w-auto">
+                            <option value="all">所有银行</option>
+                            <option value="农业银行">农业银行</option>
+                            <option value="建设银行">建设银行</option>
+                            <option value="工商银行">工商银行</option>
+                            <option value="招商银行">招商银行</option>
+                            <option value="交通银行">交通银行</option>
+                            <option value="其他银行">其他银行</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                     
+                    <div class="relative">
+                        <select id="filterStatus" class="appearance-none bg-white border border-neutral-200 rounded-lg pl-3 pr-8 py-2 input-focus text-sm w-full md:w-auto">
+                            <option value="all">所有状态</option>
+                            <option value="active">正常存款</option>
+                            <option value="expired">已到期</option>
+                            <option value="closed">已销户</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
+                            <i class="fa fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             
+            <!-- 记录列表 -->
+            <div class="bg-white rounded-xl shadow-soft overflow-hidden">
+                <table class="min-w-full divide-y divide-neutral-200">
+                    <thead class="bg-neutral-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">序号</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">银行</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">金额</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">周期</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">年利率</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">存款日</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">到期日</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">状态</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="depositList" class="bg-white divide-y divide-neutral-200">
+                        <!-- 存款记录将通过JavaScript动态生成 -->
+                        <tr>
+                            <td colspan="9" class="px-6 py-12 text-center text-neutral-400">
+                                <i class="fa fa-file-text-o text-3xl mb-3 block"></i>
+                                暂无存款记录，点击"添加存款"按钮开始记录
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+ 
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-neutral-200 py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-neutral-500 text-sm">
+            <p>定期存取款记录管理系统 &#169; 2025</p>
+            <p class="mt-1">所有数据存储在本地，确保您的财务信息安全</p>
+        </div>
+    </footer>
+ 
+    <!-- 添加/编辑存款模态框 -->
+    <div id="depositModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-neutral-200">
+                <div class="flex justify-between items-center">
+                    <h3 id="modalTitle" class="text-xl font-bold text-neutral-700">添加存款记录</h3>
+                    <button id="closeModalBtn" class="text-neutral-400 hover:text-neutral-700">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+             
+            <form id="depositForm" class="p-6 space-y-5">
+                <input type="hidden" id="depositId">
+                 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- 银行选择 -->
+                    <div>
+                        <label for="bank" class="block text-sm font-medium text-neutral-700 mb-1">银行名称 <span class="text-danger">*</span></label>
+                        <div class="flex">
+                            <select id="bank" class="flex-1 bg-white border border-neutral-200 rounded-l-lg pl-3 py-2 input-focus">
+                                <option value="农业银行">农业银行</option>
+                                <option value="建设银行">建设银行</option>
+                                <option value="工商银行">工商银行</option>
+                                <option value="招商银行">招商银行</option>
+                                <option value="交通银行">交通银行</option>
+                                <option value="其他银行">其他银行</option>
+                            </select>
+                            <input type="text" id="otherBank" placeholder="请输入银行名称" class="hidden bg-white border-y border-neutral-200 rounded-r-lg pl-3 py-2 input-focus w-40">
+                        </div>
+                    </div>
+                     
+                    <!-- 金额 -->
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-neutral-700 mb-1">存款金额 (元) <span class="text-danger">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">&#165;</span>
+                            <input type="number" id="amount" min="0" step="0.01" class="bg-white border border-neutral-200 rounded-lg pl-8 py-2 input-focus w-full" placeholder="请输入金额">
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- 周期 -->
+                    <div>
+                        <label for="period" class="block text-sm font-medium text-neutral-700 mb-1">存款周期 <span class="text-danger">*</span></label>
+                        <select id="period" class="bg-white border border-neutral-200 rounded-lg pl-3 py-2 input-focus w-full">
+                            <option value="3">3个月</option>
+                            <option value="6">6个月</option>
+                            <option value="12">1年</option>
+                            <option value="24">2年</option>
+                            <option value="36">3年</option>
+                            <option value="60">5年</option>
+                        </select>
+                    </div>
+                     
+                    <!-- 年利率 -->
+                    <div>
+                        <label for="interestRate" class="block text-sm font-medium text-neutral-700 mb-1">年利率 (%) <span class="text-danger">*</span></label>
+                        <div class="relative">
+                            <input type="number" id="interestRate" min="0" step="0.01" class="bg-white border border-neutral-200 rounded-lg pl-3 py-2 input-focus w-full" placeholder="请输入年利率">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">%</span>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- 存款日 -->
+                    <div>
+                        <label for="depositDate" class="block text-sm font-medium text-neutral-700 mb-1">存款日期 <span class="text-danger">*</span></label>
+                        <input type="date" id="depositDate" class="bg-white border border-neutral-200 rounded-lg pl-3 py-2 input-focus w-full">
+                    </div>
+                     
+                    <!-- 到期日 -->
+                    <div>
+                        <label for="maturityDate" class="block text-sm font-medium text-neutral-700 mb-1">到期日期 <span class="text-danger">*</span></label>
+                        <input type="date" id="maturityDate" class="bg-white border border-neutral-200 rounded-lg pl-3 py-2 input-focus w-full">
+                    </div>
+                </div>
+                 
+                <!-- 备注 -->
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-neutral-700 mb-1">备注</label>
+                    <textarea id="notes" rows="3" class="bg-white border border-neutral-200 rounded-lg pl-3 py-2 input-focus w-full" placeholder="请输入备注信息（可选）"></textarea>
+                </div>
+                 
+                <!-- 利息信息（仅编辑时显示） -->
+                <div id="interestInfo" class="hidden bg-neutral-50 p-4 rounded-lg">
+                    <h4 class="text-sm font-medium text-neutral-700 mb-2">利息信息</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <span class="text-neutral-500">预计利息：</span>
+                            <span id="estimatedInterest" class="font-medium text-success">&#165;0.00</span>
+                        </div>
+                        <div id="settledInterestInfo" class="hidden">
+                            <span class="text-neutral-500">已结算利息：</span>
+                            <span id="actualInterest" class="font-medium text-success">&#165;0.00</span>
+                        </div>
+                    </div>
+                </div>
+                 
+                <div class="flex justify-end gap-3 pt-3 border-t border-neutral-200">
+                    <button type="button" id="cancelBtn" class="btn-secondary">取消</button>
+                    <button type="submit" class="btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+ 
+    <!-- 销户确认模态框 -->
+    <div id="closeAccountModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+            <div class="p-6 border-b border-neutral-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-neutral-700">确认销户</h3>
+                    <button id="closeCloseAccountModalBtn" class="text-neutral-400 hover:text-neutral-700">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+             
+            <div class="p-6">
+                <p class="text-neutral-600 mb-4">您确定要对这笔存款进行销户处理吗？</p>
+                 
+                <div class="bg-neutral-50 p-4 rounded-lg mb-5">
+                    <p class="text-sm text-neutral-500 mb-1">存款信息</p>
+                    <p id="closeAccountInfo" class="text-sm font-medium">序号: <span id="closeAccountId">1</span> | 银行: <span id="closeAccountBank">农业银行</span> | 金额: <span id="closeAccountAmount">&#165;10000.00</span></p>
+                    <p id="closeAccountInterest" class="text-sm text-success mt-2">预计利息: &#165;0.00</p>
+                </div>
+                 
+                <div class="flex justify-end gap-3">
+                    <button id="cancelCloseAccountBtn" class="btn-secondary">取消</button>
+                    <button id="confirmCloseAccountBtn" class="btn-danger">确认销户</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- 到期提醒通知 -->
+    <div id="notification" class="fixed bottom-5 right-5 bg-white rounded-lg shadow-lg p-4 max-w-sm transform translate-y-full opacity-0 transition-all duration-300 z-50">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fa fa-bell text-warning text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-neutral-700">到期提醒</h3>
+                <div class="mt-2 text-sm text-neutral-600">
+                    <p>您有 <span id="notificationCount" class="font-medium text-warning">1</span> 笔存款即将到期，请及时处理。</p>
+                </div>
+                <div class="mt-3">
+                    <button id="viewExpiringBtn" class="text-primary text-sm font-medium">查看详情</button>
+                </div>
+            </div>
+            <button id="closeNotificationBtn" class="ml-auto flex-shrink-0 text-neutral-400 hover:text-neutral-700">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+ 
+    <script>
+        // 数据存储与管理
+        const DepositManager = {
+            // 初始化数据存储
+            init() {
+                if (!localStorage.getItem('deposits')) {
+                    localStorage.setItem('deposits', JSON.stringify([]));
+                }
+                if (!localStorage.getItem('nextId')) {
+                    localStorage.setItem('nextId', '1');
+                }
+            },
+             
+            // 获取所有存款记录
+            getAllDeposits() {
+                return JSON.parse(localStorage.getItem('deposits') || '[]');
+            },
+             
+            // 获取单个存款记录
+            getDeposit(id) {
+                const deposits = this.getAllDeposits();
+                return deposits.find(deposit => deposit.id === id);
+            },
+             
+            // 添加存款记录
+            addDeposit(deposit) {
+                const deposits = this.getAllDeposits();
+                const id = localStorage.getItem('nextId');
+                const newDeposit = {
+                    id,
+                    status: 'active', // active: 正常, expired: 已到期, closed: 已销户
+                    settledInterest: 0,
+                    ...deposit
+                };
+                deposits.push(newDeposit);
+                localStorage.setItem('deposits', JSON.stringify(deposits));
+                localStorage.setItem('nextId', (parseInt(id) + 1).toString());
+                return newDeposit;
+            },
+             
+            // 更新存款记录
+            updateDeposit(updatedDeposit) {
+                const deposits = this.getAllDeposits();
+                const index = deposits.findIndex(deposit => deposit.id === updatedDeposit.id);
+                if (index !== -1) {
+                    // 保留状态和已结算利息，不允许修改
+                    updatedDeposit.status = deposits[index].status;
+                    updatedDeposit.settledInterest = deposits[index].settledInterest;
+                    deposits[index] = updatedDeposit;
+                    localStorage.setItem('deposits', JSON.stringify(deposits));
+                    return updatedDeposit;
+                }
+                return null;
+            },
+             
+            // 删除存款记录
+            deleteDeposit(id) {
+                let deposits = this.getAllDeposits();
+                const initialLength = deposits.length;
+                deposits = deposits.filter(deposit => deposit.id !== id);
+                if (deposits.length < initialLength) {
+                    localStorage.setItem('deposits', JSON.stringify(deposits));
+                    return true;
+                }
+                return false;
+            },
+             
+            // 销户处理
+            closeAccount(id) {
+                const deposits = this.getAllDeposits();
+                const index = deposits.findIndex(deposit => deposit.id === id);
+                if (index !== -1) {
+                    // 计算实际利息（这里简化处理，按预计利息计算）
+                    const deposit = deposits[index];
+                    const interest = this.calculateInterest(deposit);
+                     
+                    deposits[index].status = 'closed';
+                    deposits[index].settledInterest = interest;
+                    localStorage.setItem('deposits', JSON.stringify(deposits));
+                    return true;
+                }
+                return false;
+            },
+             
+            // 计算利息
+            calculateInterest(deposit) {
+                // 简单利息计算：本金 × 年利率 × 时间(年)
+                const principal = parseFloat(deposit.amount);
+                const rate = parseFloat(deposit.interestRate) / 100;
+                const years = parseInt(deposit.period) / 12;
+                return Math.round(principal * rate * years * 100) / 100;
+            },
+             
+            // 检查并更新存款状态（是否到期）
+            checkAndUpdateStatuses() {
+                const deposits = this.getAllDeposits();
+                const today = new Date().toISOString().split('T')[0];
+                let updated = false;
+                 
+                deposits.forEach(deposit => {
+                    if (deposit.status === 'active' && deposit.maturityDate <= today) {
+                        deposit.status = 'expired';
+                        updated = true;
+                    }
+                });
+                 
+                if (updated) {
+                    localStorage.setItem('deposits', JSON.stringify(deposits));
+                }
+                 
+                return updated;
+            },
+             
+            // 导出数据
+            exportData() {
+                const data = {
+                    deposits: this.getAllDeposits(),
+                    nextId: localStorage.getItem('nextId'),
+                    exportDate: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `存款记录_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            },
+             
+            // 导入数据
+            importData(data) {
+                if (data.deposits && typeof data.nextId !== 'undefined') {
+                    localStorage.setItem('deposits', JSON.stringify(data.deposits));
+                    localStorage.setItem('nextId', data.nextId);
+                    return true;
+                }
+                return false;
+            },
+             
+            // 获取统计数据
+            getStatistics() {
+                const deposits = this.getAllDeposits();
+                let totalAmount = 0;
+                let totalInterest = 0;
+                let pendingInterest = 0;
+                let settledInterest = 0;
+                let soonExpireCount = 0;
+                 
+                const today = new Date();
+                const nextWeek = new Date();
+                nextWeek.setDate(today.getDate() + 7);
+                const todayStr = today.toISOString().split('T')[0];
+                const nextWeekStr = nextWeek.toISOString().split('T')[0];
+                 
+                deposits.forEach(deposit => {
+                    // 计算总存款金额（仅统计正常和已到期未销户的）
+                    if (deposit.status === 'active' || deposit.status === 'expired') {
+                        totalAmount += parseFloat(deposit.amount);
+                         
+                        // 计算利息
+                        const interest = this.calculateInterest(deposit);
+                        totalInterest += interest;
+                         
+                        // 区分待结算和已结算利息
+                        if (deposit.status === 'closed') {
+                            settledInterest += parseFloat(deposit.settledInterest);
+                        } else {
+                            pendingInterest += interest;
+                        }
+                         
+                        // 检查是否即将到期（未来7天内）
+                        if (deposit.maturityDate >= todayStr && deposit.maturityDate <= nextWeekStr) {
+                            soonExpireCount++;
+                        }
+                    } else if (deposit.status === 'closed') {
+                        // 已销户的只统计已结算利息
+                        settledInterest += parseFloat(deposit.settledInterest);
+                    }
+                });
+                 
+                return {
+                    totalAmount: Math.round(totalAmount * 100) / 100,
+                    totalInterest: Math.round(totalInterest * 100) / 100,
+                    pendingInterest: Math.round(pendingInterest * 100) / 100,
+                    settledInterest: Math.round(settledInterest * 100) / 100,
+                    soonExpireCount
+                };
+            },
+             
+            // 获取图表数据
+            getChartData() {
+                const deposits = this.getAllDeposits();
+                const activeDeposits = deposits.filter(d => d.status === 'active' || d.status === 'expired');
+                 
+                // 银行分布数据
+                const bankData = {
+                    '农业银行': 0,
+                    '建设银行': 0,
+                    '工商银行': 0,
+                    '招商银行': 0,
+                    '交通银行': 0,
+                    '其他银行': 0
+                };
+                 
+                // 周期分布数据
+                const periodData = {
+                    '3个月': 0,
+                    '6个月': 0,
+                    '1年': 0,
+                    '2年': 0,
+                    '3年': 0,
+                    '5年': 0
+                };
+                 
+                activeDeposits.forEach(deposit => {
+                    // 银行数据累加
+                    const bank = deposit.bank;
+                    if (bankData.hasOwnProperty(bank)) {
+                        bankData[bank] += parseFloat(deposit.amount);
+                    } else {
+                        bankData['其他银行'] += parseFloat(deposit.amount);
+                    }
+                     
+                    // 周期数据累加
+                    const periodMap = {
+                        '3': '3个月',
+                        '6': '6个月',
+                        '12': '1年',
+                        '24': '2年',
+                        '36': '3年',
+                        '60': '5年'
+                    };
+                    const periodName = periodMap[deposit.period] || deposit.period;
+                    if (periodData.hasOwnProperty(periodName)) {
+                        periodData[periodName] += parseFloat(deposit.amount);
+                    }
+                });
+                 
+                return { bankData, periodData };
+            }
+        };
+ 
+        // DOM 操作与界面渲染
+        const UIManager = {
+            // 初始化界面
+            init() {
+                this.initEventListeners();
+                this.renderDepositList();
+                this.updateStatistics();
+                this.initCharts();
+                this.checkExpiringDeposits();
+                 
+                // 设置默认日期为今天
+                document.getElementById('depositDate').valueAsDate = new Date();
+            },
+             
+            // 初始化事件监听器
+            initEventListeners() {
+                // 模态框相关
+                document.getElementById('addDepositBtn').addEventListener('click', () => this.openModal());
+                document.getElementById('closeModalBtn').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancelBtn').addEventListener('click', () => this.closeModal());
+                document.getElementById('depositForm').addEventListener('submit', (e) => this.saveDeposit(e));
+                 
+                // 银行选择逻辑
+                document.getElementById('bank').addEventListener('change', (e) => {
+                    const otherBankInput = document.getElementById('otherBank');
+                    if (e.target.value === '其他银行') {
+                        otherBankInput.classList.remove('hidden');
+                        otherBankInput.required = true;
+                    } else {
+                        otherBankInput.classList.add('hidden');
+                        otherBankInput.required = false;
+                    }
+                });
+                 
+                // 存款日变化时自动计算到期日
+                document.getElementById('depositDate').addEventListener('change', (e) => {
+                    this.calculateMaturityDate();
+                });
+                 
+                // 周期变化时自动计算到期日
+                document.getElementById('period').addEventListener('change', () => {
+                    this.calculateMaturityDate();
+                });
+                 
+                // 销户模态框相关
+                document.getElementById('closeCloseAccountModalBtn').addEventListener('click', () => this.closeCloseAccountModal());
+                document.getElementById('cancelCloseAccountBtn').addEventListener('click', () => this.closeCloseAccountModal());
+                document.getElementById('confirmCloseAccountBtn').addEventListener('click', () => this.confirmCloseAccount());
+                 
+                // 排序和筛选
+                document.getElementById('sortSelect').addEventListener('change', () => this.renderDepositList());
+                document.getElementById('filterBank').addEventListener('change', () => this.renderDepositList());
+                document.getElementById('filterStatus').addEventListener('change', () => this.renderDepositList());
+                 
+                // 数据导入导出
+                document.getElementById('exportDataBtn').addEventListener('click', () => DepositManager.exportData());
+                document.getElementById('importData').addEventListener('change', (e) => this.importData(e));
+                 
+                // 通知相关
+                document.getElementById('closeNotificationBtn').addEventListener('click', () => this.hideNotification());
+                document.getElementById('viewExpiringBtn').addEventListener('click', () => {
+                    this.hideNotification();
+                    document.getElementById('filterStatus').value = 'active';
+                    this.renderDepositList();
+                });
+            },
+             
+            // 打开添加/编辑模态框
+            openModal(deposit = null) {
+                const modal = document.getElementById('depositModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const depositIdInput = document.getElementById('depositId');
+                const bankSelect = document.getElementById('bank');
+                const otherBankInput = document.getElementById('otherBank');
+                const amountInput = document.getElementById('amount');
+                const periodSelect = document.getElementById('period');
+                const interestRateInput = document.getElementById('interestRate');
+                const depositDateInput = document.getElementById('depositDate');
+                const maturityDateInput = document.getElementById('maturityDate');
+                const notesInput = document.getElementById('notes');
+                const interestInfo = document.getElementById('interestInfo');
+                const estimatedInterest = document.getElementById('estimatedInterest');
+                const settledInterestInfo = document.getElementById('settledInterestInfo');
+                const actualInterest = document.getElementById('actualInterest');
+                 
+                // 重置表单
+                document.getElementById('depositForm').reset();
+                depositIdInput.value = '';
+                otherBankInput.classList.add('hidden');
+                otherBankInput.required = false;
+                interestInfo.classList.add('hidden');
+                settledInterestInfo.classList.add('hidden');
+                 
+                if (deposit) {
+                    // 编辑模式
+                    modalTitle.textContent = '编辑存款记录';
+                    depositIdInput.value = deposit.id;
+                    bankSelect.value = deposit.bank in {'农业银行':1, '建设银行':1, '工商银行':1, '招商银行':1, '交通银行':1, '其他银行':1} ? deposit.bank : '其他银行';
+                     
+                    if (bankSelect.value === '其他银行' && !{'其他银行':1}.hasOwnProperty(deposit.bank)) {
+                        otherBankInput.classList.remove('hidden');
+                        otherBankInput.required = true;
+                        otherBankInput.value = deposit.bank;
+                    }
+                     
+                    amountInput.value = deposit.amount;
+                    periodSelect.value = deposit.period;
+                    interestRateInput.value = deposit.interestRate;
+                    depositDateInput.value = deposit.depositDate;
+                    maturityDateInput.value = deposit.maturityDate;
+                    notesInput.value = deposit.notes || '';
+                     
+                    // 显示利息信息
+                    interestInfo.classList.remove('hidden');
+                    const interest = DepositManager.calculateInterest(deposit);
+                    estimatedInterest.textContent = `&#165;${interest.toFixed(2)}`;
+                     
+                    // 如果已销户，显示已结算利息
+                    if (deposit.status === 'closed') {
+                        settledInterestInfo.classList.remove('hidden');
+                        actualInterest.textContent = `&#165;${parseFloat(deposit.settledInterest).toFixed(2)}`;
+                    }
+                } else {
+                    // 添加模式
+                    modalTitle.textContent = '添加存款记录';
+                    depositDateInput.valueAsDate = new Date();
+                    this.calculateMaturityDate();
+                }
+                 
+                modal.classList.remove('hidden');
+                // 阻止背景滚动
+                document.body.style.overflow = 'hidden';
+            },
+             
+            // 关闭模态框
+            closeModal() {
+                const modal = document.getElementById('depositModal');
+                modal.classList.add('hidden');
+                // 恢复背景滚动
+                document.body.style.overflow = '';
+            },
+             
+            // 保存存款记录
+            saveDeposit(e) {
+                e.preventDefault();
+                 
+                const depositId = document.getElementById('depositId').value;
+                const bankSelect = document.getElementById('bank');
+                const otherBankInput = document.getElementById('otherBank');
+                const amount = document.getElementById('amount').value;
+                const period = document.getElementById('period').value;
+                const interestRate = document.getElementById('interestRate').value;
+                const depositDate = document.getElementById('depositDate').value;
+                const maturityDate = document.getElementById('maturityDate').value;
+                const notes = document.getElementById('notes').value;
+                 
+                // 验证必填字段
+                if (!amount || !interestRate || !depositDate || !maturityDate) {
+                    alert('请填写所有必填字段');
+                    return;
+                }
+                 
+                // 确定银行名称
+                let bank = bankSelect.value;
+                if (bank === '其他银行' && otherBankInput.value) {
+                    bank = otherBankInput.value;
+                }
+                 
+                const depositData = {
+                    bank,
+                    amount,
+                    period,
+                    interestRate,
+                    depositDate,
+                    maturityDate,
+                    notes: notes || ''
+                };
+                 
+                if (depositId) {
+                    // 更新现有记录
+                    depositData.id = depositId;
+                    DepositManager.updateDeposit(depositData);
+                } else {
+                    // 添加新记录
+                    DepositManager.addDeposit(depositData);
+                }
+                 
+                this.closeModal();
+                this.renderDepositList();
+                this.updateStatistics();
+                this.updateCharts();
+            },
+             
+            // 打开销户确认模态框
+            openCloseAccountModal(deposit) {
+                document.getElementById('closeAccountId').textContent = deposit.id;
+                document.getElementById('closeAccountBank').textContent = deposit.bank;
+                document.getElementById('closeAccountAmount').textContent = `&#165;${parseFloat(deposit.amount).toFixed(2)}`;
+                 
+                const interest = DepositManager.calculateInterest(deposit);
+                document.getElementById('closeAccountInterest').textContent = `预计利息: &#165;${interest.toFixed(2)}`;
+                 
+                // 存储当前要销户的ID
+                document.getElementById('confirmCloseAccountBtn').dataset.depositId = deposit.id;
+                 
+                document.getElementById('closeAccountModal').classList.remove('hidden');
+                // 阻止背景滚动
+                document.body.style.overflow = 'hidden';
+            },
+             
+            // 关闭销户确认模态框
+            closeCloseAccountModal() {
+                document.getElementById('closeAccountModal').classList.add('hidden');
+                // 恢复背景滚动
+                document.body.style.overflow = '';
+            },
+             
+            // 确认销户
+            confirmCloseAccount() {
+                const depositId = document.getElementById('confirmCloseAccountBtn').dataset.depositId;
+                if (depositId && DepositManager.closeAccount(depositId)) {
+                    this.closeCloseAccountModal();
+                    this.renderDepositList();
+                    this.updateStatistics();
+                    this.updateCharts();
+                }
+            },
+             
+            // 渲染存款记录列表
+            renderDepositList() {
+                // 先检查并更新存款状态
+                DepositManager.checkAndUpdateStatuses();
+                 
+                const depositListElement = document.getElementById('depositList');
+                let deposits = DepositManager.getAllDeposits();
+                 
+                // 获取筛选和排序条件
+                const sortBy = document.getElementById('sortSelect').value;
+                const filterBank = document.getElementById('filterBank').value;
+                const filterStatus = document.getElementById('filterStatus').value;
+                 
+                // 筛选
+                if (filterBank !== 'all') {
+                    deposits = deposits.filter(deposit => {
+                        if (filterBank === '其他银行') {
+                            return !['农业银行', '建设银行', '工商银行', '招商银行', '交通银行'].includes(deposit.bank);
+                        }
+                        return deposit.bank === filterBank;
+                    });
+                }
+                 
+                if (filterStatus !== 'all') {
+                    deposits = deposits.filter(deposit => deposit.status === filterStatus);
+                }
+                 
+                // 排序
+                deposits.sort((a, b) => {
+                    switch (sortBy) {
+                        case 'bank':
+                            return a.bank.localeCompare(b.bank);
+                        case 'amount':
+                            return parseFloat(b.amount) - parseFloat(a.amount);
+                        case 'maturityDate':
+                            return new Date(a.maturityDate) - new Date(b.maturityDate);
+                        case 'id':
+                        default:
+                            return parseInt(a.id) - parseInt(b.id);
+                    }
+                });
+                 
+                // 清空列表
+                depositListElement.innerHTML = '';
+                 
+                if (deposits.length === 0) {
+                    // 显示空状态
+                    depositListElement.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="px-6 py-12 text-center text-neutral-400">
+                                <i class="fa fa-file-text-o text-3xl mb-3 block"></i>
+                                没有找到符合条件的存款记录
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                 
+                // 渲染记录
+                const today = new Date().toISOString().split('T')[0];
+                const nextWeek = new Date();
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                const nextWeekStr = nextWeek.toISOString().split('T')[0];
+                 
+                deposits.forEach(deposit => {
+                    // 计算利息
+                    const interest = DepositManager.calculateInterest(deposit);
+                     
+                    // 确定状态标签样式
+                    let statusLabel = '';
+                    switch (deposit.status) {
+                        case 'active':
+                            statusLabel = '<span class="badge bg-success/10 text-success">正常</span>';
+                            break;
+                        case 'expired':
+                            statusLabel = '<span class="badge bg-warning/10 text-warning">已到期</span>';
+                            break;
+                        case 'closed':
+                            statusLabel = '<span class="badge bg-neutral-200 text-neutral-500">已销户</span>';
+                            break;
+                    }
+                     
+                    // 检查是否即将到期（未来7天内）
+                    const isSoonExpire = deposit.status === 'active' && 
+                                        deposit.maturityDate >= today && 
+                                        deposit.maturityDate <= nextWeekStr;
+                     
+                    // 创建行元素
+                    const row = document.createElement('tr');
+                    if (isSoonExpire) {
+                        row.classList.add('bg-warning/5');
+                    }
+                     
+                    // 格式化日期显示
+                    const formatDate = (dateStr) => {
+                        const date = new Date(dateStr);
+                        return date.toLocaleDateString('zh-CN');
+                    };
+                     
+                    // 操作按钮
+                    let actionButtons = '';
+                    if (deposit.status === 'closed') {
+                        // 已销户的只能编辑和删除
+                        actionButtons = `
+                            <button class="edit-btn text-primary hover:text-primary/80 mr-3" data-id="${deposit.id}">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="delete-btn text-danger hover:text-danger/80" data-id="${deposit.id}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        `;
+                    } else if (deposit.status === 'expired' || deposit.status === 'active') {
+                        // 正常和已到期的可以编辑、删除和销户
+                        actionButtons = `
+                            <button class="edit-btn text-primary hover:text-primary/80 mr-3" data-id="${deposit.id}">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="delete-btn text-danger hover:text-danger/80 mr-3" data-id="${deposit.id}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                            <button class="close-account-btn text-warning hover:text-warning/80" data-id="${deposit.id}">
+                                <i class="fa fa-unlock-alt"></i> 销户
+                            </button>
+                        `;
+                    }
+                     
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-700">${deposit.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">${deposit.bank}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">&#165;${parseFloat(deposit.amount).toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                            ${deposit.period === '3' ? '3个月' : 
+                              deposit.period === '6' ? '6个月' : 
+                              deposit.period === '12' ? '1年' : 
+                              deposit.period === '24' ? '2年' : 
+                              deposit.period === '36' ? '3年' : 
+                              deposit.period === '60' ? '5年' : deposit.period}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">${deposit.interestRate}%</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">${formatDate(deposit.depositDate)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm ${isSoonExpire ? 'text-warning font-medium' : 'text-neutral-600'}">
+                            ${formatDate(deposit.maturityDate)}
+                            ${isSoonExpire ? '<span class="ml-2 badge bg-warning text-white text-[10px]">即将到期</span>' : ''}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${statusLabel}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            ${actionButtons}
+                        </td>
+                    `;
+                     
+                    depositListElement.appendChild(row);
+                });
+                 
+                // 为按钮添加事件监听器
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const depositId = e.currentTarget.dataset.id;
+                        const deposit = DepositManager.getDeposit(depositId);
+                        if (deposit) {
+                            this.openModal(deposit);
+                        }
+                    });
+                });
+                 
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const depositId = e.currentTarget.dataset.id;
+                        if (confirm('确定要删除这条存款记录吗？')) {
+                            if (DepositManager.deleteDeposit(depositId)) {
+                                this.renderDepositList();
+                                this.updateStatistics();
+                                this.updateCharts();
+                            }
+                        }
+                    });
+                });
+                 
+                document.querySelectorAll('.close-account-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const depositId = e.currentTarget.dataset.id;
+                        const deposit = DepositManager.getDeposit(depositId);
+                        if (deposit) {
+                            this.openCloseAccountModal(deposit);
+                        }
+                    });
+                });
+            },
+             
+            // 更新统计信息
+            updateStatistics() {
+                const stats = DepositManager.getStatistics();
+                 
+                document.getElementById('totalAmount').textContent = `&#165;${stats.totalAmount.toFixed(2)}`;
+                document.getElementById('totalInterest').textContent = `&#165;${stats.totalInterest.toFixed(2)}`;
+                document.getElementById('pendingInterest').textContent = `&#165;${stats.pendingInterest.toFixed(2)}`;
+                document.getElementById('settledInterest').textContent = `&#165;${stats.settledInterest.toFixed(2)}`;
+                document.getElementById('soonExpireCount').textContent = stats.soonExpireCount;
+            },
+             
+            // 初始化图表
+            initCharts() {
+                const { bankData, periodData } = DepositManager.getChartData();
+                 
+                // 银行分布图表
+                const bankCtx = document.getElementById('bankChart').getContext('2d');
+                this.bankChart = new Chart(bankCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(bankData),
+                        datasets: [{
+                            data: Object.values(bankData),
+                            backgroundColor: [
+                                '#165DFF', '#36CFC9', '#722ED1', '#FF7D00', '#F53F3F', '#86909C'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                 
+                // 周期分布图表
+                const periodCtx = document.getElementById('periodChart').getContext('2d');
+                this.periodChart = new Chart(periodCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(periodData),
+                        datasets: [{
+                            label: '存款金额 (元)',
+                            data: Object.values(periodData),
+                            backgroundColor: '#165DFF',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        if (value >= 10000) {
+                                            return value / 10000 + '万';
+                                        }
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+             
+            // 更新图表数据
+            updateCharts() {
+                const { bankData, periodData } = DepositManager.getChartData();
+                 
+                this.bankChart.data.datasets[0].data = Object.values(bankData);
+                this.bankChart.update();
+                 
+                this.periodChart.data.datasets[0].data = Object.values(periodData);
+                this.periodChart.update();
+            },
+             
+            // 计算到期日
+            calculateMaturityDate() {
+                const depositDateInput = document.getElementById('depositDate');
+                const periodSelect = document.getElementById('period');
+                const maturityDateInput = document.getElementById('maturityDate');
+                 
+                if (depositDateInput.value) {
+                    const depositDate = new Date(depositDateInput.value);
+                    const periodMonths = parseInt(periodSelect.value);
+                     
+                    // 计算到期日
+                    const maturityDate = new Date(depositDate);
+                    maturityDate.setMonth(maturityDate.getMonth() + periodMonths);
+                     
+                    // 处理月份溢出的情况
+                    if (maturityDate.getDate() !== depositDate.getDate()) {
+                        maturityDate.setDate(0); // 上个月的最后一天
+                    }
+                     
+                    maturityDateInput.value = maturityDate.toISOString().split('T')[0];
+                }
+            },
+             
+            // 导入数据
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                 
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (DepositManager.importData(data)) {
+                            alert('数据导入成功');
+                            this.renderDepositList();
+                            this.updateStatistics();
+                            this.updateCharts();
+                        } else {
+                            alert('数据格式不正确，导入失败');
+                        }
+                    } catch (error) {
+                        alert('数据解析错误，导入失败');
+                        console.error(error);
+                    }
+                };
+                reader.readAsText(file);
+                 
+                // 重置文件输入，允许重复选择同一个文件
+                event.target.value = '';
+            },
+             
+            // 检查即将到期的存款并显示通知
+            checkExpiringDeposits() {
+                const stats = DepositManager.getStatistics();
+                if (stats.soonExpireCount > 0) {
+                    document.getElementById('notificationCount').textContent = stats.soonExpireCount;
+                    this.showNotification();
+                }
+            },
+             
+            // 显示通知
+            showNotification() {
+                const notification = document.getElementById('notification');
+                notification.classList.remove('translate-y-full', 'opacity-0');
+            },
+             
+            // 隐藏通知
+            hideNotification() {
+                const notification = document.getElementById('notification');
+                notification.classList.add('translate-y-full', 'opacity-0');
+            }
+        };
+ 
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            DepositManager.init();
+            UIManager.init();
+        });
+    </script>
+</body>
+</html>
