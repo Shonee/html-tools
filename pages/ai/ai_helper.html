@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的智能问答助手</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2c85ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #1a73e8;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+        #timeDisplay {
+            margin: 10px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .history-item {
+            margin: 15px 0;
+            padding: 12px;
+            background-color: #f0f7ff;
+            border-radius: 6px;
+            border-left: 3px solid #2c85ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>我的智能问答助手</h1>
+        <div id="timeDisplay"></div>
+        <input type="text" id="inputText" placeholder="请输入你的问题...">
+        <button>提问</button>
+        <button>开启新对话</button>
+        <button>历史对话</button>
+        <button>保存对话</button>
+        <input type="file" id="fileInput" accept=".txt" style="display: none;">
+        <button>加载对话</button>
+        <div class="result" id="result"></div>
+    </div>
+ 
+    <script>
+        // 配置API信息（替换为你的密钥）
+        const API_KEY = 'YOUR_API_KEY'; // 填入通义千问API Key
+        const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+         
+        let conversationHistory = []; // 所有历史对话
+        let currentConversation = []; // 当前对话上下文
+ 
+        // 显示实时时间
+        function showTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN');
+            document.getElementById('timeDisplay').innerHTML = `当前时间：${timeString}`;
+        }
+        setInterval(showTime, 1000);
+        showTime(); // 初始显示
+ 
+        // 发送问题到API
+        function askQuestion() {
+            const input = document.getElementById('inputText').value.trim();
+            const resultDiv = document.getElementById('result');
+             
+            if (!input) {
+                resultDiv.innerHTML = '<p>请输入问题后再提问~</p>';
+                return;
+            }
+             
+            // 记录提问信息
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN');
+            currentConversation.push({
+                role: 'user',
+                content: `${input}（${timeString}）`
+            });
+             
+            resultDiv.innerHTML = '<p>正在思考中...</p>';
+             
+            // 调用API获取回答
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'qwen-plus',
+                    messages: currentConversation
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.choices && data.choices.length > 0) {
+                    const answer = data.choices[0].message.content;
+                    currentConversation.push({ role: 'assistant', content: answer });
+                    conversationHistory.push([...currentConversation]);
+                    resultDiv.innerHTML = `<p><strong>你的问题：</strong>${input}</p><p><strong>回答：</strong>${answer}</p>`;
+                } else {
+                    resultDiv.innerHTML = '<p>暂时没有找到答案，请换个问题试试~</p>';
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<p>连接失败，请检查网络或API密钥是否正确</p>';
+            });
+        }
+ 
+        // 开启新对话
+        function newConversation() {
+            currentConversation = [];
+            document.getElementById('inputText').value = '';
+            document.getElementById('result').innerHTML = '';
+        }
+ 
+        // 查看历史对话
+        function showHistory() {
+            const resultDiv = document.getElementById('result');
+            if (conversationHistory.length === 0) {
+                resultDiv.innerHTML = '<p>暂无历史对话记录</p>';
+                return;
+            }
+             
+            resultDiv.innerHTML = '<h3>历史对话记录</h3>';
+            conversationHistory.forEach((item, index) => {
+                resultDiv.innerHTML += `
+                    <div class="history-item">
+                        <p><strong>第${index+1}次提问：</strong>${item[0].content}</p>
+                        <p><strong>回答：</strong>${item[1].content}</p>
+                    </div>
+                `;
+            });
+        }
+ 
+        // 保存对话到本地文件
+        function saveHistoryToFile() {
+            if (conversationHistory.length === 0) {
+                alert('没有可保存的对话记录');
+                return;
+            }
+             
+            let content = '智能问答记录\n';
+            content += '==============================\n\n';
+             
+            conversationHistory.forEach((item, index) => {
+                content += `【对话 ${index+1}】\n`;
+                content += `提问：${item[0].content}\n`;
+                content += `回答：${item[1].content}\n\n`;
+            });
+             
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `问答记录_${new Date().toLocaleDateString().replace(/\//g, '-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+ 
+        // 从本地文件加载对话
+        function loadHistoryFromFile(files) {
+            if (!files || files.length === 0) return;
+             
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const content = event.target.result;
+                    const dialogues = content.split('\n\n');
+                    conversationHistory = [];
+                     
+                    dialogues.forEach(dialogue => {
+                        if (!dialogue.includes('提问：') || !dialogue.includes('回答：')) return;
+                         
+                        const question = dialogue.match(/提问：(.*)/)[1];
+                        const answer = dialogue.match(/回答：(.*)/)[1];
+                         
+                        conversationHistory.push([
+                            { role: 'user', content: question },
+                            { role: 'assistant', content: answer }
+                        ]);
+                    });
+                     
+                    showHistory();
+                    alert(`成功加载 ${conversationHistory.length} 条对话记录`);
+                } catch (error) {
+                    alert('文件格式错误，请使用系统保存的对话文件');
+                }
+            };
+            reader.readAsText(files[0]);
+        }
+    </script>
+</body>
+</html>
