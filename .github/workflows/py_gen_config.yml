@@ -18,8 +18,9 @@ jobs:
           python-version: 3.7
 
       - name: install
-        run: pip install requests
-        run: python py_gen_config.py
+        run: ｜
+          pip install requests
+          python py_gen_config.py
       
       - name: commit
         run: |
