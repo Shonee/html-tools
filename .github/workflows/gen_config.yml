@@ -1,0 +1,31 @@
+name: gen_config # yml文件名
+ 
+on:
+  # push:
+  #   branches:
+  #     - main
+  # schedule:
+  #   # # 定时运行的时间，国际标准时间，北京时间要+8
+  #   - cron: '0 9 10 * *' 
+  workflow_dispatch:
+ 
+jobs:
+  run-coupons: # 任务名
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main  #采用main分支下的
+           
+      - name: Setup Node.js
+        uses: actions/setup-node@v2  #安装node.js
+        with:
+          node-version: '14'
+          
+      - name: Install Dependency       
+        run: |
+          npm install
+          npm install parse
+          npm install got
+          npm install xmlhttprequest
+          npm install tough-cookie         
+          # node ./coupons.js  # 要运行的js脚本，放在根目录下
+          node ./gen_config.js  # 要运行的js脚本，放在scripts目录下
