@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
  
 jobs:
-  run-coupons: # 任务名
+  run-gen-config: # 任务名
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main  #采用main分支下的
@@ -26,6 +26,8 @@ jobs:
           npm install parse
           npm install got
           npm install xmlhttprequest
-          npm install tough-cookie         
+          npm install tough-cookie  
+      - name: Run Script
+        run: |
           # node ./coupons.js  # 要运行的js脚本，放在根目录下
           node ./gen_config.js  # 要运行的js脚本，放在scripts目录下
