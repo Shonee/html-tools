@@ -9,10 +9,26 @@ jobs:
   run-python-script:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+
+      - name: setup python 3.7
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.8.0'
+          python-version: 3.7
+
+      - name: install
       - run: pip install requests
       - run: python py_gen_config.py
       
+      - name: commit
+        run: |
+          git config --global user.email 1048394082@qq.com
+          git config --global user.name shone
+          git add .
+          git commit -m "update" -a
+        
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
