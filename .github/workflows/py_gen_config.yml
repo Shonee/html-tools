@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: setup python 3.7
         uses: actions/setup-python@v2
@@ -18,8 +18,8 @@ jobs:
           python-version: 3.7
 
       - name: install
-      - run: pip install requests
-      - run: python py_gen_config.py
+        run: pip install requests
+        run: python py_gen_config.py
       
       - name: commit
         run: |
