@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 
 console.log("hello gen_config.js!");
 
