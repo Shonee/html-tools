@@ -60,8 +60,8 @@ def gen_config():
 def save_config(configs):
   json_data = json.dumps(configs, ensure_ascii=False, indent=4)
   print(json_data)
-  # with open("tools-config.json", "w", encoding="utf-8") as f:
-  #   json.dump(configs, f, ensure_ascii=False, indent=4)
+  with open("tools-config.json", "w", encoding="utf-8") as f:
+    json.dump(configs, f, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
   configs = gen_config()
