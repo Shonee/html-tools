@@ -21,19 +21,16 @@ def gen_config():
               with open(file_path, "r", encoding="utf-8") as f:
                   html_content = f.read()
                   soup = BeautifulSoup(html_content, "html.parser")
-                  # 获取标题
+                  # 获取标题,如果为空则展示文件名
                   title = soup.title.string if soup.title else file.split(".")[0]
-                  print(title)
   
                   # 获取 keywords, 判断是否存在，不存在则返回空
                   keywords = soup.find("meta", attrs={"name": "keywords"})
                   keywords = keywords["content"] if keywords else ""
-                  print(keywords)
   
                   # 获取 description
                   description = soup.find("meta", attrs={"name": "description"})
                   description = description["content"] if description else ""
-                  print(description)
   
                   # # 获取 favicon
                   # icon = soup.find("link", attrs={"rel": "icon"})["href"]
@@ -42,23 +39,22 @@ def gen_config():
                   # 获取 favicon
                   icon = soup.find("meta", attrs={"name": "icon"})
                   icon = icon["content"] if icon else ""
-                  print(icon)
   
                   # 获取功能 feture 并根据，转成字符串 list
                   features = soup.find("meta", attrs={"name": "features"})
                   features = features["content"] if features else ""
                   features = features.split("，")
-                  print(features)
   
                   config = {
+                      "icon": icon,
                       "title": title,
                       "keywords": keywords,
+                      "features": features,
                       "description": description,
-                      "icon": icon,
-                      "features": features
+                      "url": file_path
                   }
                   tools.append(config)
-  print(configs)
+#   print(configs)
   return configs
 
 def save_config(configs):
