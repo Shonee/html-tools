@@ -30,7 +30,7 @@ jobs:
           git config --global user.email 1048394082@qq.com
           git config --global user.name shone
           git add .
-          git commit -m "update" -a
+          git commit -m "update" -a || echo "No changes to commit"
         
       - name: Push changes
         uses: ad-m/github-push-action@master
