@@ -22,7 +22,7 @@ def gen_config():
                   html_content = f.read()
                   soup = BeautifulSoup(html_content, "html.parser")
                   # 获取标题
-                  title = soup.title.string
+                  title = soup.title.string if soup.title else file.split(".")[0]
                   print(title)
   
                   # 获取 keywords, 判断是否存在，不存在则返回空
