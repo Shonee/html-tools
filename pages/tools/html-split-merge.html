@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML 文件处理工具</title>
+    <style>
+        /* 新增样式 */
+        .code-container {
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-family: monospace;
+            border: none;
+            resize: vertical;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            padding: 5px 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .file-input-wrapper {
+            margin: 10px 0;
+            position: relative;
+        }
+        .toggle-input {
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #666;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .mode-selector {
+            margin-bottom: 20px;
+        }
+        .file-section {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .download-section {
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../index.html" class="home-link">← 返回首页</a>
+    </header>
+    
+    <div class="container">
+        <h1>HTML 文件处理工具</h1>
+
+        <div class="mode-selector">
+            <button onclick="showMode('split')">拆分模式</button>
+            <button onclick="showMode('merge')">合并模式</button>
+        </div>
+
+        <!-- 拆分模式 -->
+        <div id="split-mode" class="file-section hidden">
+            <h3>拆分 HTML 文件</h3>
+            <div class="file-input-wrapper">
+                <input type="file" id="html-input" accept=".html">
+                <span class="toggle-input" onclick="toggleInput('split-code-container')">或直接输入代码</span>
+            </div>
+            
+            <div id="split-code-container" class="code-container" style="display: none;">
+                <textarea id="split-source" placeholder="在此粘贴HTML代码或上传文件"></textarea>
+                <button class="copy-btn" onclick="copyCode('split-source')">复制</button>
+            </div>
+
+            <button onclick="processSplit()">处理代码</button>
+            <div id="split-result-container" class="hidden">
+                <h4>处理结果：</h4>
+                <div>
+                    <h4>HTML 内容</h4>
+                    <div class="code-container"> 
+                        <textarea id="split-html-result" placeholder="处理后的HTML"></textarea>
+                        <button class="copy-btn" onclick="copyCode('split-html-result')">复制</button>
+                    </div>
+                </div>
+                <div>
+                    <h4>CSS 内容</h4>
+                    <div class="code-container">
+                        <textarea id="split-css-result" placeholder="提取的CSS"></textarea>
+                        <button class="copy-btn" onclick="copyCode('split-css-result')">复制</button>
+                    </div>
+                </div>
+                <div>
+                    <h4>JS 内容</h4>
+                    <div class="code-container">
+                        <textarea id="split-js-result" placeholder="提取的JS"></textarea>
+                        <button class="copy-btn" onclick="copyCode('split-js-result')">复制</button>
+                    </div>
+                </div>
+                
+                <div class="download-section">
+                    <button onclick="downloadFromTextarea('split-html-result', 'html')">下载 HTML</button>
+                    <button onclick="downloadFromTextarea('split-css-result', 'css')">下载 CSS</button>
+                    <button onclick="downloadFromTextarea('split-js-result', 'js')">下载 JS</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 合并模式 -->
+        <div id="merge-mode" class="file-section hidden">
+            <h3>合并文件</h3>
+            <div class="input-section">
+                <div class="file-group">
+                    <h4>HTML 内容</h4>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="merge-html" accept=".html">
+                        <span class="toggle-input" onclick="toggleInput('merge-html-code-container')">或直接输入代码</span>
+                    </div>
+                    <div id="merge-html-code-container" class="code-container" style="display: none;">
+                        <textarea id="merge-html-source"></textarea>
+                        <button class="copy-btn" onclick="copyCode('merge-html-source')">复制</button>
+                    </div>
+                </div>
+                
+                <!-- 类似结构添加CSS和JS部分 -->
+                <!-- CSS部分 -->
+                <div class="file-group">
+                    <h4>CSS 内容</h4>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="merge-css" accept=".css">
+                        <span class="toggle-input" onclick="toggleInput('merge-css-code-container')">或直接输入代码</span>
+                    </div>
+                    <div id="merge-css-code-container" class="code-container" style="display: none;">
+                        <textarea id="merge-css-source"></textarea>
+                        <button class="copy-btn" onclick="copyCode('merge-css-source')">复制</button>
+                    </div>
+                </div>
+                
+                <!-- JS部分 -->
+                <div class="file-group">
+                    <h4>JS 内容</h4>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="merge-js" accept=".js">
+                        <span class="toggle-input" onclick="toggleInput('merge-js-code-container')">或直接输入代码</span>
+                    </div>
+                    <div id="merge-js-code-container" class="code-container" style="display: none;">
+                        <textarea id="merge-js-source"></textarea>
+                        <button class="copy-btn" onclick="copyCode('merge-js-source')">复制</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="processMerge()">合并代码</button>
+
+            <div id="merge-result-container" class="hidden"> 
+                <!--  style="display: none;" -->
+                <div class="code-container">
+                    <textarea id="merged-result" placeholder="合并后的HTML"></textarea>
+                    <button class="copy-btn" onclick="copyCode('merged-result')">复制</button>
+                </div>
+                
+                <div class="download-section">
+                    <button onclick="downloadFromTextarea('merged-result', 'html')">下载合并文件</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showMode(mode) {
+            document.getElementById('split-mode').classList.add('hidden');
+            document.getElementById('merge-mode').classList.add('hidden');
+            document.getElementById(mode + '-mode').classList.remove('hidden');
+        }
+
+        // 初始化代码容器显示状态
+        function toggleInput(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            textarea.style.display = textarea.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 文件上传处理（拆分模式）
+        document.getElementById('html-input').addEventListener('change', function(e) {
+            readFile(e.target).then(content => {
+                document.getElementById('split-source').value = content;
+            });
+        });
+
+        // 处理拆分功能
+        function processSplit() {
+            const source = document.getElementById('split-source').value;
+            
+            // 提取CSS
+            const cssContent = source.match(/<style[\s\S]*?>([\s\S]*?)<\/style>/i)?.[1] || '';
+            const cleanHtml = source
+                .replace(/<style[\s\S]*?<\/style>/gi, '')
+                .replace(/<link[^>]+>/gi, '')
+                .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, '')
+                + '\n<link rel="stylesheet" href="styles.css">\n<script src="script.js"><\/script>';
+
+            // 提取JS
+            const jsContent = source.match(/<script[\s\S]*?>([\s\S]*?)<\/script>/gi)
+                ?.map(s => s.replace(/<\/?script[\s\S]*?>/gi, ''))
+                .join('\n') || '';
+
+            // 更新结果区域
+            document.getElementById('split-html-result').value = cleanHtml;
+            document.getElementById('split-css-result').value = cssContent;
+            document.getElementById('split-js-result').value = jsContent;
+            document.getElementById('split-result-container').classList.remove('hidden');
+        }
+
+        ['merge-html', 'merge-css', 'merge-js'].forEach(id => {
+            document.getElementById(id).addEventListener('change', async function(e) {
+                readFile(e.target).then(content => {
+                    document.getElementById(id+'-source').value = content;
+                });
+            });
+        });
+
+        // 处理合并功能
+        function processMerge() {
+            const html = document.getElementById('merge-html-source').value;
+            const css = document.getElementById('merge-css-source').value;
+            const js = document.getElementById('merge-js-source').value;
+
+            const merged = html
+                .replace('</head>', `<style>${css}<\/style><\/head>`)
+                .replace('</body>', `<script>${js}<\/script><\/body>`);
+
+            document.getElementById('merged-result').value = merged;
+            document.getElementById('merge-result-container').classList.remove('hidden');
+        }
+
+        // 通用文件读取函数
+        function readFile(input) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsText(input.files[0]);
+            });
+        }
+
+        // 复制功能
+        function copyCode(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            textarea.select();
+            navigator.clipboard.writeText(textarea.value);
+        }
+
+        // 下载功能（从文本区域）
+        function downloadFromTextarea(textareaId, ext) {
+            const content = document.getElementById(textareaId).value;
+            const blob = new Blob([content], {type: 'text/plain'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `result.${ext}`;
+            link.click();
+        }
+    </script>
+</body>
+</html>

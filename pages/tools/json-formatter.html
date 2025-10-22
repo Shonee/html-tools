@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON 格式化工具</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+</head>
+<body>
+    <header>
+        <a href="../index.html" class="home-link">← 返回首页</a>
+        <h1>JSON 格式化工具</h1>
+    </header>
+
+    <main>
+        <div class="tool-container">
+            <textarea id="json-input" placeholder="输入JSON内容..."></textarea>
+            <button onclick="formatJSON()">格式化</button>
+            <pre id="output"></pre>
+        </div>
+    </main>
+
+    <script>
+    function formatJSON() {
+        try {
+            const input = document.getElementById('json-input').value;
+            const obj = JSON.parse(input);
+            const formatted = JSON.stringify(obj, null, 4);
+            document.getElementById('output').textContent = formatted;
+        } catch (e) {
+            alert('无效的 JSON 格式！');
+        }
+    }
+    </script>
+</body>
+</html>
