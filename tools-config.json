@@ -1,63 +1,394 @@
 {
     "tools": [
         {
-            "title": "JSON 格式化",
-            "description": "在线JSON数据格式化工具",
-            "url": "tools/json-formatter.html",
-            "icon": "📝"
-        },
-        {
-            "title": "JSON 格式化2",
-            "description": "在线JSON数据格式化工具",
-            "url": "tools/json-parse.html",
-            "icon": "📝"
-        },
-        {
-            "title": "字符串工具",
-            "description": "字符串工具",
-            "url": "tools/string-tool.html",
-            "icon": "🔐"
-        },
-        {
-            "title": "字符串编解码",
-            "description": "字符串编码/解码工具，url、base64、md5",
-            "url": "tools/base64.html",
-            "icon": "🔐"
-        },
-        {
-            "title": "HTML 实时预览",
-            "description": "在线编写并预览HTML代码",
-            "url": "tools/html-previewer.html",
-            "icon": "🖥️"
-        },
-        {
-            "title": "HTML 拆分/合并",
-            "description": "HTML文件分割与合并工具",
-            "url": "tools/html-split-merge.html",
-            "icon": "✂️📂",
+            "icon": "",
+            "title": "GitHub directory downloader",
+            "keywords": "GitHub directory for web",
             "features": [
-                "按标签拆分文档",
-                "多文件合并",
-                "自动闭合标签检测"
-            ]
+                ""
+            ],
+            "description": "GitHub directory downloader for web, Momo's Blog, LuckyMomo",
+            "url": "pages/github_file_download_uckly-mjw.html"
         },
         {
-            "title": "AI模型导航",
-            "description": "主流大模型聚合中心",
-            "url": "tools/html_ai_group.html",
-            "icon": "🤖"
+            "icon": "",
+            "title": "加班时长记录器（多条目 - 修正）",
+            "keywords": "加班时长记录器",
+            "features": [
+                ""
+            ],
+            "description": "加班时长记录器",
+            "url": "pages/add_work_record.html"
         },
         {
-            "title": "UML 实时预览",
-            "description": "在线编写并预览UML代码",
-            "url": "tools/uml-preview.html",
-            "icon": "🖥️"
+            "icon": "",
+            "title": "Markdown离线转换工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/markdown_preview2.html"
         },
         {
-            "title": "飞书文档转Markdown",
-            "description": "飞书文档转Markdown",
-            "url": "tools/feishu_2_md.html",
-            "icon": "🖥️"
+            "icon": "",
+            "title": "lottery_page",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/lottery_page.html"
+        },
+        {
+            "icon": "",
+            "title": "定期存取款记录管理系统",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/save_money_record.html"
+        },
+        {
+            "icon": "",
+            "title": "随机美女图片 - 极致美学（修复版）",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/random_img.html"
+        },
+        {
+            "icon": "",
+            "title": "开发者工具箱 - 专业的开发工具集",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tool_index_bootstrap.html"
+        },
+        {
+            "icon": "",
+            "title": "JSON Remark Parse",
+            "keywords": "带备注的 JSON 排班工具,毛静文的博客,Momo's Blog",
+            "features": [
+                ""
+            ],
+            "description": "带备注的 JSON 排班工具,YAPI JSON 格式化必备工具,YAPI JSON 美化工具",
+            "url": "pages/json_parse_luckly-mjw.html"
+        },
+        {
+            "icon": "",
+            "title": "HTML网页代码预览器-离线版",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/html_code_preview_no_js.html"
+        },
+        {
+            "icon": "",
+            "title": "上传csv文件渲染为html页面",
+            "keywords": "文件上传",
+            "features": [
+                ""
+            ],
+            "description": "文件上传",
+            "url": "pages/csv_render.html"
+        },
+        {
+            "icon": "",
+            "title": "link_2_card",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/link_2_card.html"
+        },
+        {
+            "icon": "",
+            "title": "资讯热榜",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/hot_news_static_page.html"
+        },
+        {
+            "icon": "",
+            "title": "纯前端4字LOGO生成器",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/logo_gen.html"
+        },
+        {
+            "icon": "",
+            "title": "2025年会抽奖大转盘",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/lucky_draw.html"
+        },
+        {
+            "icon": "",
+            "title": "Markdown实时预览工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/markdown_preview1.html"
+        },
+        {
+            "icon": "",
+            "title": "用户登录",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/login.html"
+        },
+        {
+            "icon": "",
+            "title": "每日一句",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/date_card.html"
+        },
+        {
+            "icon": "",
+            "title": "拖拽定制课程表",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/class_table_drag.html"
+        },
+        {
+            "icon": "",
+            "title": "WPS文件报送管理系统",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/todo.html"
+        },
+        {
+            "icon": "",
+            "title": "webhook消息推送",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/webhook_notice.html"
+        },
+        {
+            "icon": "",
+            "title": "我要答题（仅支持Excel题库）",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/study_test.html"
+        },
+        {
+            "icon": "",
+            "title": "高级证件照排版工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/advanced-photo-layout.html"
+        },
+        {
+            "icon": "",
+            "title": "我的智能问答助手",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/ai/ai_helper.html"
+        },
+        {
+            "icon": "",
+            "title": "全能导航 | 时钟+计算器+番茄钟",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/nav/personal_nav.html"
+        },
+        {
+            "icon": "",
+            "title": "工具导航",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/nav/biz_Intranet_nav.html"
+        },
+        {
+            "icon": "",
+            "title": "效率工具列表",
+            "keywords": "开发效率工具, Efficient tool",
+            "features": [
+                ""
+            ],
+            "description": "开发效率工具, 毛静文博客, Efficient tool, Momo's Blog",
+            "url": "pages/nav/tools_nav_uckly-mjw.html"
+        },
+        {
+            "icon": "",
+            "title": "bituplink导航 - 没有最好只有最适合",
+            "keywords": "bituplink,导航,网址",
+            "features": [
+                ""
+            ],
+            "description": "简单但实用的导航",
+            "url": "pages/nav/bituplink_nav.html"
+        },
+        {
+            "icon": "",
+            "title": "九九乘法表消消乐",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/games/99words.html"
+        },
+        {
+            "icon": "",
+            "title": "小学生键盘指法练习",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/games/key_exercice.html"
+        },
+        {
+            "icon": "",
+            "title": "字符串工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/string-tool.html"
+        },
+        {
+            "icon": "",
+            "title": "JSON 格式化工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/json-parse.html"
+        },
+        {
+            "icon": "",
+            "title": "feishu_2_md",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/feishu_2_md.html"
+        },
+        {
+            "icon": "",
+            "title": "UML 预览工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/uml-preview.html"
+        },
+        {
+            "icon": "",
+            "title": "全能工具箱 - 在线工具集合",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/online_tools.html"
+        },
+        {
+            "icon": "",
+            "title": "JSON 格式化工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/json-formatter.html"
+        },
+        {
+            "icon": "",
+            "title": "HTML实时预览工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/html-previewer.html"
+        },
+        {
+            "icon": "",
+            "title": "AI大模型聚合平台",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/html_ai_group.html"
+        },
+        {
+            "icon": "",
+            "title": "JSON 可视化（简化版）",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/uml_json_preview.html"
+        },
+        {
+            "icon": "",
+            "title": "HTML 文件处理工具",
+            "keywords": "",
+            "features": [
+                ""
+            ],
+            "description": "",
+            "url": "pages/tools/html-split-merge.html"
         }
     ]
 }
