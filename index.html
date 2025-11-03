@@ -677,7 +677,7 @@
                     <h4><i class="fas fa-envelope"></i> 联系方式</h4>
                     <div class="social-links">
                         <a href="https://github.com/Shonee" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-                        <a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzI5NTM3MDk4Mg==&action=getalbum&album_id=3019998732068913156#wechat_redirect" title="微信公众号"><i class="fab fa-weixin"></i></a>
+                        <a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzI5NTM3MDk4Mg==&action=getalbum&album_id=3019998732068913156#wechat_redirect" target="_blank"  title="微信公众号"><i class="fab fa-weixin"></i></a>
                     </div>
                 </div>
             </div>
@@ -1011,14 +1011,15 @@
             if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
                 // 百度统计 - 请替换为实际 ID
                 const baiduId = '681214730fa9909a036881a56e64fd3f';
-                if (baiduId) {
-                    console.log('baiduId', baiduId);
-                    const hm = document.createElement('script');
-                    hm.src = `https://hm.baidu.com/hm.js?${baiduId}`;
-                    document.head.appendChild(hm);
-                }
+                // if (baiduId) {
+                //     console.log('baiduId', baiduId);
+                //     const hm = document.createElement('script');
+                //     hm.src = `https://hm.baidu.com/hm.js?${baiduId}`;
+                //     document.head.appendChild(hm);
+                // }
                 var _hmt = _hmt || [];
                 (function() {
+                  console.log('baiduId', baiduId);
                   var hm = document.createElement("script");
                   hm.src = "https://hm.baidu.com/hm.js?681214730fa9909a036881a56e64fd3f";
                   var s = document.getElementsByTagName("script")[0]; 
