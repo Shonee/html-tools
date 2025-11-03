@@ -708,9 +708,6 @@
             // 加载主题设置
             loadThemeSettings();
             
-            // 加载工具配置
-            loadTools();
-            
             // 初始化搜索
             initSearch();
             
@@ -735,6 +732,9 @@
                 const response = await fetch(configPath);
                 if (!response.ok) throw new Error('配置加载失败');
                 toolsConfig = await response.json();
+
+                // 加载工具配置
+                loadTools();
             } catch (error) {
                 console.error('工具加载失败:', error);
                 showErrorAlert();
