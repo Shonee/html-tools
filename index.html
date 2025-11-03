@@ -703,7 +703,7 @@
             document.getElementById('currentYear').textContent = new Date().getFullYear();
             
             // 加载工具配置
-            loadTools('./tools-config.json');
+            loadConfigs('./tools-config.json');
 
             // 加载主题设置
             loadThemeSettings();
@@ -730,7 +730,7 @@
          * 加载工具配置并生成导航卡片
          * @param {string} configPath 配置文件路径
          */
-        async function loadTools(configPath) {
+        async function loadConfigs(configPath) {
             try {
                 const response = await fetch(configPath);
                 if (!response.ok) throw new Error('配置加载失败');
