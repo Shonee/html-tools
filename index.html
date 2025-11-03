@@ -3,7 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <title>HTML工具导航</title>
-    <link rel="stylesheet" href="styles/styles.css">
+     <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .home-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #0366d6;
+        }
+
+        .tool-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .preview-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .code-panel, .preview-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .preview-container {
+                flex-direction: column;
+            }
+            .code-panel, .preview-panel {
+                height: 50vh;
+            }
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        button {
+            background: #0366d6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        pre {
+            background: #f6f8fa;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+
+        /* 卡片图标样式 */
+        .tool-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        /* 错误提示样式 */
+        .error-alert {
+            text-align: center;
+            padding: 30px;
+            background: #ffe3e3;
+            border: 2px solid #ff6b6b;
+            border-radius: 8px;
+            color: #c92a2a;
+            grid-column: 1 / -1;
+        }
+
+        .error-alert h3 {
+            margin: 0 0 10px 0;
+        }
+     </style>
 </head>
 <body>
     <header>
@@ -25,12 +128,79 @@
     </footer>
 
     <!-- 加载脚本 -->
-    <script src="js/index.js"></script>
+    <!-- <script src="/static/js/index.js"></script> -->
+    <script>
+        /**
+         * 加载工具配置并生成导航卡片
+         * @param {string} configPath 配置文件路径
+         */
+        async function loadTools(configPath) {
+            try {
+                const response = await fetch(configPath);
+                if (!response.ok) throw new Error('配置加载失败');
+                
+                const config = await response.json();
+                renderToolCards(config.tools);
+                
+            } catch (error) {
+                console.error('工具加载失败:', error);
+                showErrorAlert();
+            }
+        }
+
+        /**
+         * 渲染工具卡片
+         * @param {Array} tools 工具配置数组
+         */
+        function renderToolCards(tools) {
+            const container = document.getElementById('tool-container');
+            const template = tools.map(tool => `
+                <div class="tool-card">
+                    <div class="tool-icon">${tool.icon || '⚙️'}</div>
+                    <h2>${tool.title}</h2>
+                    <p>${tool.description}</p>
+                    <a href="${tool.url}" target="_blank">立即使用</a>
+                </div>
+            `).join('');
+
+            container.innerHTML = template;
+            addCardHoverEffect();
+        }
+
+        /**
+         * 添加卡片悬停动画
+         */
+        function addCardHoverEffect() {
+            const cards = document.querySelectorAll('.tool-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'none';
+                });
+            });
+        }
+
+        /**
+         * 显示错误提示
+         */
+        function showErrorAlert() {
+            const container = document.getElementById('tool-container');
+            container.innerHTML = `
+                <div class="error-alert">
+                    <h3>⚠️ 工具加载失败</h3>
+                    <p>请刷新页面重试或联系管理员</p>
+                </div>
+            `;
+        }
+    </script>
     <script>
         // DOM加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
-            loadTools('tools-config.json');
+            loadTools('./tools-config.json');
         });
     </script>
+
 </body>
 </html>
