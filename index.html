@@ -1017,7 +1017,14 @@
                     hm.src = `https://hm.baidu.com/hm.js?${baiduId}`;
                     document.head.appendChild(hm);
                 }
-                
+                var _hmt = _hmt || [];
+                (function() {
+                  var hm = document.createElement("script");
+                  hm.src = "https://hm.baidu.com/hm.js?681214730fa9909a036881a56e64fd3f";
+                  var s = document.getElementsByTagName("script")[0]; 
+                  s.parentNode.insertBefore(hm, s);
+                })();
+
                 // Google Analytics - 请替换为实际 ID
                 const googleId = 'GTM-M4PH62W4';
                 if (googleId) {
