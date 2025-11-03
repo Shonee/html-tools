@@ -693,7 +693,7 @@
         let searchDebounceTimer = null;
 
         // 工具配置数据
-        const toolsConfig = {
+        let toolsConfig = {
         };
 
 
@@ -734,13 +734,24 @@
             try {
                 const response = await fetch(configPath);
                 if (!response.ok) throw new Error('配置加载失败');
-                
                 toolsConfig = await response.json();
-                
             } catch (error) {
                 console.error('工具加载失败:', error);
                 showErrorAlert();
             }
+        }
+
+        /**
+         * 显示错误提示
+         */
+        function showErrorAlert() {
+            const container = document.getElementById('tool-container');
+            container.innerHTML = `
+                <div class="error-alert">
+                    <h3>⚠️ 工具加载失败</h3>
+                    <p>请刷新页面重试或联系管理员</p>
+                </div>
+            `;
         }
 
         // 加载主题设置
