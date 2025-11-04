@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="icon" content="🔖">
+  <meta name="category" content="JSON">
+  <meta name="keywords" content="JSON 格式化工具">
+  <meta name="description" content="JSON 格式化、压缩、转义工具">
+  <meta name="features" content="JSON格式化、JSON转义、JSON压缩">
+  <title>JSON 格式化工具</title>
+  
+  <!-- Font Awesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- CodeMirror 核心与 JSON 模式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  
+  <!-- highlight.js 语法高亮与行号插件 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+  
+  <style>
+    :root {
+      --primary-color: #4a6cf7;
+      --primary-hover: #3a5bd9;
+      --secondary-color: #f5f5f5;
+      --text-color: #333;
+      --light-text: #666;
+      --error-color: #e53935;
+      --success-color: #43a047;
+      --border-color: #ddd;
+      --bg-color: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f9fafb;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--light-text);
+      font-size: 1rem;
+    }
+
+    .json-formatter {
+      background-color: var(--bg-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .options {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .option-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-weight: 500;
+      color: var(--light-text);
+      font-size: 0.9rem;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 0.4rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e8e8e8;
+    }
+
+    .editor-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .editor-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .actions, .options {
+        width: 100%;
+      }
+    }
+
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-stats {
+      font-size: 0.85rem;
+      color: var(--light-text);
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--light-text);
+      font-size: 1rem;
+      padding: 0.3rem;
+      border-radius: 3px;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      color: var(--primary-color);
+      background-color: rgba(74, 108, 247, 0.1);
+    }
+
+    .editor {
+      height: 500px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .CodeMirror {
+      height: 100%;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .output-viewer {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: #282c34;
+      color: #abb2bf;
+      padding: 0;
+    }
+
+    .output-viewer pre {
+      margin: 0;
+      padding: 1rem;
+      white-space: pre;
+    }
+
+    /* 压缩模式样式 */
+    .output-viewer.minified pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+
+    /* 树状视图样式 */
+    .output-viewer.tree-view {
+      background-color: #282c34;
+      padding: 1rem;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .tree-node {
+      position: relative;
+      margin: 2px 0;
+    }
+
+    .tree-node-content {
+      display: flex;
+      align-items: center;
+      padding: 2px 0;
+      border-radius: 3px;
+      transition: background-color 0.15s;
+    }
+
+    .tree-node-content:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .tree-toggle {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      user-select: none;
+      margin-right: 4px;
+      text-align: center;
+      line-height: 16px;
+      color: #888;
+      flex-shrink: 0;
+    }
+
+    .tree-toggle:hover {
+      color: #4a6cf7;
+    }
+
+    .tree-toggle.collapsed::before {
+      content: '▶';
+    }
+
+    .tree-toggle.expanded::before {
+      content: '▼';
+    }
+
+    .tree-toggle.no-toggle {
+      visibility: hidden;
+    }
+
+    .tree-key {
+      color: #e06c75;
+      margin-right: 4px;
+    }
+
+    .tree-colon {
+      color: #abb2bf;
+      margin-right: 4px;
+    }
+
+    .tree-value {
+      color: #98c379;
+    }
+
+    .tree-value.string {
+      color: #98c379;
+    }
+
+    .tree-value.number {
+      color: #d19a66;
+    }
+
+    .tree-value.boolean {
+      color: #56b6c2;
+    }
+
+    .tree-value.null {
+      color: #888;
+    }
+
+    .tree-bracket {
+      color: #abb2bf;
+    }
+
+    .tree-children {
+      margin-left: 20px;
+    }
+
+    .tree-children.collapsed {
+      display: none;
+    }
+
+    .tree-copy-btn {
+      display: none;
+      margin-left: 8px;
+      padding: 2px 6px;
+      background-color: rgba(74, 108, 247, 0.2);
+      border: none;
+      border-radius: 3px;
+      color: #4a6cf7;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+
+    .tree-copy-btn:hover {
+      background-color: rgba(74, 108, 247, 0.3);
+      color: #6a8cf7;
+    }
+
+    .tree-node-content:hover .tree-copy-btn {
+      display: inline-block;
+    }
+
+    .tree-ellipsis {
+      color: #888;
+      font-style: italic;
+    }
+
+    .output-viewer code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* highlight.js 行号样式 */
+    .hljs-ln-numbers {
+      user-select: none;
+      text-align: right;
+      color: #5c6370;
+      border-right: 1px solid #3e4451;
+      padding-right: 0.8rem !important;
+      vertical-align: top;
+    }
+
+    .hljs-ln-code {
+      padding-left: 1rem !important;
+    }
+
+    .status-bar {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: none;
+      white-space: pre-wrap;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      line-height: 1.6;
+    }
+
+    .status-bar.error {
+      background-color: rgba(229, 57, 53, 0.1);
+      color: var(--error-color);
+      display: block;
+      border-left: 4px solid var(--error-color);
+    }
+
+    .status-bar.success {
+      background-color: rgba(67, 160, 71, 0.1);
+      color: var(--success-color);
+      display: block;
+      border-left: 4px solid var(--success-color);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--light-text);
+      font-size: 0.9rem;
+    }
+
+    /* 暗色模式支持 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text-color: #e0e0e0;
+        --light-text: #aaa;
+        --border-color: #444;
+        --bg-color: #1e293b;
+        --secondary-color: #334155;
+      }
+
+      body {
+        background-color: #0f172a;
+      }
+
+      .btn-secondary {
+        background-color: #334155;
+        color: #e0e0e0;
+      }
+
+      .btn-secondary:hover {
+        background-color: #475569;
+      }
+
+      .CodeMirror {
+        background-color: #1e293b;
+        color: #e0e0e0;
+      }
+
+      .output-viewer {
+        background-color: #1b2433;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>JSON 格式化工具</h1>
+      <p class="subtitle">轻松格式化、验证、压缩和转义你的 JSON 数据</p>
+    </header>
+
+    <div class="json-formatter">
+      <div class="toolbar">
+        <div class="actions">
+          <button id="format-btn" class="btn btn-primary">
+            <i class="fas fa-magic"></i> 格式化
+          </button>
+          <button id="minify-btn" class="btn btn-secondary">
+            <i class="fas fa-compress-alt"></i> 压缩
+          </button>
+          <button id="escape-btn" class="btn btn-secondary">
+            <i class="fas fa-quote-right"></i> 转义
+          </button>
+          <button id="clear-btn" class="btn btn-secondary">
+            <i class="fas fa-trash"></i> 清空
+          </button>
+          <button id="example-btn" class="btn btn-secondary">
+            <i class="fas fa-lightbulb"></i> 示例
+          </button>
+        </div>
+        <div class="options">
+          <div class="option-group">
+            <label for="indent-size">缩进空格:</label>
+            <input type="number" id="indent-size" min="1" max="8" value="2">
+          </div>
+          <div class="option-group">
+            <label for="view-mode">输出模式:</label>
+            <select id="view-mode" style="padding: 0.4rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.9rem;">
+              <option value="tree">树状视图</option>
+              <option value="text">纯文本</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-container">
+        <div class="editor-panel">
+          <div class="panel-header">
+            <span class="panel-title">输入 JSON</span>
+            <div class="panel-actions">
+              <button id="copy-input-btn" class="icon-btn" title="复制输入内容">
+                <i class="fas fa-copy"></i>
+              </button>
+              <span id="input-stats" class="panel-stats">0 字符</span>
+            </div>
+          </div>
+          <div class="editor">
+            <textarea id="input-editor" placeholder="在这里粘贴你的 JSON 数据..."></textarea>
+          </div>
+        </div>
+
+        <div class="editor-panel">
+          <div class="panel-header">
+            <span class="panel-title">格式化结果</span>
+            <div class="panel-actions">
+              <button id="collapse-all-btn" class="icon-btn" title="全部折叠" style="display: none;">
+                <i class="fas fa-compress"></i>
+              </button>
+              <button id="expand-all-btn" class="icon-btn" title="全部展开" style="display: none;">
+                <i class="fas fa-expand"></i>
+              </button>
+              <button id="copy-output-btn" class="icon-btn" title="复制输出内容">
+                <i class="fas fa-copy"></i>
+              </button>
+              <span id="output-stats" class="panel-stats">0 字符</span>
+            </div>
+          </div>
+          <div class="editor">
+            <div id="output-viewer" class="output-viewer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="status-bar" class="status-bar"></div>
+    </div>
+
+    <footer>
+      <p>&copy; <span id="current-year"></span> JSON 格式化工具</p>
+    </footer>
+  </div>
+
+  <script>
+    // 初始化 CodeMirror 编辑器
+    let cmEditor;
+    let lastOutputText = '';
+    let currentViewMode = 'tree'; // 'tree' 或 'text'
+    let currentJsonData = null; // 当前解析的 JSON 数据
+    let currentOperation = ''; // 'format', 'minify', 'escape'
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化 CodeMirror
+      const inputTextarea = document.getElementById('input-editor');
+      cmEditor = CodeMirror.fromTextArea(inputTextarea, {
+        mode: { name: 'javascript', json: true },
+        lineNumbers: true,
+        theme: 'material-darker',
+        lineWrapping: false,
+        tabSize: 2,
+        indentWithTabs: false
+      });
+
+      // 获取元素
+      const outputViewer = document.getElementById('output-viewer');
+      const formatBtn = document.getElementById('format-btn');
+      const minifyBtn = document.getElementById('minify-btn');
+      const escapeBtn = document.getElementById('escape-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const exampleBtn = document.getElementById('example-btn');
+      const copyInputBtn = document.getElementById('copy-input-btn');
+      const copyOutputBtn = document.getElementById('copy-output-btn');
+      const indentSize = document.getElementById('indent-size');
+      const statusBar = document.getElementById('status-bar');
+      const inputStats = document.getElementById('input-stats');
+      const outputStats = document.getElementById('output-stats');
+      const currentYearElement = document.getElementById('current-year');
+      const viewModeSelect = document.getElementById('view-mode');
+      const collapseAllBtn = document.getElementById('collapse-all-btn');
+      const expandAllBtn = document.getElementById('expand-all-btn');
+
+      // 设置当前年份
+      currentYearElement.textContent = new Date().getFullYear();
+
+      // 示例 JSON 数据
+      const exampleJSON = {
+        "name": "JSON 格式化工具",
+        "version": "2.0.0",
+        "description": "简洁高效的 JSON 格式化和验证工具",
+        "features": [
+          "智能格式化",
+          "语法验证",
+          "一键压缩",
+          "转义处理",
+          "语法高亮",
+          "行号显示"
+        ],
+        "settings": {
+          "indentSize": 2,
+          "theme": "dark",
+          "autoFormat": true
+        },
+        "stats": {
+          "downloads": 15000,
+          "activeUsers": 8500,
+          "rating": 4.9
+        },
+        "author": {
+          "name": "开发者",
+          "website": "https://example.com",
+          "contact": {
+            "email": "dev@example.com",
+            "github": "@jsonformatter"
+          }
+        },
+        "license": "MIT",
+        "isActive": true,
+        "testNull": null
+      };
+
+      // 更新字符统计
+      function updateStats() {
+        const inputLen = cmEditor.getValue().length;
+        const outputLen = lastOutputText.length;
+        inputStats.textContent = `${inputLen} 字符`;
+        outputStats.textContent = `${outputLen} 字符`;
+      }
+
+      // 设置状态栏信息
+      function setStatus(message, type) {
+        statusBar.textContent = message;
+        statusBar.className = 'status-bar';
+        if (type) {
+          statusBar.classList.add(type);
+        }
+        
+        // 3秒后自动隐藏成功消息
+        if (type === 'success') {
+          setTimeout(() => {
+            statusBar.style.display = 'none';
+          }, 3000);
+        }
+      }
+
+      // ==================== 树状视图功能 ====================
+      
+      // 构建树状节点数据结构
+      function buildTreeNode(value, key = null, depth = 0) {
+        const node = {
+          key: key,
+          value: value,
+          depth: depth,
+          collapsed: depth > 1, // 默认折叠深度 > 1 的节点
+          rendered: false
+        };
+
+        if (value === null) {
+          node.type = 'null';
+        } else if (Array.isArray(value)) {
+          node.type = 'array';
+          node.children = [];
+          // 懒加载：仅在需要时构建子节点
+          node.childrenData = value;
+        } else if (typeof value === 'object') {
+          node.type = 'object';
+          node.children = [];
+          // 懒加载：仅在需要时构建子节点
+          node.childrenData = value;
+        } else if (typeof value === 'string') {
+          node.type = 'string';
+        } else if (typeof value === 'number') {
+          node.type = 'number';
+        } else if (typeof value === 'boolean') {
+          node.type = 'boolean';
+        }
+
+        return node;
+      }
+
+      // 构建子节点（懒加载调用）
+      function buildChildren(node) {
+        if (node.rendered) return;
+        
+        node.children = [];
+        if (node.type === 'array') {
+          node.childrenData.forEach((item, index) => {
+            node.children.push(buildTreeNode(item, index, node.depth + 1));
+          });
+        } else if (node.type === 'object') {
+          Object.keys(node.childrenData).forEach(key => {
+            node.children.push(buildTreeNode(node.childrenData[key], key, node.depth + 1));
+          });
+        }
+        node.rendered = true;
+      }
+
+      // 渲染树状节点
+      function renderTreeNode(node, isRoot = false) {
+        const container = document.createElement('div');
+        container.className = 'tree-node';
+        container.dataset.depth = node.depth;
+
+        const content = document.createElement('div');
+        content.className = 'tree-node-content';
+
+        // 折叠/展开按钮
+        const toggle = document.createElement('span');
+        toggle.className = 'tree-toggle';
+        if (node.type === 'object' || node.type === 'array') {
+          toggle.className += node.collapsed ? ' collapsed' : ' expanded';
+          toggle.onclick = function(e) {
+            e.stopPropagation();
+            toggleNode(node, container);
+          };
+        } else {
+          toggle.className += ' no-toggle';
+        }
+        content.appendChild(toggle);
+
+        // 节点内容
+        const textSpan = document.createElement('span');
+        
+        if (node.key !== null) {
+          const keySpan = document.createElement('span');
+          keySpan.className = 'tree-key';
+          keySpan.textContent = `"${node.key}"`;
+          textSpan.appendChild(keySpan);
+          
+          const colonSpan = document.createElement('span');
+          colonSpan.className = 'tree-colon';
+          colonSpan.textContent = ': ';
+          textSpan.appendChild(colonSpan);
+        }
+
+        const valueSpan = document.createElement('span');
+        
+        if (node.type === 'object') {
+          const bracket = document.createElement('span');
+          bracket.className = 'tree-bracket';
+          const keys = Object.keys(node.childrenData);
+          bracket.textContent = node.collapsed ? `{ ... }` : '{';
+          if (keys.length === 0) {
+            bracket.textContent = '{ }';
+          } else if (!node.collapsed && keys.length > 0) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'tree-ellipsis';
+            ellipsis.textContent = ` // ${keys.length} keys`;
+            bracket.appendChild(ellipsis);
+          }
+          valueSpan.appendChild(bracket);
+        } else if (node.type === 'array') {
+          const bracket = document.createElement('span');
+          bracket.className = 'tree-bracket';
+          const len = node.childrenData.length;
+          bracket.textContent = node.collapsed ? `[ ... ]` : '[';
+          if (len === 0) {
+            bracket.textContent = '[ ]';
+          } else if (!node.collapsed && len > 0) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'tree-ellipsis';
+            ellipsis.textContent = ` // ${len} items`;
+            bracket.appendChild(ellipsis);
+          }
+          valueSpan.appendChild(bracket);
+        } else if (node.type === 'string') {
+          valueSpan.className = 'tree-value string';
+          const str = node.value;
+          valueSpan.textContent = `"${str.length > 100 ? str.substring(0, 100) + '...' : str}"`;
+          if (str.length > 100) {
+            valueSpan.title = str;
+          }
+        } else if (node.type === 'number') {
+          valueSpan.className = 'tree-value number';
+          valueSpan.textContent = node.value;
+        } else if (node.type === 'boolean') {
+          valueSpan.className = 'tree-value boolean';
+          valueSpan.textContent = node.value;
+        } else if (node.type === 'null') {
+          valueSpan.className = 'tree-value null';
+          valueSpan.textContent = 'null';
+        }
+
+        textSpan.appendChild(valueSpan);
+        content.appendChild(textSpan);
+
+        // 复制按钮（仅对对象和数组）
+        if (node.type === 'object' || node.type === 'array') {
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'tree-copy-btn';
+          copyBtn.textContent = '复制';
+          copyBtn.onclick = function(e) {
+            e.stopPropagation();
+            copyNodeData(node);
+          };
+          content.appendChild(copyBtn);
+        }
+
+        container.appendChild(content);
+
+        // 子节点容器
+        if (node.type === 'object' || node.type === 'array') {
+          const childrenContainer = document.createElement('div');
+          childrenContainer.className = 'tree-children';
+          if (node.collapsed) {
+            childrenContainer.className += ' collapsed';
+          } else {
+            // 懒加载：展开时才构建子节点
+            if (!node.rendered) {
+              buildChildren(node);
+            }
+            node.children.forEach(child => {
+              childrenContainer.appendChild(renderTreeNode(child));
+            });
+            
+            // 闭合括号
+            const closeBracket = document.createElement('div');
+            closeBracket.className = 'tree-node-content';
+            closeBracket.style.marginLeft = '0';
+            const closeBracketSpan = document.createElement('span');
+            closeBracketSpan.className = 'tree-bracket';
+            closeBracketSpan.textContent = node.type === 'object' ? '}' : ']';
+            closeBracket.appendChild(closeBracketSpan);
+            childrenContainer.appendChild(closeBracket);
+          }
+          container.appendChild(childrenContainer);
+        }
+
+        return container;
+      }
+
+      // 折叠/展开节点
+      function toggleNode(node, container) {
+        node.collapsed = !node.collapsed;
+        
+        const toggle = container.querySelector('.tree-toggle');
+        const childrenContainer = container.querySelector('.tree-children');
+        const valueSpan = container.querySelector('.tree-bracket');
+        
+        if (node.collapsed) {
+          toggle.className = 'tree-toggle collapsed';
+          childrenContainer.className = 'tree-children collapsed';
+          if (node.type === 'object') {
+            valueSpan.textContent = '{ ... }';
+          } else if (node.type === 'array') {
+            valueSpan.textContent = '[ ... ]';
+          }
+        } else {
+          toggle.className = 'tree-toggle expanded';
+          childrenContainer.className = 'tree-children';
+          childrenContainer.innerHTML = '';
+          
+          // 懒加载：展开时构建子节点
+          if (!node.rendered) {
+            buildChildren(node);
+          }
+          
+          node.children.forEach(child => {
+            childrenContainer.appendChild(renderTreeNode(child));
+          });
+          
+          // 闭合括号
+          const closeBracket = document.createElement('div');
+          closeBracket.className = 'tree-node-content';
+          closeBracket.style.marginLeft = '0';
+          const closeBracketSpan = document.createElement('span');
+          closeBracketSpan.className = 'tree-bracket';
+          closeBracketSpan.textContent = node.type === 'object' ? '}' : ']';
+          closeBracket.appendChild(closeBracketSpan);
+          childrenContainer.appendChild(closeBracket);
+          
+          // 更新括号显示
+          if (node.type === 'object') {
+            const keys = Object.keys(node.childrenData);
+            valueSpan.textContent = '{';
+            if (keys.length > 0) {
+              const ellipsis = document.createElement('span');
+              ellipsis.className = 'tree-ellipsis';
+              ellipsis.textContent = ` // ${keys.length} keys`;
+              valueSpan.appendChild(ellipsis);
+            }
+          } else if (node.type === 'array') {
+            const len = node.childrenData.length;
+            valueSpan.textContent = '[';
+            if (len > 0) {
+              const ellipsis = document.createElement('span');
+              ellipsis.className = 'tree-ellipsis';
+              ellipsis.textContent = ` // ${len} items`;
+              valueSpan.appendChild(ellipsis);
+            }
+          }
+        }
+      }
+
+      // 复制节点数据
+      function copyNodeData(node) {
+        let data;
+        if (node.type === 'object' || node.type === 'array') {
+          data = node.childrenData;
+        } else {
+          data = node.value;
+        }
+        
+        const jsonString = JSON.stringify(data, null, 2);
+        copyToClipboard(jsonString, '节点数据已复制到剪贴板！');
+      }
+
+      // 全部折叠
+      function collapseAll(node) {
+        if (node.type === 'object' || node.type === 'array') {
+          node.collapsed = true;
+          if (node.rendered && node.children) {
+            node.children.forEach(child => collapseAll(child));
+          }
+        }
+      }
+
+      // 全部展开
+      function expandAll(node) {
+        if (node.type === 'object' || node.type === 'array') {
+          node.collapsed = false;
+          if (!node.rendered) {
+            buildChildren(node);
+          }
+          node.children.forEach(child => expandAll(child));
+        }
+      }
+
+      // 渲染树状视图
+      function renderTreeView(jsonData, preserveState = false) {
+        outputViewer.innerHTML = '';
+        outputViewer.className = 'output-viewer tree-view';
+        
+        // 如果是保持状态模式且已有数据，直接使用现有节点
+        if (preserveState && currentJsonData) {
+          outputViewer.appendChild(renderTreeNode(currentJsonData, true));
+        } else {
+          // 创建新节点
+          const rootNode = buildTreeNode(jsonData);
+          rootNode.collapsed = false; // 根节点默认展开
+          currentJsonData = rootNode;
+          outputViewer.appendChild(renderTreeNode(rootNode, true));
+        }
+        
+        // 显示折叠/展开按钮
+        collapseAllBtn.style.display = 'inline-block';
+        expandAllBtn.style.display = 'inline-block';
+      }
+
+      // ==================== 纯文本视图功能 ====================
+
+      // 递归去除转义
+      function removeEscapes(str) {
+        let result = str;
+        let prevResult = '';
+        
+        // 持续去除转义直到没有变化
+        while (result !== prevResult) {
+          prevResult = result;
+          result = result.replace(/\\"/g, '"');
+        }
+        
+        return result;
+      }
+
+      // 检测并处理单引号字符串（Python/JS 格式转换）
+      function handleSingleQuotes(str) {
+        str = str.trim();
+        
+        // 检测是否是单引号包裹的字符串
+        if (str.startsWith("'") && str.endsWith("'")) {
+          // 去除首尾单引号
+          str = str.slice(1, -1);
+          // 转义内部的双引号
+          str = str.replace(/"/g, '\\"');
+          // 用双引号包裹
+          str = '"' + str + '"';
+          
+          // 尝试解析，如果是JSON对象字符串，需要再处理
+          try {
+            const parsed = JSON.parse(str);
+            if (typeof parsed === 'string') {
+              // 是字符串字面量，尝试解析为JSON
+              try {
+                return JSON.parse(parsed);
+              } catch (e) {
+                return parsed;
+              }
+            }
+          } catch (e) {
+            // 不是有效的JSON，返回原字符串
+          }
+        }
+        
+        return str;
+      }
+
+      // 获取 JSON 解析错误的详细位置和建议
+      function getDetailedError(jsonString, error) {
+        const errorMsg = error.message;
+        let position = -1;
+        
+        // 尝试从错误消息中提取位置信息
+        const positionMatch = errorMsg.match(/position (\d+)/);
+        if (positionMatch) {
+          position = parseInt(positionMatch[1]);
+        }
+        
+        if (position === -1) {
+          return {
+            message: errorMsg,
+            suggestion: '请检查 JSON 语法是否正确'
+          };
+        }
+        
+        // 计算行号和列号
+        const lines = jsonString.substring(0, position).split('\n');
+        const line = lines.length;
+        const column = lines[lines.length - 1].length + 1;
+        
+        // 获取错误上下文（前后各2行）
+        const allLines = jsonString.split('\n');
+        const contextStart = Math.max(0, line - 3);
+        const contextEnd = Math.min(allLines.length, line + 2);
+        const contextLines = allLines.slice(contextStart, contextEnd);
+        
+        // 生成错误提示
+        let detailedMessage = `JSON 解析错误（第 ${line} 行，第 ${column} 列）\n\n`;
+        
+        // 显示上下文代码
+        contextLines.forEach((contextLine, idx) => {
+          const lineNum = contextStart + idx + 1;
+          const prefix = lineNum === line ? '>>> ' : '    ';
+          detailedMessage += `${prefix}${lineNum}: ${contextLine}\n`;
+        });
+        
+        detailedMessage += `\n错误详情: ${errorMsg}`;
+        
+        // 根据错误类型提供解决建议
+        let suggestion = '';
+        if (errorMsg.includes('Unexpected token')) {
+          if (errorMsg.includes('}')) {
+            suggestion = '可能原因：多余的闭合括号，或缺少逗号分隔符';
+          } else if (errorMsg.includes(']')) {
+            suggestion = '可能原因：多余的闭合方括号，或缺少逗号分隔符';
+          } else if (errorMsg.includes(',')) {
+            suggestion = '可能原因：多余的逗号（JSON 不允许末尾逗号）';
+          } else if (errorMsg.includes("'")) {
+            suggestion = '可能原因：使用了单引号，JSON 必须使用双引号';
+          } else {
+            suggestion = '可能原因：语法错误，请检查括号、引号、逗号是否匹配';
+          }
+        } else if (errorMsg.includes('Unexpected end')) {
+          suggestion = '可能原因：JSON 结构不完整，缺少闭合的括号或方括号';
+        } else if (errorMsg.includes('Expected')) {
+          suggestion = '可能原因：缺少必要的语法元素，如冒号、逗号或引号';
+        } else {
+          suggestion = '建议：检查 JSON 格式是否符合标准规范';
+        }
+        
+        return {
+          message: detailedMessage,
+          suggestion: suggestion,
+          line: line,
+          column: column
+        };
+      }
+
+      // 验证 JSON 格式
+      function validateJSON(jsonString) {
+        try {
+          JSON.parse(jsonString);
+          return { valid: true };
+        } catch (error) {
+          const errorInfo = getDetailedError(jsonString, error);
+          return {
+            valid: false,
+            error: errorInfo
+          };
+        }
+      }
+
+      // 格式化 JSON
+      function formatJSON() {
+        let input = cmEditor.getValue().trim();
+        
+        if (!input) {
+          setStatus('请输入 JSON 数据', 'error');
+          return;
+        }
+
+        viewModeSelect.value = 'tree';
+
+        // 步骤1: 处理单引号字符串（Python/JS 格式转换）
+        let processedInput = handleSingleQuotes(input);
+        
+        // 步骤2: 递归去除转义
+        let unescapedInput = removeEscapes(processedInput);
+        
+        // 步骤3: 尝试多种解析策略
+        let jsonObj = null;
+        let parseSuccess = false;
+        let lastError = null;
+        
+        // 策略1: 尝试解析去转义后的字符串
+        const validation1 = validateJSON(unescapedInput);
+        if (validation1.valid) {
+          try {
+            jsonObj = JSON.parse(unescapedInput);
+            parseSuccess = true;
+          } catch (e) {
+            lastError = e;
+          }
+        } else {
+          lastError = validation1.error;
+        }
+        
+        // 策略2: 如果策略1失败，尝试直接解析原字符串
+        if (!parseSuccess) {
+          const validation2 = validateJSON(processedInput);
+          if (validation2.valid) {
+            try {
+              jsonObj = JSON.parse(processedInput);
+              parseSuccess = true;
+            } catch (e) {
+              // 保持使用第一个错误信息
+            }
+          }
+        }
+        
+        // 策略3: 如果前两个策略都失败，尝试解析原始输入
+        if (!parseSuccess) {
+          const validation3 = validateJSON(input);
+          if (validation3.valid) {
+            try {
+              jsonObj = JSON.parse(input);
+              parseSuccess = true;
+            } catch (e) {
+              // 保持使用第一个错误信息
+            }
+          } else if (!lastError) {
+            lastError = validation3.error;
+          }
+        }
+        
+        // 根据解析结果处理
+        if (parseSuccess && jsonObj !== null) {
+          // 格式化成功
+          const spaces = parseInt(indentSize.value) || 2;
+          const formatted = JSON.stringify(jsonObj, null, spaces);
+          
+          // 渲染输出
+          currentOperation = 'format';
+          renderOutput(formatted, 'format');
+          lastOutputText = formatted;
+          
+          setStatus('JSON 格式化成功！', 'success');
+          updateStats();
+        } else {
+          // 格式化失败，显示详细错误信息
+          if (lastError && lastError.message) {
+            let errorMsg = lastError.message;
+            if (lastError.suggestion) {
+              errorMsg += '\n\n💡 ' + lastError.suggestion;
+            }
+            setStatus(errorMsg, 'error');
+            
+            // 如果有行号信息，高亮显示错误行
+            if (lastError.line) {
+              cmEditor.setCursor(lastError.line - 1, lastError.column - 1);
+              cmEditor.focus();
+            }
+          } else {
+            setStatus('JSON 解析失败，请检查格式是否正确', 'error');
+          }
+        }
+      }
+
+      // 压缩 JSON
+      function minifyJSON() {
+        let input = cmEditor.getValue().trim();
+        
+        if (!input) {
+          setStatus('请输入 JSON 数据', 'error');
+          return;
+        }
+
+        // 处理单引号和转义
+        let processedInput = handleSingleQuotes(input);
+        let unescapedInput = removeEscapes(processedInput);
+        
+        // 尝试多种解析策略
+        let jsonObj = null;
+        let parseSuccess = false;
+        let lastError = null;
+        
+        // 策略1: 解析去转义后的字符串
+        const validation1 = validateJSON(unescapedInput);
+        if (validation1.valid) {
+          try {
+            jsonObj = JSON.parse(unescapedInput);
+            parseSuccess = true;
+          } catch (e) {
+            lastError = e;
+          }
+        } else {
+          lastError = validation1.error;
+        }
+        
+        // 策略2: 解析处理后的字符串
+        if (!parseSuccess) {
+          const validation2 = validateJSON(processedInput);
+          if (validation2.valid) {
+            try {
+              jsonObj = JSON.parse(processedInput);
+              parseSuccess = true;
+            } catch (e) {
+              // 保持第一个错误
+            }
+          }
+        }
+        
+        // 策略3: 解析原始输入
+        if (!parseSuccess) {
+          const validation3 = validateJSON(input);
+          if (validation3.valid) {
+            try {
+              jsonObj = JSON.parse(input);
+              parseSuccess = true;
+            } catch (e) {
+              // 保持第一个错误
+            }
+          } else if (!lastError) {
+            lastError = validation3.error;
+          }
+        }
+        
+        if (parseSuccess && jsonObj !== null) {
+          // 压缩
+          const minified = JSON.stringify(jsonObj);
+          
+          // 压缩时自动切换到纯文本视图
+          viewModeSelect.value = 'text';
+          
+          // 渲染输出
+          currentOperation = 'minify';
+          renderOutput(minified, 'minify');
+          lastOutputText = minified;
+          
+          setStatus('JSON 压缩成功！', 'success');
+          updateStats();
+        } else {
+          // 显示详细错误信息
+          if (lastError && lastError.message) {
+            let errorMsg = lastError.message;
+            if (lastError.suggestion) {
+              errorMsg += '\n\n💡 ' + lastError.suggestion;
+            }
+            setStatus(errorMsg, 'error');
+            
+            if (lastError.line) {
+              cmEditor.setCursor(lastError.line - 1, lastError.column - 1);
+              cmEditor.focus();
+            }
+          } else {
+            setStatus('JSON 解析失败，请检查格式是否正确', 'error');
+          }
+        }
+      }
+
+      // 转义 JSON
+      function escapeJSON() {
+        const input = cmEditor.getValue().trim();
+        
+        if (!input) {
+          setStatus('请输入 JSON 数据', 'error');
+          return;
+        }
+
+        // 转义双引号
+        const escaped = input.replace(/\\"/g, '\\\\"').replace(/([^\\])"/g, '$1\\"');
+        
+        // 渲染输出
+        currentOperation = 'escape';
+        renderOutput(escaped, 'escape');
+        lastOutputText = escaped;
+        
+        setStatus('JSON 转义成功！', 'success');
+        updateStats();
+      }
+
+      // 渲染输出（使用 highlight.js 和行号插件）
+      function renderOutput(text, mode = 'format') {
+        currentViewMode = viewModeSelect.value;
+        
+        // 如果是树状视图模式且不是转义操作
+        if (currentViewMode === 'tree' && mode !== 'escape') {
+          try {
+            const jsonData = JSON.parse(text);
+            renderTreeView(jsonData);
+            return;
+          } catch (e) {
+            // 解析失败，降级为纯文本模式
+            console.error('Tree view parse error:', e);
+          }
+        }
+        
+        // 纯文本模式
+        outputViewer.innerHTML = '';
+        outputViewer.className = 'output-viewer';
+        
+        // 如果是压缩模式，添加 minified 类
+        if (mode === 'minify') {
+          outputViewer.classList.add('minified');
+        }
+        
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        code.className = 'language-json';
+        code.textContent = text;
+        
+        pre.appendChild(code);
+        outputViewer.appendChild(pre);
+        
+        // 应用语法高亮
+        if (window.hljs) {
+          hljs.highlightElement(code);
+          
+          // 应用行号
+          if (window.hljs.lineNumbersBlock) {
+            hljs.lineNumbersBlock(code);
+          }
+        }
+        
+        // 隐藏折叠/展开按钮
+        collapseAllBtn.style.display = 'none';
+        expandAllBtn.style.display = 'none';
+      }
+
+      // 复制到剪贴板
+      function copyToClipboard(text, successMessage) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text)
+            .then(() => {
+              setStatus(successMessage, 'success');
+            })
+            .catch(err => {
+              setStatus('复制失败: ' + err, 'error');
+            });
+        } else {
+          // 降级方案
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand('copy');
+            setStatus(successMessage, 'success');
+          } catch (err) {
+            setStatus('复制失败，请手动复制', 'error');
+          }
+          document.body.removeChild(textarea);
+        }
+      }
+
+      // 复制输入内容
+      function copyInput() {
+        const input = cmEditor.getValue();
+        if (!input) {
+          setStatus('没有内容可复制', 'error');
+          return;
+        }
+        copyToClipboard(input, '输入内容已复制到剪贴板！');
+      }
+
+      // 复制输出内容
+      function copyOutput() {
+        if (!lastOutputText) {
+          setStatus('没有内容可复制', 'error');
+          return;
+        }
+        copyToClipboard(lastOutputText, '输出内容已复制到剪贴板！');
+      }
+
+      // 清空所有内容
+      function clearAll() {
+        cmEditor.setValue('');
+        outputViewer.innerHTML = '';
+        outputViewer.className = 'output-viewer';
+        lastOutputText = '';
+        currentJsonData = null;
+        currentOperation = '';
+        statusBar.style.display = 'none';
+        collapseAllBtn.style.display = 'none';
+        expandAllBtn.style.display = 'none';
+        updateStats();
+      }
+
+      // 加载示例数据
+      function loadExample() {
+        cmEditor.setValue(JSON.stringify(exampleJSON, null, 2));
+        updateStats();
+        formatJSON();
+      }
+
+      // 事件监听
+      formatBtn.addEventListener('click', formatJSON);
+      minifyBtn.addEventListener('click', minifyJSON);
+      escapeBtn.addEventListener('click', escapeJSON);
+      clearBtn.addEventListener('click', clearAll);
+      exampleBtn.addEventListener('click', loadExample);
+      copyInputBtn.addEventListener('click', copyInput);
+      copyOutputBtn.addEventListener('click', copyOutput);
+      
+      // 视图模式切换
+      viewModeSelect.addEventListener('change', function() {
+        if (lastOutputText && currentOperation !== 'escape') {
+          // 重新渲染当前数据
+          renderOutput(lastOutputText, currentOperation);
+        }
+      });
+      
+      // 全部折叠
+      collapseAllBtn.addEventListener('click', function() {
+        if (currentJsonData) {
+          collapseAll(currentJsonData);
+          // 重新渲染：保持节点状态
+          renderTreeView(null, true);
+        }
+      });
+      
+      // 全部展开
+      expandAllBtn.addEventListener('click', function() {
+        if (currentJsonData) {
+          expandAll(currentJsonData);
+          // 重新渲染：保持节点状态
+          renderTreeView(null, true);
+        }
+      });
+
+      // CodeMirror 变化监听
+      cmEditor.on('change', function() {
+        updateStats();
+      });
+
+      // 快捷键支持 Ctrl+Enter 格式化
+      cmEditor.addKeyMap({
+        'Ctrl-Enter': formatJSON
+      });
+
+      // 拖拽文件支持
+      const cmWrapper = cmEditor.getWrapperElement();
+      cmWrapper.addEventListener('dragover', function(e) {
+        e.preventDefault();
+      });
+      
+      cmWrapper.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            cmEditor.setValue(event.target.result);
+            updateStats();
+          };
+          reader.readAsText(file);
+        }
+      });
+
+      // 初始化统计
+      updateStats();
+    });
+  </script>
+</body>
+</html>
