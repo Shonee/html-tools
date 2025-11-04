@@ -302,16 +302,6 @@
         },
         {
             "icon": "",
-            "title": "JSON 格式化工具",
-            "keywords": "",
-            "features": [
-                ""
-            ],
-            "description": "",
-            "url": "pages/tools/json-parse.html"
-        },
-        {
-            "icon": "",
             "title": "feishu_2_md",
             "keywords": "",
             "features": [
@@ -341,13 +331,13 @@
             "url": "pages/tools/online_tools.html"
         },
         {
-            "icon": "",
+            "icon": "🔖",
             "title": "JSON 格式化工具",
-            "keywords": "",
+            "keywords": "JSON 格式化工具",
             "features": [
-                ""
+                "JSON格式化、JSON转义、JSON压缩"
             ],
-            "description": "",
+            "description": "JSON 格式化、压缩、转义工具",
             "url": "pages/tools/json-formatter.html"
         },
         {
