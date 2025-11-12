@@ -23,7 +23,13 @@ def gen_config():
                   soup = BeautifulSoup(html_content, "html.parser")
                   # 获取标题,如果为空则展示文件名
                   title = soup.title.string if soup.title else file.split(".")[0]
-  
+
+                  # 判断是否展示，默认不展示
+                  show = soup.find("meta", attrs={"name": "show"})
+                  show = show["content"] if show else "false"
+                  if "false" == show:
+                    continue
+                
                   # 获取 keywords, 判断是否存在，不存在则返回空
                   keywords = soup.find("meta", attrs={"name": "keywords"})
                   keywords = keywords["content"] if keywords else ""
@@ -44,6 +50,10 @@ def gen_config():
                   features = soup.find("meta", attrs={"name": "features"})
                   features = features["content"] if features else ""
                   features = features.split("，")
+
+                  # 获取排序
+                  rank = soup.find("meta", attrs={"name": "rank"})
+                  rank = int(rank["content"]) if rank else 0
   
                   config = {
                       "icon": icon,
@@ -51,7 +61,8 @@ def gen_config():
                       "keywords": keywords,
                       "features": features,
                       "description": description,
-                      "url": file_path
+                      "url": file_path,
+                      "rank": rank
                   }
                   tools.append(config)
 #   print(configs)
