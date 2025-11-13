@@ -1,6 +1,17 @@
 {
     "tools": [
         {
+            "icon": "🚀",
+            "title": "Github Pages 推荐",
+            "keywords": "github pages,项目",
+            "features": [
+                ""
+            ],
+            "description": "精选优质 Github Pages 项目，快速访问和部署，助力开发者发现更多开源工具与灵感,",
+            "url": "pages/nav/nav_github_pages.html",
+            "rank": 998
+        },
+        {
             "icon": "🔐",
             "title": "编码解码工具集",
             "keywords": "编码,解码",
