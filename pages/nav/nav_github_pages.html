@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Github Pages 推荐</title>
+    <meta name="keywords" content="github pages,项目"/>
+    <meta name="description" content="精选优质 Github Pages 项目，快速访问和部署，助力开发者发现更多开源工具与灵感,"/>
+    <meta name="icon" content="🚀"/>
+    <meta name="rank" content="998"/>
+    <meta name="show" content="true"/>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .project-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fire-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            animation: fire-pulse 2s infinite;
+            z-index: 10;
+        }
+        
+        @keyframes fire-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .search-box:focus {
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tab-button.active {
+            background: #f97316;
+            color: white;
+            border-color: #f97316;
+        }
+        
+        .tag {
+            transition: all 0.2s ease;
+        }
+        
+        .tag:hover {
+            transform: scale(1.05);
+        }
+        
+        /* 分类选择器样式 */
+        .category-button {
+            transition: all 0.3s ease;
+        }
+        
+        .category-button:hover {
+            transform: translateX(5px);
+        }
+        
+        .category-button.active {
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+        
+        /* 标签滚动容器 */
+        .tags-container {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #fb923c #f3f4f6;
+        }
+        
+        .tags-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .tags-container::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+        
+        .tags-container::-webkit-scrollbar-thumb {
+            background: #fb923c;
+            border-radius: 10px;
+        }
+        
+        .tags-container::-webkit-scrollbar-thumb:hover {
+            background: #f97316;
+        }
+        
+        /* 页脚渐变背景 */
+        .footer-gradient {
+            background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+        }
+        
+        /* 权重徽章 */
+        .weight-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 5;
+        }
+        
+        /* 响应式布局优化 */
+        @media (max-width: 1024px) {
+            .filter-sidebar {
+                position: relative;
+                width: 100%;
+            }
+        }
+        
+        /* 确保按钮文字不换行 */
+        .action-button {
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-[1600px] mx-auto px-4 py-12 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+                    <!-- 发现最好的<br> -->
+                    <span class="gradient-text text-5xl sm:text-6xl">Github Pages 推荐</span>
+                </h1>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto mt-6">
+                    精选优质 Github Pages 项目，快速访问和部署，助力开发者发现更多开源工具与灵感
+                </p>
+                
+                <!-- Search Box -->
+                <div class="mt-8 max-w-2xl mx-auto">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="快来搜一搜你需要的项目或文档吧" 
+                            class="search-box w-full px-6 py-4 text-lg border-2 border-orange-400 rounded-full focus:outline-none focus:border-orange-500 transition-all"
+                        >
+                        <button class="absolute right-4 top-1/2 transform -translate-y-1/2 text-orange-500 hover:text-orange-600">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-center gap-4 mt-4">
+                        <a href="https://github.com" target="_blank" class="text-orange-500 hover:text-orange-600 flex items-center gap-1">
+                            <span>提交项目</span>
+                            <i class="fas fa-hand-point-right"></i>
+                        </a>
+                        <span class="text-gray-300">|</span>
+                        <a href="mailto:feedback@example.com" class="text-orange-500 hover:text-orange-600 flex items-center gap-1">
+                            <span>意见反馈</span>
+                            <i class="fas fa-hand-point-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 max-w-[1600px] mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Left Sidebar - Category Filter -->
+            <aside class="filter-sidebar w-full lg:w-72 flex-shrink-0">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-filter text-orange-500"></i>
+                        <span>项目分类</span>
+                    </h3>
+                    <div id="categoryList" class="space-y-2">
+                        <!-- Categories will be inserted here -->
+                    </div>
+                    
+                    <!-- Statistics -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="text-sm text-gray-600">
+                            <div class="flex justify-between mb-2">
+                                <span>总项目数</span>
+                                <span id="totalProjects" class="font-semibold text-orange-500">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>当前显示</span>
+                                <span id="currentProjects" class="font-semibold text-orange-500">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Content Area -->
+            <div class="flex-1 min-w-0">
+                <!-- Tag Filter -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-tags text-orange-500"></i>
+                        <span>标签筛选</span>
+                    </h3>
+                    <div id="tagsList" class="tags-container flex flex-wrap gap-2">
+                        <!-- Tags will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Projects Grid -->
+                <div id="projectsGrid" class="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                    <!-- Projects will be inserted here -->
+                </div>
+                
+                <!-- No Results Message -->
+                <div id="noResults" class="hidden text-center py-16">
+                    <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-xl text-gray-500">未找到匹配的项目</p>
+                    <p class="text-gray-400 mt-2">尝试调整筛选条件或搜索关键词</p>
+                    <button onclick="resetFilters()" class="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                        重置筛选条件
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-gradient border-t border-gray-200 mt-16">
+        <div class="max-w-[1600px] mx-auto px-4 py-12 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">关于项目</h3>
+                    <p class="text-gray-600 mb-4">
+                        精心整理的 Github Pages 项目展示平台，为开发者提供优质的开源项目和工具资源。
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="https://github.com" target="_blank" class="text-gray-600 hover:text-orange-500 transition-colors">
+                            <i class="fab fa-github text-2xl"></i>
+                        </a>
+                        <a href="https://twitter.com" target="_blank" class="text-gray-600 hover:text-orange-500 transition-colors">
+                            <i class="fab fa-twitter text-2xl"></i>
+                        </a>
+                        <a href="mailto:contact@example.com" class="text-gray-600 hover:text-orange-500 transition-colors">
+                            <i class="fas fa-envelope text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 hover:text-orange-500 transition-colors">首页</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-500 transition-colors">项目提交</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-500 transition-colors">使用指南</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-500 transition-colors">API 文档</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Resources -->
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">资源</h3>
+                    <ul class="space-y-2">
+                        <li><a href="https://pages.github.com" target="_blank" class="text-gray-600 hover:text-orange-500 transition-colors">Github Pages</a></li>
+                        <li><a href="https://docs.github.com" target="_blank" class="text-gray-600 hover:text-orange-500 transition-colors">GitHub 文档</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-500 transition-colors">博客</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-500 transition-colors">更新日志</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center">
+                <p class="text-gray-600 text-sm">
+                    © 2024 Github Pages 项目展示. All rights reserved. 
+                    <a href="#" class="text-orange-500 hover:text-orange-600">隐私政策</a> · 
+                    <a href="#" class="text-orange-500 hover:text-orange-600">使用条款</a>
+                </p>
+                <p class="text-gray-500 text-xs mt-2">
+                    Made with <i class="fas fa-heart text-red-500"></i> by Developers
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 项目数据
+        const projects = [
+            {
+                name: "awesome-github-pages",
+                description: "精选的 GitHub Pages 示例和资源集合，包含各种主题、模板和最佳实践",
+                repo: "https://github.com/username/awesome-github-pages",
+                demo: "https://username.github.io/awesome-github-pages",
+                preview: "",
+                status: "Active",
+                hot: true,
+                tags: ["资源", "模板", "教程"],
+                category: "开发工具",
+                weight: 100
+            },
+            {
+                name: "html-tools",
+                description: "html-tools",
+                repo: "https://github.com/Shonee/html-tools/",
+                demo: "https://shonee.github.io/html-tools/",
+                preview: "",
+                status: "Active",
+                hot: true,
+                tags: ["html", "作品集", "响应式"],
+                category: "实用工具",
+                weight: 95
+            },
+            // {
+            //     name: "markdown-blog",
+            //     description: "基于 Markdown 的静态博客系统，无需数据库，支持标签、分类和搜索功能",
+            //     repo: "https://github.com/username/markdown-blog",
+            //     demo: "https://username.github.io/markdown-blog",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: false,
+            //     tags: ["博客", "Markdown", "CMS"],
+            //     category: "内容管理",
+            //     weight: 88
+            // },
+            // {
+            //     name: "docs-generator",
+            //     description: "自动化文档生成工具，将代码注释转换为美观的在线文档",
+            //     repo: "https://github.com/username/docs-generator",
+            //     demo: "https://username.github.io/docs-generator",
+            //     preview: "",
+            //     status: "Beta",
+            //     hot: false,
+            //     tags: ["文档", "工具", "自动化"],
+            //     category: "开发工具",
+            //     weight: 82
+            // },
+            // {
+            //     name: "landing-page-kit",
+            //     description: "精美的落地页组件库，包含多种可复用的区块和动画效果",
+            //     repo: "https://github.com/username/landing-page-kit",
+            //     demo: "https://username.github.io/landing-page-kit",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: true,
+            //     tags: ["组件", "落地页", "UI"],
+            //     category: "设计资源",
+            //     weight: 90
+            // },
+            // {
+            //     name: "resume-builder",
+            //     description: "在线简历生成器，支持多种模板，可导出 PDF，适合求职者使用",
+            //     repo: "https://github.com/username/resume-builder",
+            //     demo: "https://username.github.io/resume-builder",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: false,
+            //     tags: ["简历", "生成器", "PDF"],
+            //     category: "实用工具",
+            //     weight: 85
+            // },
+            // {
+            //     name: "image-hosting",
+            //     description: "免费图床服务，支持拖拽上传、CDN加速、图片管理等功能",
+            //     repo: "https://github.com/username/image-hosting",
+            //     demo: "https://username.github.io/image-hosting",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: true,
+            //     tags: ["图床", "上传", "CDN"],
+            //     category: "实用工具",
+            //     weight: 92
+            // },
+            // {
+            //     name: "url-shortener",
+            //     description: "开源短链接服务，简洁易用，支持自定义域名和访问统计",
+            //     repo: "https://github.com/username/url-shortener",
+            //     demo: "https://username.github.io/url-shortener",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: false,
+            //     tags: ["短链", "工具", "统计"],
+            //     category: "实用工具",
+            //     weight: 78
+            // },
+            // {
+            //     name: "api-docs-theme",
+            //     description: "专业的 API 文档主题，支持多语言、搜索、代码高亮等功能",
+            //     repo: "https://github.com/username/api-docs-theme",
+            //     demo: "https://username.github.io/api-docs-theme",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: false,
+            //     tags: ["文档", "API", "主题"],
+            //     category: "开发工具",
+            //     weight: 80
+            // },
+            // {
+            //     name: "icon-library",
+            //     description: "海量开源图标库，支持 SVG、PNG 多格式下载，快速搜索",
+            //     repo: "https://github.com/username/icon-library",
+            //     demo: "https://username.github.io/icon-library",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: true,
+            //     tags: ["图标", "资源", "SVG"],
+            //     category: "设计资源",
+            //     weight: 87
+            // },
+            // {
+            //     name: "cms-simple",
+            //     description: "轻量级内容管理系统，基于 Git 的内容存储，适合技术博客",
+            //     repo: "https://github.com/username/cms-simple",
+            //     demo: "https://username.github.io/cms-simple",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: false,
+            //     tags: ["CMS", "博客", "Git"],
+            //     category: "内容管理",
+            //     weight: 75
+            // },
+            // {
+            //     name: "design-system",
+            //     description: "完整的设计系统文档和组件库，包含颜色、排版、组件等规范",
+            //     repo: "https://github.com/username/design-system",
+            //     demo: "https://username.github.io/design-system",
+            //     preview: "",
+            //     status: "Active",
+            //     hot: true,
+            //     tags: ["设计系统", "组件", "文档"],
+            //     category: "设计资源",
+            //     weight: 93
+            // }
+        ];
+
+        // 全局状态
+        let currentFilters = {
+            search: '',
+            tag: 'all',
+            category: 'all'
+        };
+
+        // 提取所有唯一的标签
+        function getAllTags() {
+            const tagsSet = new Set();
+            projects.forEach(project => {
+                project.tags.forEach(tag => tagsSet.add(tag));
+            });
+            return Array.from(tagsSet).sort();
+        }
+
+        // 提取所有唯一的分类及其项目数量
+        function getAllCategories() {
+            const categoriesMap = new Map();
+            projects.forEach(project => {
+                const count = categoriesMap.get(project.category) || 0;
+                categoriesMap.set(project.category, count + 1);
+            });
+            return Array.from(categoriesMap.entries()).map(([name, count]) => ({
+                name,
+                count
+            })).sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        // 渲染分类列表
+        function renderCategoryList() {
+            const categories = getAllCategories();
+            const categoryList = document.getElementById('categoryList');
+            
+            let html = `
+                <button class="category-button active w-full text-left px-4 py-3 rounded-lg transition-all flex items-center justify-between group" data-category="all">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-th-large"></i>
+                        <span class="font-medium">全部项目</span>
+                    </span>
+                    <span class="text-sm font-semibold">${projects.length}</span>
+                </button>
+            `;
+            
+            categories.forEach(category => {
+                html += `
+                    <button class="category-button w-full text-left px-4 py-3 rounded-lg transition-all flex items-center justify-between group hover:bg-gray-50" data-category="${category.name}">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-folder text-gray-400 group-hover:text-orange-500"></i>
+                            <span class="font-medium">${category.name}</span>
+                        </span>
+                        <span class="text-sm text-gray-500 font-semibold">${category.count}</span>
+                    </button>
+                `;
+            });
+            
+            categoryList.innerHTML = html;
+            
+            // 绑定点击事件
+            document.querySelectorAll('.category-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.category-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    currentFilters.category = this.dataset.category;
+                    filterAndRenderProjects();
+                });
+            });
+        }
+
+        // 渲染标签列表
+        function renderTagsList() {
+            const allTags = getAllTags();
+            const tagsList = document.getElementById('tagsList');
+            
+            let html = `
+                <button class="tab-button active px-4 py-2 rounded-full border-2 border-orange-500 transition-all whitespace-nowrap" data-tag="all">
+                    <i class="fas fa-star"></i> 全部
+                </button>
+            `;
+            
+            allTags.forEach(tag => {
+                html += `
+                    <button class="tab-button px-4 py-2 rounded-full border-2 border-gray-300 text-gray-600 hover:border-orange-300 hover:bg-orange-50 transition-all whitespace-nowrap" data-tag="${tag}">
+                        ${tag}
+                    </button>
+                `;
+            });
+            
+            tagsList.innerHTML = html;
+            
+            // 绑定点击事件
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active', 'bg-orange-500', 'text-white', 'border-orange-500');
+                        btn.classList.add('border-gray-300', 'text-gray-600');
+                    });
+                    this.classList.add('active', 'bg-orange-500', 'text-white', 'border-orange-500');
+                    this.classList.remove('border-gray-300', 'text-gray-600');
+                    
+                    currentFilters.tag = this.dataset.tag;
+                    filterAndRenderProjects();
+                });
+            });
+        }
+
+        // 筛选项目
+        function filterProjects() {
+            let filtered = [...projects];
+            
+            // 搜索筛选
+            if (currentFilters.search) {
+                const searchTerm = currentFilters.search.toLowerCase();
+                filtered = filtered.filter(project => 
+                    project.name.toLowerCase().includes(searchTerm) || 
+                    project.description.toLowerCase().includes(searchTerm) ||
+                    project.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                    project.category.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // 标签筛选
+            if (currentFilters.tag !== 'all') {
+                filtered = filtered.filter(project => 
+                    project.tags.includes(currentFilters.tag)
+                );
+            }
+            
+            // 分类筛选
+            if (currentFilters.category !== 'all') {
+                filtered = filtered.filter(project => 
+                    project.category === currentFilters.category
+                );
+            }
+            
+            // 按权重倒序排序
+            filtered.sort((a, b) => b.weight - a.weight);
+            
+            return filtered;
+        }
+
+        // 渲染项目卡片
+        function renderProjects(projectsToRender) {
+            const grid = document.getElementById('projectsGrid');
+            const noResults = document.getElementById('noResults');
+            
+            // 更新统计信息
+            document.getElementById('totalProjects').textContent = projects.length;
+            document.getElementById('currentProjects').textContent = projectsToRender.length;
+            
+            if (projectsToRender.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+            grid.innerHTML = '';
+            
+            projectsToRender.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'project-card bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-orange-300';
+                
+                card.innerHTML = `
+                    ${project.hot ? '<div class="fire-badge text-3xl">🔥</div>' : ''}
+                    ${project.weight >= 90 ? '<div class="weight-badge">TOP</div>' : ''}
+                    
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="w-16 h-16 bg-gray-900 rounded-xl flex items-center justify-center flex-shrink-0">
+                            ${project.preview ? 
+                                `<img src="${project.preview}" alt="${project.name}" class="w-full h-full object-cover rounded-xl">` :
+                                '<i class="fab fa-github text-white text-3xl"></i>'
+                            }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xl font-bold text-gray-900 mb-1 truncate">${project.name}</h3>
+                            <div class="flex gap-2 flex-wrap">
+                                ${project.tags.slice(0, 3).map(tag => `
+                                    <span class="tag text-xs px-2 py-1 bg-orange-100 text-orange-600 rounded-full">${tag}</span>
+                                `).join('')}
+                                ${project.tags.length > 3 ? `<span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">+${project.tags.length - 3}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-3">${project.description}</p>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-xs text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-folder-open"></i> 
+                            <span>${project.category}</span>
+                        </div>
+                        <div class="text-xs text-gray-400 flex items-center gap-1">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span>${project.weight}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <a href="${project.repo}" target="_blank" 
+                           class="action-button flex-1 px-3 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 text-sm font-medium">
+                            <i class="fab fa-github"></i>
+                            <span>查看源码</span>
+                        </a>
+                        <a href="${project.demo}" target="_blank" 
+                           class="action-button flex-1 px-3 py-2.5 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors flex items-center justify-center gap-2 text-sm font-medium">
+                            <i class="fas fa-external-link-alt"></i>
+                            <span>在线预览</span>
+                        </a>
+                    </div>
+                    
+                    <div class="mt-3 flex items-center justify-center">
+                        <span class="px-3 py-1.5 ${project.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'} rounded-lg text-xs flex items-center gap-1 font-medium">
+                            <i class="fas fa-circle" style="font-size: 6px;"></i>
+                            ${project.status}
+                        </span>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // 筛选并渲染
+        function filterAndRenderProjects() {
+            const filtered = filterProjects();
+            renderProjects(filtered);
+        }
+
+        // 重置筛选条件
+        function resetFilters() {
+            currentFilters = {
+                search: '',
+                tag: 'all',
+                category: 'all'
+            };
+            
+            document.getElementById('searchInput').value = '';
+            
+            // 重置分类按钮
+            document.querySelectorAll('.category-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('.category-button[data-category="all"]').classList.add('active');
+            
+            // 重置标签按钮
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'bg-orange-500', 'text-white', 'border-orange-500');
+                btn.classList.add('border-gray-300', 'text-gray-600');
+            });
+            document.querySelector('.tab-button[data-tag="all"]').classList.add('active', 'bg-orange-500', 'text-white', 'border-orange-500');
+            
+            filterAndRenderProjects();
+        }
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            currentFilters.search = e.target.value;
+            filterAndRenderProjects();
+        });
+
+        // 初始化
+        function init() {
+            renderCategoryList();
+            renderTagsList();
+            filterAndRenderProjects();
+        }
+
+        // 页面加载完成后初始化
+        init();
+
+        // 平滑滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    </script>
+</body>
+</html>
