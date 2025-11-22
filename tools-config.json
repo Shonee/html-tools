@@ -21,6 +21,17 @@
             "description": "实用编码解码工具集",
             "url": "pages/tools/codec_tools.html",
             "rank": 999
+        },
+        {
+            "icon": "🔖",
+            "title": "JSON 格式化工具",
+            "keywords": "JSON 格式化工具",
+            "features": [
+                "JSON格式化、JSON转义、JSON压缩"
+            ],
+            "description": "JSON 格式化、压缩、转义工具",
+            "url": "pages/tools/json-formatter.html",
+            "rank": 997
         }
     ]
 }
