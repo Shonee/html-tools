@@ -8,6 +8,8 @@
   <meta name="keywords" content="JSON 格式化工具">
   <meta name="description" content="JSON 格式化、压缩、转义工具">
   <meta name="features" content="JSON格式化、JSON转义、JSON压缩">
+  <meta name="rank" content="997"/>
+  <meta name="show" content="true"/>
   <title>JSON 格式化工具</title>
   
   <!-- Font Awesome 图标库 -->
@@ -162,6 +164,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
+      min-height: 500px;
     }
 
     @media (max-width: 768px) {
@@ -182,6 +185,8 @@
     .editor-panel {
       display: flex;
       flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .panel-header {
@@ -229,13 +234,49 @@
       border: 1px solid var(--border-color);
       border-radius: 4px;
       overflow: hidden;
+      position: relative;
     }
 
     .CodeMirror {
-      height: 100%;
+      height: 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
       font-size: 0.9rem;
       line-height: 1.5;
+      box-sizing: border-box !important;
+    }
+
+    .CodeMirror-scroll {
+      overflow-y: auto !important;
+      overflow-x: auto !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .CodeMirror-lines {
+      padding: 4px 0;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .CodeMirror pre {
+      padding: 0 4px;
+      line-height: 1.5;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      white-space: pre-wrap !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+    }
+
+    .CodeMirror-line {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      white-space: pre-wrap !important;
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
     }
 
     .output-viewer {
@@ -245,12 +286,14 @@
       background-color: #282c34;
       color: #abb2bf;
       padding: 0;
+      position: relative;
     }
 
     .output-viewer pre {
       margin: 0;
       padding: 1rem;
       white-space: pre;
+      min-height: calc(100% - 2rem);
     }
 
     /* 压缩模式样式 */
@@ -575,9 +618,11 @@
         mode: { name: 'javascript', json: true },
         lineNumbers: true,
         theme: 'material-darker',
-        lineWrapping: false,
+        lineWrapping: true,
         tabSize: 2,
-        indentWithTabs: false
+        indentWithTabs: false,
+        scrollbarStyle: 'native',
+        viewportMargin: Infinity
       });
 
       // 获取元素
