@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="每日日报 - 一站式获取今日新闻、天气、历史、诗词等信息">
+    <meta name="keywords" content="每日日报,新闻,天气,历史上的今天,诗词,节气,节假日">
+    <meta name="icon" content="📰">
+    <meta name="category" content="信息工具">
+    <meta name="features" content="新闻资讯、天气信息、历史上的今天、每日诗词、节气节假日、时间进度">
+    <meta name="show" content="true">
+    <title>每日日报 - 今日信息一览</title>
+    
+    <!-- CDN 资源预连接 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --border-radius: 12px;
+        }
+
+        /* 简洁主题 */
+        body.theme-simple {
+            --primary-color: #333333;
+            --secondary-color: #666666;
+            --accent-color: #999999;
+            --success-color: #4a4a4a;
+            --warning-color: #666666;
+            --bg-color: #ffffff;
+            --card-bg: #fafafa;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.05);
+            --border-radius: 4px;
+        }
+
+        body.theme-simple {
+            background: var(--bg-color);
+        }
+
+        body.theme-simple .title-section {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        body.theme-simple .section-header,
+        body.theme-simple .sidebar-header {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        body.theme-simple .news-index {
+            background: var(--text-color);
+        }
+
+        body.theme-simple .history-year {
+            background: var(--text-color);
+        }
+
+        body.theme-simple .progress-bar {
+            background: var(--text-color);
+        }
+
+        body.theme-simple .poetry-content {
+            background: var(--card-bg);
+        }
+
+        body.theme-simple .fun-content {
+            background: var(--card-bg);
+        }
+
+        body.theme-simple .carousel-controls {
+            background: rgba(0,0,0,0.3);
+        }
+
+        body.theme-simple .carousel-controls:hover {
+            background: rgba(0,0,0,0.5);
+        }
+
+        body.theme-simple .export-btn {
+            background: var(--text-color);
+        }
+
+        body.theme-simple .export-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* 三栏布局样式 */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 15px;
+            /* min-height: calc(100vh - 80px); */
+        }
+
+        .left-sidebar,
+        .right-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 侧栏卡片样式 */
+        .sidebar-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .sidebar-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 10px 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .sidebar-content {
+            padding: 8px;
+            font-size: 0.85rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-content {
+            padding: 15px;
+        }
+
+        /* 标题区域样式 */
+        .title-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-bottom: 10px;
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .date-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .date-separator {
+            color: rgba(255,255,255,0.6);
+            font-weight: 300;
+        }
+
+        .summary-keywords {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .keyword-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 新闻列表样式 */
+        .news-list {
+            list-style: none;
+        }
+
+        .news-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .news-item:hover {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            margin: 0 -10px;
+            padding: 15px 10px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-index {
+            background: var(--secondary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .news-content {
+            flex: 1;
+        }
+
+        .news-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+        }
+
+        .news-title:hover {
+            color: var(--secondary-color);
+        }
+
+        .news-source {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* 历史上的今天样式 */
+        .history-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .history-item {
+            padding: 1px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-year {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .history-event {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        /* 每日图片样式 */
+        .daily-image {
+            text-align: center;
+            position: relative;
+        }
+
+        /* 图片轮播样式 */
+        .image-carousel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .carousel-container {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            position: relative;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-slide img:hover {
+            transform: scale(1.02);
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .carousel-controls:hover {
+            background: rgba(0,0,0,0.7);
+        }
+
+        .carousel-prev {
+            left: 10px;
+        }
+
+        .carousel-next {
+            right: 10px;
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .carousel-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .carousel-indicator.active {
+            background: white;
+        }
+
+        .image-caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* 大图查看模态框样式 */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .image-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .modal-close:hover {
+            color: #ccc;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 轻松一刻样式 */
+        .fun-content {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #2d3436;
+        }
+
+        /* 每日诗词样式 */
+        .poetry-content {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .poetry-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d3436;
+        }
+
+        .poetry-content-text {
+            font-size: 1.1rem;
+            line-height: 2;
+            margin-bottom: 15px;
+        }
+
+        .poetry-author {
+            font-style: italic;
+            color: #74b9ff;
+            font-weight: 500;
+        }
+
+        /* 时间进度网格样式 */
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .progress-item {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-item h4 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress {
+            height: 20px;
+            border-radius: 10px;
+            background-color: var(--bg-color);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--success-color), var(--secondary-color));
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .progress-info {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        /* 倒计时样式 */
+        .countdown-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            text-align: center;
+        }
+
+        .countdown-item {
+            background: var(--bg-color);
+            padding: 15px 10px;
+            border-radius: 8px;
+        }
+
+        .countdown-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .layout-container {
+                grid-template-columns: 250px 1fr 250px;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .layout-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .left-sidebar,
+            .right-sidebar {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 15px;
+            }
+
+            .main-content {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+
+            .layout-container {
+                gap: 15px;
+            }
+
+            .left-sidebar,
+            .right-sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .date-info-row {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .date-separator {
+                display: none;
+            }
+
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .carousel-slide img {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 5px;
+            }
+
+            .section-content,
+            .sidebar-content {
+                padding: 10px;
+            }
+
+            .progress-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-item {
+                padding: 10px;
+            }
+
+            .carousel-slide img {
+                height: 150px;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                max-height: 95%;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 错误提示样式 */
+.error-message {
+    color: #dc3545;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9rem;
+}
+
+/* 导出功能样式 */
+.export-section {
+    margin-top: 12px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.3s forwards;
+}
+
+.export-btn {
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.8), rgba(108, 117, 125, 0.9));
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.export-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.export-btn:hover {
+    background: linear-gradient(135deg, rgba(90, 98, 104, 0.9), rgba(90, 98, 104, 1));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.export-btn:hover::before {
+    left: 100%;
+}
+
+.export-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
+}
+
+/* 页脚样式 */
+.footer {
+    background: linear-gradient(to top, rgba(248, 249, 250, 0.8), rgba(248, 249, 250, 0.3));
+    border-top: 1px solid rgba(222, 226, 230, 0.5);
+    padding: 12px 0;
+    margin-top: 15px;
+    font-size: 0.75rem;
+    color: rgba(108, 117, 125, 0.8);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out 0.5s forwards;
+    position: relative;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(222, 226, 230, 0.6), transparent);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.footer-content:hover {
+    color: rgba(108, 117, 125, 1);
+    transform: translateY(-1px);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+    
+    .footer {
+        padding: 10px 0;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- 标题信息区域 -->
+        <header class="title-section section-card">
+            <h1 class="main-title">📰 每日简报</h1>
+            <div class="date-info-row" id="dateInfoRow">
+                <span id="currentDate">加载中...</span>
+                <span class="date-separator">|</span>
+                <span id="lunarYear">加载中...</span>
+                <span class="date-separator">|</span>
+                <span id="lunarDate">加载中...</span>
+                <span class="date-separator">|</span>
+                <span id="weekDay">加载中...</span>
+                <span class="date-separator">|</span>
+                <span id="solarTerm">加载中...</span>
+                <span class="date-separator">|</span>
+                <span id="holiday">加载中...</span>
+                <span class="date-separator">|</span>
+                <span id="weatherSummary">加载中...</span>
+            </div>
+            <div class="summary-keywords" id="summaryKeywords">
+                <!-- 关键词标签将通过JavaScript动态生成 -->
+            </div>
+            <!-- 主题切换按钮 -->
+            <div class="theme-toggle" style="margin-top: 15px;">
+                <button id="themeToggle" class="btn btn-sm" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 20px; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-adjust"></i> 切换简洁模式
+                </button>
+            </div>
+        </header>
+
+        <!-- 三栏布局容器 -->
+        <div class="layout-container">
+            <!-- 左侧栏 -->
+            <aside class="left-sidebar">
+                <!-- 每日图片 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-image"></i>
+                        <span>每日图片</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="daily-image" id="dailyImage">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 轻松一刻 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-smile"></i>
+                        <span>轻松一刻</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="fun-content" id="funContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史上的今天 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-history"></i>
+                        <span>历史上的今天 11.23</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <ul class="history-list" id="historyList">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 主内容区 -->
+            <main class="main-content">
+                <!-- 新闻资讯 -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="fas fa-newspaper"></i>
+                        <span>新闻资讯</span>
+                        <div class="ms-auto">
+                            <select id="newsCount" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                <option value="5" selected>显示 5 条</option>
+                                <option value="10">显示 10 条</option>
+                                <option value="15">显示 15 条</option>
+                                <option value="20">显示 20 条</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <ul class="news-list" id="newsList">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 时间进度 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-chart-line"></i>
+                        <span>时间进度</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="progress-grid">
+                            <div class="progress-item">
+                                <h4>📅 今日进度</h4>
+                                <div class="progress">
+                                    <div class="progress-bar" id="dayProgress" role="progressbar" style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="dayProgressInfo">加载中...</span>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <h4>📆 本周进度</h4>
+                                <div class="progress">
+                                    <div class="progress-bar" id="weekProgress" role="progressbar" style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="weekProgressInfo">加载中...</span>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <h4>📊 本月进度</h4>
+                                <div class="progress">
+                                    <div class="progress-bar" id="monthProgress" role="progressbar" style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="monthProgressInfo">加载中...</span>
+                                </div>
+                            </div>
+                            <div class="progress-item">
+                                <h4>📈 年度进度</h4>
+                                <div class="progress">
+                                    <div class="progress-bar" id="yearProgress" role="progressbar" style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="progressDays">已过去 0 天</span>
+                                    <span id="progressRemaining">还剩 365 天</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- 导出功能区域 -->
+                <div class="export-section">
+                    <button id="exportMarkdown" class="export-btn">
+                        <i class="fas fa-copy"></i>
+                        复制为 Markdown
+                    </button>
+                </div>
+            </main>
+
+            <!-- 右侧栏 -->
+            <aside class="right-sidebar">
+                <!-- 每日诗词 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-feather-alt"></i>
+                        <span>每日诗词</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <div class="poetry-content" id="poetryContent">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 节气信息 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-leaf"></i>
+                        <span>节气信息</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <div id="solarTermInfo">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 节假日信息 -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>节假日信息</span>
+                    </div>
+                    <div class="sidebar-content">
+                        <div id="holidayCountdown">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </aside>
+        </div>
+
+        <!-- 大图查看模态框 -->
+        <div class="image-modal" id="imageModal">
+            <div class="modal-content">
+                <button class="modal-close" id="modalClose">&times;</button>
+                <img class="modal-image" id="modalImage" src="" alt="">
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <span>© 2025 每日日报 | 数据来源于公开API</span>
+                <span>最后更新：<span id="lastUpdate">--</span></span>
+            </div>
+        </footer>
+    </div>
+
+    
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+        // 模拟数据
+        const dailyData = {
+            weather: {
+                location: '杭州',
+                temperature: '20°C',
+                condition: '多云',
+                humidity: '65%',
+                windSpeed: '微风'
+            },
+            summary: {
+                keywords: ['科技创新', '国际关系', '体育竞技', '文化娱乐', '经济发展']
+            },
+            historyToday: [
+                { year: '2012', event: '雷政富不雅视频事件' },
+                { year: '1925', event: '国民党右派召开西山会议' },
+                { year: '1993', event: '古巴政府向江泽民授勋' },
+                { year: '2008', event: '孟买恐怖袭击事件发生' },
+                { year: '1990', event: '联合国安理会授权对伊拉克动武' }
+            ],
+            dailyImages: [
+                {
+                    url: 'https://picsum.photos/500/400',
+                    caption: '今日美图 - 蓝天白云'
+                },
+                {
+                    url: 'https://www.loliapi.com/bg/',
+                    caption: '今日美图 - 绿意盎然'
+                },
+                {
+                    url: 'https://api.neix.in/random',
+                    caption: '今日美图 - 夕阳西下'
+                }
+            ],
+            funMoment: '到了没有人自甘堕落的时候，人也就不会因为诚实而得到赞誉了。——西塞罗',
+            poetry: {
+                title: '静夜思',
+                content: '床前明月光，疑是地上霜。</br>举头望明月，低头思故乡。',
+                author: '李白'
+            },
+            holidays: [
+                { name: '元旦', date: '2025-01-01' },
+                { name: '春节', date: '2025-01-29' },
+                { name: '清明节', date: '2025-04-05' }
+            ],
+            solarTerms: [
+                { name: '小雪', date: '2024-11-22', description: '小雪，是二十四节气中的第20个节气。' },
+                { name: '大雪', date: '2024-12-07', description: '大雪，是二十四节气中的第21个节气。' }
+            ]
+        };
+
+        // 图片轮播管理器
+        class ImageCarousel {
+            constructor(container, images) {
+                this.container = container;
+                this.images = images;
+                this.currentIndex = 0;
+                this.init();
+            }
+
+            init() {
+                if (this.images.length === 1) {
+                    // 单张图片
+                    this.renderSingleImage();
+                } else {
+                    // 多张图片轮播
+                    this.renderCarousel();
+                    this.bindEvents();
+                    this.startAutoPlay();
+                }
+            }
+
+            renderSingleImage() {
+                const image = this.images[0];
+                this.container.innerHTML = `
+                    <img src="${image.url}" alt="${image.caption}" onclick="showImageModal('${image.url}')" loading="lazy">
+                    <div class="image-caption">${image.caption}</div>
+                `;
+            }
+
+            renderCarousel() {
+                const carouselHtml = `
+                    <div class="image-carousel">
+                        <div class="carousel-container" id="carouselContainer">
+                            ${this.images.map(image => `
+                                <div class="carousel-slide">
+                                    <img src="${image.url}" alt="${image.caption}" onclick="showImageModal('${image.url}')" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="carousel-controls carousel-prev" onclick="imageCarousel.prev()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="carousel-controls carousel-next" onclick="imageCarousel.next()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <div class="carousel-indicators">
+                            ${this.images.map((_, index) => `
+                                <div class="carousel-indicator ${index === 0 ? 'active' : ''}" onclick="imageCarousel.goTo(${index})"></div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="image-caption">${this.images[this.currentIndex].caption}</div>
+                `;
+                this.container.innerHTML = carouselHtml;
+            }
+
+            updateCarousel() {
+                const container = document.getElementById('carouselContainer');
+                if (container) {
+                    container.style.transform = `translateX(-${this.currentIndex * 100}%)`;
+                    
+                    // 更新指示器
+                    document.querySelectorAll('.carousel-indicator').forEach((indicator, index) => {
+                        indicator.classList.toggle('active', index === this.currentIndex);
+                    });
+                    
+                    // 更新标题
+                    const caption = this.container.querySelector('.image-caption');
+                    if (caption) {
+                        caption.textContent = this.images[this.currentIndex].caption;
+                    }
+                }
+            }
+
+            next() {
+                this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                this.updateCarousel();
+            }
+
+            prev() {
+                this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                this.updateCarousel();
+            }
+
+            goTo(index) {
+                this.currentIndex = index;
+                this.updateCarousel();
+            }
+
+            bindEvents() {
+                // 键盘事件
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') this.prev();
+                    if (e.key === 'ArrowRight') this.next();
+                });
+            }
+
+            startAutoPlay() {
+                setInterval(() => {
+                    this.next();
+                }, 5000); // 5秒自动切换
+            }
+        }
+
+        // 全局变量
+        let imageCarousel;
+
+        // 显示大图模态框
+        function showImageModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageUrl;
+            modal.classList.add('show');
+        }
+
+        // 关闭大图模态框
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+        }
+
+        // 农历计算工具类
+        const LunarCalendar = {
+            // 农历数据数组
+            lunarInfo: [
+                0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
+                0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
+                0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
+                0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
+                0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
+                0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5b0, 0x14573, 0x052b0, 0x0a9a8, 0x0e950, 0x06aa0,
+                0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
+                0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b6a0, 0x195a6,
+                0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
+                0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x055c0, 0x0ab60, 0x096d5, 0x092e0,
+                0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
+                0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
+                0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
+                0x05aa0, 0x076a3, 0x096d0, 0x04bd7, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,
+                0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0
+            ],
+
+            /**
+             * 获取农历年的天数
+             */
+            lYearDays: function(y) {
+                let i, sum = 348;
+                for (i = 0x8000; i > 0x8; i >>= 1) {
+                    sum += (this.lunarInfo[y - 1900] & i) ? 1 : 0;
+                }
+                return sum + this.leapDays(y);
+            },
+
+            /**
+             * 获取农历年闰月的天数
+             */
+            leapDays: function(y) {
+                if (this.leapMonth(y)) {
+                    return (this.lunarInfo[y - 1900] & 0x10000) ? 30 : 29;
+                }
+                return 0;
+            },
+
+            /**
+             * 获取农历年闰哪个月
+             */
+            leapMonth: function(y) {
+                return this.lunarInfo[y - 1900] & 0xf;
+            },
+
+            /**
+             * 获取农历年月的天数
+             */
+            monthDays: function(y, m) {
+                return (this.lunarInfo[y - 1900] & (0x10000 >> m)) ? 30 : 29;
+            },
+
+            /**
+             * 公历转农历
+             */
+            solar2lunar: function(sYear, sMonth, sDay) {
+                const solarDate = new Date(sYear, sMonth - 1, sDay);
+                const baseDate = new Date(1900, 0, 31);
+                let offset = Math.floor((solarDate - baseDate) / 86400000);
+
+                let i, leap = 0, temp = 0;
+                let lYear = 1900;
+
+                for (i = 1900; i < 2050 && offset > 0; i++) {
+                    temp = this.lYearDays(i);
+                    offset -= temp;
+                    lYear++;
+                }
+
+                if (offset < 0) {
+                    offset += temp;
+                    lYear--;
+                }
+
+                leap = this.leapMonth(lYear);
+                let isLeap = false;
+
+                let lMonth = 1;
+                for (i = 1; i < 13 && offset > 0; i++) {
+                    if (leap > 0 && i === (leap + 1) && !isLeap) {
+                        --i;
+                        isLeap = true;
+                        temp = this.leapDays(lYear);
+                    } else {
+                        temp = this.monthDays(lYear, i);
+                    }
+
+                    if (isLeap && i === (leap + 1)) isLeap = false;
+
+                    offset -= temp;
+                    if (!isLeap) lMonth++;
+                }
+
+                if (offset === 0 && leap > 0 && i === leap + 1) {
+                    if (isLeap) {
+                        isLeap = false;
+                    } else {
+                        isLeap = true;
+                        --lMonth;
+                    }
+                }
+
+                if (offset < 0) {
+                    offset += temp;
+                    --lMonth;
+                }
+
+                const lDay = offset + 1;
+
+                return {
+                    lYear: lYear,
+                    lMonth: lMonth,
+                    lDay: lDay,
+                    isLeap: isLeap
+                };
+            },
+
+            /**
+             * 格式化农历日期
+             */
+            formatLunar: function(lunar) {
+                const months = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+                const days = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                             '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                             '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+
+                const monthStr = (lunar.isLeap ? '闰' : '') + months[lunar.lMonth - 1] + '月';
+                const dayStr = days[lunar.lDay - 1];
+
+                return monthStr + dayStr;
+            }
+        };
+
+        // 二十四节气计算工具类
+        const SolarTerms = {
+            terms: [
+                '立春', '雨水', '惊蛰', '春分', '清明', '谷雨',
+                '立夏', '小满', '芒种', '夏至', '小暑', '大暑',
+                '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
+                '立冬', '小雪', '大雪', '冬至', '小寒', '大寒'
+            ],
+
+            termInfo: [
+                0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693,
+                263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758
+            ],
+
+            /**
+             * 获取某年某节气的日期
+             */
+            getSolarTermDay: function(year, termIndex) {
+                if (year < 1900 || year > 2100) return null;
+                if (termIndex < 0 || termIndex > 23) return null;
+
+                const termDay = this.termInfo[termIndex];
+                let termDate = Math.floor(termDay / 1000);
+
+                if (year !== 1900) {
+                    termDate += Math.floor((year - 1900) * 365.2422 * (this.termInfo[termIndex] % 1000) / 1000);
+                }
+
+                const month = Math.floor(termIndex / 2) + 1;
+                return new Date(year, month - 1, termDate);
+            },
+
+            /**
+             * 获取当前日期对应的节气
+             */
+            getCurrentTerm: function(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+
+                for (let i = 0; i < 24; i++) {
+                    const termDate = this.getSolarTermDay(year, i);
+                    const termMonth = termDate.getMonth() + 1;
+                    const termDay = termDate.getDate();
+
+                    if (month === termMonth && day >= termDay) {
+                        if (i === 23) {
+                            const nextYearFirstTerm = this.getSolarTermDay(year + 1, 0);
+                            if (date < nextYearFirstTerm) {
+                                return { name: this.terms[i], date: termDate };
+                            }
+                        } else {
+                            const nextTerm = this.getSolarTermDay(year, i + 1);
+                            if (date < nextTerm) {
+                                return { name: this.terms[i], date: termDate };
+                            }
+                        }
+                    }
+                }
+
+                const lastYearWinterSolstice = this.getSolarTermDay(year - 1, 23);
+                return { name: this.terms[23], date: lastYearWinterSolstice };
+            }
+        };
+
+        /**
+         * 获取农历纪年名称（天干地支生肖年）
+         */
+        function getLunarYearName(lunarYear) {
+            const heavenlyStems = ['庚', '辛', '壬', '癸', '甲', '乙', '丙', '丁', '戊', '己'];
+            const earthlyBranches = ['申', '酉', '戌', '亥', '子', '丑', '寅', '卯', '辰', '巳', '午', '未'];
+            const zodiacAnimals = ['猴', '鸡', '狗', '猪', '鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊'];
+
+            const heavenlyIndex = (lunarYear - 1900) % 10;
+            const earthlyIndex = (lunarYear - 1900) % 12;
+
+            const heavenlyStem = heavenlyStems[heavenlyIndex];
+            const earthlyBranch = earthlyBranches[earthlyIndex];
+            const zodiacAnimal = zodiacAnimals[earthlyIndex];
+
+            return `${heavenlyStem}${earthlyBranch}${zodiacAnimal}`;
+        }
+
+        /**
+         * 初始化日期信息
+         */
+        function initializeDateInfo() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+
+            // 公历日期
+            $('#currentDate').text(`${year}年${month}月${day}日`);
+
+            // 农历信息
+            const lunar = LunarCalendar.solar2lunar(year, month, day);
+            const lunarYearName = getLunarYearName(lunar.lYear);
+            $('#lunarYear').text(`${lunarYearName}年`);
+            $('#lunarDate').text(LunarCalendar.formatLunar(lunar));
+
+            // 星期
+            const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            $('#weekDay').text(weekDays[now.getDay()]);
+
+            // 节气
+            const currentTerm = SolarTerms.getCurrentTerm(now);
+            $('#solarTerm').text(currentTerm.name);
+
+            // 节假日（简化处理）
+            $('#holiday').text('工作日');
+
+            // 天气信息
+            $('#weatherSummary').text(`${dailyData.weather.location} ${dailyData.weather.temperature} ${dailyData.weather.condition}`);
+        }
+
+        /**
+         * 初始化新闻区域
+         */
+        function initializeNewsSection() {
+            const newsData = [
+                { title: 'T1官宣Gumayusi离队', source: '微博热搜', url: '#', hot: '1970123' },
+                { title: '中国强烈回应震动日本', source: '微博热搜', url: '#', hot: '915779' },
+                { title: '美被曝伪造证据黑吃黑窃取巨额比特币', source: '微博热搜', url: '#', hot: '780187' },
+                { title: 'T1管理层', source: '微博热搜', url: '#', hot: '660831' },
+                { title: '高市早苗搞事已遭反噬', source: '微博热搜', url: '#', hot: '562978' },
+                { title: 'Gumayusi将离开T1', source: 'B站热搜', url: '#', hot: '' },
+                { title: '外交部敦促日方停止越线玩火', source: 'B站热搜', url: '#', hot: '' },
+                { title: 'T1官宣Doran续约', source: 'B站热搜', url: '#', hot: '' },
+                { title: '国防部回应美对台3.3亿美元军售', source: 'B站热搜', url: '#', hot: '' },
+                { title: '方大同出道20周年纪念', source: 'B站热搜', url: '#', hot: '' }
+            ];
+
+            renderNewsList(newsData);
+        }
+
+        /**
+         * 渲染新闻列表
+         */
+        function renderNewsList(newsData) {
+            const count = parseInt($('#newsCount').val()) || 10;
+            const limitedNews = newsData.slice(0, count);
+
+            const newsHtml = limitedNews.map((news, index) => `
+                <li class="news-item">
+                    <div class="news-index">${index + 1}</div>
+                    <div class="news-content">
+                        <a href="${news.url}" target="_blank" class="news-title">
+                            ${news.title}
+                        </a>
+                        <div class="news-source">
+                            来源：${news.source} ${news.hot ? `| 热度：${news.hot}` : ''}
+                        </div>
+                    </div>
+                </li>
+            `).join('');
+
+            $('#newsList').html(newsHtml);
+        }
+
+        /**
+         * 初始化历史上的今天
+         */
+        function initializeHistorySection() {
+            const historyHtml = dailyData.historyToday.slice(0, 5).map(item => `
+                <li class="history-item">
+                    <div class="history-year">${item.year}</div>
+                    <div class="history-event">${item.event}</div>
+                </li>
+            `).join('');
+
+            $('#historyList').html(historyHtml);
+        }
+
+        /**
+         * 初始化每日图片
+         */
+        function initializeDailyImage() {
+            const container = document.getElementById('dailyImage');
+            imageCarousel = new ImageCarousel(container, dailyData.dailyImages);
+        }
+
+        /**
+         * 初始化轻松一刻
+         */
+        function initializeFunContent() {
+            $('#funContent').html(dailyData.funMoment);
+        }
+
+        /**
+         * 初始化每日诗词
+         */
+        function initializePoetryContent() {
+            const poetryHtml = `
+                <div class="poetry-title">${dailyData.poetry.title}</div>
+                <div class="poetry-content-text">${dailyData.poetry.content}</div>
+                <div class="poetry-author">—— ${dailyData.poetry.author}</div>
+            `;
+
+            $('#poetryContent').html(poetryHtml);
+        }
+
+        /**
+         * 初始化节假日倒计时
+         */
+        function initializeHolidayCountdown() {
+            const nextHoliday = getNextHoliday(dailyData.holidays);
+            if (nextHoliday) {
+                const countdown = calculateCountdown(nextHoliday.date);
+                const countdownHtml = `
+                    <h5>距离 ${nextHoliday.name} 还有：</h5>
+                    <div class="countdown-container">
+                        <div class="countdown-item">
+                            <span class="countdown-number">${countdown.days}</span>
+                            <div class="countdown-label">天</div>
+                        </div>
+                        <div class="countdown-item">
+                            <span class="countdown-number">${countdown.hours}</span>
+                            <div class="countdown-label">时</div>
+                        </div>
+                        <div class="countdown-item">
+                            <span class="countdown-number">${countdown.minutes}</span>
+                            <div class="countdown-label">分</div>
+                        </div>
+                        <div class="countdown-item">
+                            <span class="countdown-number">${countdown.seconds}</span>
+                            <div class="countdown-label">秒</div>
+                        </div>
+                    </div>
+                `;
+                $('#holidayCountdown').html(countdownHtml);
+            } else {
+                $('#holidayCountdown').html('<div class="text-center">暂无即将到来的节假日</div>');
+            }
+        }
+
+        /**
+         * 初始化节气信息
+         */
+        function initializeSolarTermInfo() {
+            const currentTerm = getCurrentSolarTermInfo(dailyData.solarTerms);
+            const nextTerm = getNextSolarTerm(dailyData.solarTerms);
+
+            let termHtml = '';
+            if (currentTerm) {
+                termHtml += `
+                    <div class="mb-3">
+                        <h5>当前节气：${currentTerm.name}</h5>
+                        <p>${currentTerm.description}</p>
+                    </div>
+                `;
+            }
+
+            if (nextTerm) {
+                const countdown = calculateCountdown(nextTerm.date);
+                termHtml += `
+                    <div>
+                        <h5>下个节气：${nextTerm.name}</h5>
+                        <div class="countdown-container">
+                            <div class="countdown-item">
+                                <span class="countdown-number">${countdown.days}</span>
+                                <div class="countdown-label">天</div>
+                            </div>
+                            <div class="countdown-item">
+                                <span class="countdown-number">${countdown.hours}</span>
+                                <div class="countdown-label">时</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            $('#solarTermInfo').html(termHtml);
+        }
+
+        /**
+         * 初始化年度时间进度
+         */
+        function initializeYearProgress() {
+            const now = new Date();
+
+            // 计算当天进度
+            const dayProgress = calculateDayProgress(now);
+            updateProgressBar('dayProgress', dayProgress.percentage);
+            $('#dayProgressInfo').text(`${dayProgress.info}`);
+
+            // 计算本周进度
+            const weekProgress = calculateWeekProgress(now);
+            updateProgressBar('weekProgress', weekProgress.percentage);
+            $('#weekProgressInfo').text(`${weekProgress.info}`);
+
+            // 计算本月进度
+            const monthProgress = calculateMonthProgress(now);
+            updateProgressBar('monthProgress', monthProgress.percentage);
+            $('#monthProgressInfo').text(`${monthProgress.info}`);
+
+            // 计算年度进度
+            const yearProgress = calculateYearProgress(now);
+            updateProgressBar('yearProgress', yearProgress.percentage);
+            $('#progressDays').text(`已过去 ${yearProgress.passedDays} 天`);
+            $('#progressRemaining').text(`还剩 ${yearProgress.remainingDays} 天`);
+        }
+
+        /**
+         * 计算当天进度
+         */
+        function calculateDayProgress(now) {
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+            const percentage = Math.round((totalMinutes / (24 * 60)) * 100);
+
+            return {
+                percentage: percentage,
+                info: `${hours}:${minutes.toString().padStart(2, '0')} (${percentage}%)`
+            };
+        }
+
+        /**
+         * 计算本周进度
+         */
+        function calculateWeekProgress(now) {
+            const dayOfWeek = now.getDay();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+
+            const mondayBasedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            const totalMinutes = mondayBasedDay * 24 * 60 + hours * 60 + minutes;
+            const weekTotalMinutes = 7 * 24 * 60;
+            const percentage = Math.round((totalMinutes / weekTotalMinutes) * 100);
+
+            const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            return {
+                percentage: percentage,
+                info: `${weekDays[dayOfWeek]} (${percentage}%)`
+            };
+        }
+
+        /**
+         * 计算本月进度
+         */
+        function calculateMonthProgress(now) {
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const date = now.getDate();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const totalMinutes = (date - 1) * 24 * 60 + hours * 60 + minutes;
+            const monthTotalMinutes = daysInMonth * 24 * 60;
+            const percentage = Math.round((totalMinutes / monthTotalMinutes) * 100);
+
+            return {
+                percentage: percentage,
+                info: `${date}/${daysInMonth}日 (${percentage}%)`
+            };
+        }
+
+        /**
+         * 计算年度进度
+         */
+        function calculateYearProgress(now) {
+            const year = now.getFullYear();
+            const startOfYear = new Date(year, 0, 1);
+            const endOfYear = new Date(year + 1, 0, 1);
+
+            const totalDays = Math.floor((endOfYear - startOfYear) / (1000 * 60 * 60 * 24));
+            const passedDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+            const remainingDays = totalDays - passedDays;
+            const percentage = Math.round((passedDays / totalDays) * 100);
+
+            return {
+                percentage: percentage,
+                passedDays: passedDays,
+                remainingDays: remainingDays
+            };
+        }
+
+        /**
+         * 更新进度条
+         */
+        function updateProgressBar(elementId, percentage) {
+            $(`#${elementId}`).css('width', percentage + '%').text(percentage + '%');
+        }
+
+        /**
+         * 获取下一个节假日
+         */
+        function getNextHoliday(holidays) {
+            const now = new Date();
+            const futureHolidays = holidays.filter(holiday => new Date(holiday.date) > now);
+            futureHolidays.sort((a, b) => new Date(a.date) - new Date(b.date));
+            return futureHolidays[0];
+        }
+
+        /**
+         * 获取当前节气信息
+         */
+        function getCurrentSolarTermInfo(solarTerms) {
+            return solarTerms[0];
+        }
+
+        /**
+         * 获取下一个节气
+         */
+        function getNextSolarTerm(solarTerms) {
+            const now = new Date();
+            const futureSolarTerms = solarTerms.filter(term => new Date(term.date) > now);
+            futureSolarTerms.sort((a, b) => new Date(a.date) - new Date(b.date));
+            return futureSolarTerms[0];
+        }
+
+        /**
+         * 计算倒计时
+         */
+        function calculateCountdown(targetDate) {
+            const now = new Date();
+            const target = new Date(targetDate);
+            const diff = target - now;
+
+            if (diff <= 0) {
+                return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            return { days, hours, minutes, seconds };
+        }
+
+        /**
+         * 绑定事件
+         */
+        function bindEvents() {
+            // 新闻数量选择变化事件
+            $('#newsCount').on('change', function() {
+                initializeNewsSection();
+            });
+
+            // 模态框关闭事件
+            $('#modalClose').on('click', closeImageModal);
+            $('#imageModal').on('click', function(e) {
+                if (e.target === this) {
+                    closeImageModal();
+                }
+            });
+
+            // ESC键关闭模态框
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeImageModal();
+                }
+            });
+
+            // 主题切换事件
+            $('#themeToggle').on('click', function() {
+                toggleTheme();
+            });
+
+            // 定时更新倒计时
+            setInterval(() => {
+                initializeHolidayCountdown();
+                initializeSolarTermInfo();
+                initializeYearProgress();
+            }, 1000);
+        }
+
+        /**
+         * 切换主题
+         */
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (body.classList.contains('theme-simple')) {
+                // 切换回默认主题
+                body.classList.remove('theme-simple');
+                themeToggle.innerHTML = '<i class="fas fa-adjust"></i> 切换简洁模式';
+                localStorage.setItem('theme', 'default');
+            } else {
+                // 切换到简洁主题
+                body.classList.add('theme-simple');
+                themeToggle.innerHTML = '<i class="fas fa-adjust"></i> 切换默认模式';
+                localStorage.setItem('theme', 'simple');
+            }
+        }
+
+        /**
+         * 初始化主题
+         */
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (savedTheme === 'simple') {
+                document.body.classList.add('theme-simple');
+                themeToggle.innerHTML = '<i class="fas fa-adjust"></i> 切换默认模式';
+            }
+        }
+
+        /**
+         * 页面初始化
+         */
+        $(document).ready(function() {
+            try {
+                initializeTheme();
+                initializeDateInfo();
+                initializeNewsSection();
+                initializeHistorySection();
+                initializeDailyImage();
+                initializeFunContent();
+                initializePoetryContent();
+                initializeHolidayCountdown();
+                initializeSolarTermInfo();
+                initializeYearProgress();
+                bindEvents();
+                
+                // 绑定导出按钮事件
+                document.getElementById('exportMarkdown').addEventListener('click', exportToMarkdown);
+                
+                // 更新最后更新时间
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
+            } catch (error) {
+                console.error('页面初始化失败:', error);
+            }
+        });
+
+        // 导出为Markdown功能
+        function exportToMarkdown() {
+            try {
+                let markdown = '';
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('zh-CN');
+                
+                // 标题
+                markdown += `# 每日日报 - ${dateStr}\n\n`;
+                
+                // 日期信息
+                const dateInfo = document.querySelector('.date-info-row');
+                if (dateInfo) {
+                    markdown += `### 📅 日期信息\n\n`;
+                    const dateItems = dateInfo.querySelectorAll('.date-item, span');
+                    const dateTexts = [];
+                    dateItems.forEach(item => {
+                        const text = item.textContent.trim();
+                        if (text && !text.includes('|') && text !== '·') {
+                            dateTexts.push(text);
+                        }
+                    });
+                    if (dateTexts.length > 0) {
+                        markdown += `${dateTexts.join(' · ')}\n\n`;
+                    }
+                }
+
+                // 天气信息
+                const weatherInfo = document.querySelector('.weather-summary');
+                if (weatherInfo && weatherInfo.textContent.trim()) {
+                    markdown += `### 🌤️ 天气信息\n\n`;
+                    markdown += `${weatherInfo.textContent.trim()}\n\n`;
+                }
+
+                // 历史上的今天
+                const historyContent = document.getElementById('historyContent');
+                if (historyContent && !historyContent.querySelector('.loading')) {
+                    markdown += `### 📚 历史上的今天\n\n`;
+                    const historyItems = historyContent.querySelectorAll('.history-item');
+                    historyItems.forEach(item => {
+                        const year = item.querySelector('.history-year')?.textContent || '';
+                        const event = item.querySelector('.history-event')?.textContent || '';
+                        if (year && event) {
+                            markdown += `- **${year}** ${event}\n`;
+                        }
+                    });
+                    markdown += '\n';
+                }
+
+                // 轻松一刻
+                const funContent = document.getElementById('funContent');
+                if (funContent && !funContent.querySelector('.loading')) {
+                    markdown += `### 😄 轻松一刻\n\n`;
+                    const funText = funContent.textContent.trim();
+                    if (funText) {
+                        markdown += `${funText}\n\n`;
+                    }
+                }
+
+                // 每日图片
+                const dailyImage = document.getElementById('dailyImage');
+                if (dailyImage && !dailyImage.querySelector('.loading')) {
+                    markdown += `### 🖼️ 每日图片\n\n`;
+                    const images = dailyImage.querySelectorAll('img');
+                    images.forEach((img, index) => {
+                        if (img.src && img.alt) {
+                            markdown += `![${img.alt}](${img.src})\n`;
+                        }
+                    });
+                    markdown += '\n';
+                }
+
+                // 每日诗词
+                const poetryContent = document.getElementById('poetryContent');
+                if (poetryContent && !poetryContent.querySelector('.loading')) {
+                    markdown += `### 📝 每日诗词\n\n`;
+                    const poetryText = poetryContent.textContent.trim();
+                    if (poetryText) {
+                        markdown += `> ${poetryText}\n\n`;
+                    }
+                }
+
+                // 节假日信息
+                const holidayInfo = document.getElementById('holidayInfo');
+                if (holidayInfo && !holidayInfo.querySelector('.loading')) {
+                    markdown += `### 🎉 节假日信息\n\n`;
+                    const holidayText = holidayInfo.textContent.trim();
+                    if (holidayText && holidayText !== '今日无特殊节假日') {
+                        markdown += `${holidayText}\n\n`;
+                    }
+                }
+
+                // 节气信息
+                const solarTermInfo = document.getElementById('solarTermInfo');
+                if (solarTermInfo && !solarTermInfo.querySelector('.loading')) {
+                    markdown += `### 🌿 节气信息\n\n`;
+                    const termText = solarTermInfo.textContent.trim();
+                    if (termText) {
+                        markdown += `${termText}\n\n`;
+                    }
+                }
+
+                // 时间进度
+                const progressItems = document.querySelectorAll('.progress-item');
+                if (progressItems.length > 0) {
+                    markdown += `### 📊 时间进度\n\n`;
+                    progressItems.forEach(item => {
+                        const title = item.querySelector('h4')?.textContent || '';
+                        const progressBar = item.querySelector('.progress-bar');
+                        const progressInfo = item.querySelector('.progress-info')?.textContent || '';
+                        
+                        if (title && progressBar) {
+                            const percentage = progressBar.style.width || progressBar.textContent || '0%';
+                            markdown += `- **${title}**: ${percentage}`;
+                            if (progressInfo) {
+                                markdown += ` (${progressInfo})`;
+                            }
+                            markdown += '\n';
+                        }
+                    });
+                    markdown += '\n';
+                }
+
+                // 新闻资讯
+                const newsList = document.getElementById('newsList');
+                if (newsList && !newsList.querySelector('.loading')) {
+                    markdown += `### 📰 新闻资讯\n\n`;
+                    
+                    const newsItems = newsList.querySelectorAll('.news-item');
+                    newsItems.forEach((item, index) => {
+                        const title = item.querySelector('.news-title')?.textContent || '';
+                        const source = item.querySelector('.news-source')?.textContent || '';
+                        if (title) {
+                            markdown += `${index + 1}. **${title}**`;
+                            if (source) {
+                                markdown += ` - ${source}`;
+                            }
+                            markdown += '\n';
+                        }
+                    });
+                    markdown += '\n';
+                }
+
+                // 页脚信息
+                markdown += `---\n\n`;
+                markdown += `*生成时间：${now.toLocaleString('zh-CN')}*\n`;
+                markdown += `*数据来源：公开API*\n`;
+
+                // 复制到剪贴板
+                navigator.clipboard.writeText(markdown).then(() => {
+                    // 显示成功提示
+                    const btn = document.getElementById('exportMarkdown');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                    btn.style.background = '#28a745';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '#6c757d';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    alert('复制失败，请手动复制内容');
+                });
+
+            } catch (error) {
+                console.error('导出Markdown失败:', error);
+                alert('导出失败，请稍后重试');
+            }
+        }
+    </script>
+</body>
+</html>
