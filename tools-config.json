@@ -1,6 +1,17 @@
 {
     "tools": [
         {
+            "icon": "📰",
+            "title": "每日日报 - 今日信息一览",
+            "keywords": "每日日报,新闻,天气,历史上的今天,诗词,节气,节假日",
+            "features": [
+                "新闻资讯、天气信息、历史上的今天、每日诗词、节气节假日、时间进度"
+            ],
+            "description": "每日日报 - 一站式获取今日新闻、天气、历史、诗词等信息",
+            "url": "pages/daily-simple-report.html",
+            "rank": 0
+        },
+        {
             "icon": "🚀",
             "title": "Github Pages 推荐",
             "keywords": "github pages,项目",
@@ -10,6 +21,28 @@
             "description": "精选优质 Github Pages 项目，快速访问和部署，助力开发者发现更多开源工具与灵感,",
             "url": "pages/nav/nav_github_pages.html",
             "rank": 998
+        },
+        {
+            "icon": "",
+            "title": "StorageUtils 使用示例",
+            "keywords": "storage工具",
+            "features": [
+                "storage"
+            ],
+            "description": "storage",
+            "url": "pages/storage/storage_utils_example.html",
+            "rank": 997
+        },
+        {
+            "icon": "",
+            "title": "GitHub API 功能测试页面",
+            "keywords": "Github API",
+            "features": [
+                "Github API"
+            ],
+            "description": "Github API 测试",
+            "url": "pages/github/github_api_demo.html",
+            "rank": 1001
         },
         {
             "icon": "🔐",
