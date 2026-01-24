@@ -1,1 +1,587 @@
-"/**\n * GitHub API 操作模块\n * 提供与 GitHub 仓库交互的增删改查功能\n */\n\nclass GitHubAPI {\n  constructor() {\n    this.baseURL = \"https://api.github.com\";\n    this.config = null;\n  }\n\n  /**\n   * 初始化配置\n   * @param {Object} config - 配置对象\n   * @param {string} config.accessToken - GitHub Personal Access Token\n   * @param {string} config.owner - 仓库所有者（可选）\n   * @param {string} config.repo - 仓库名称（可选）\n   * @param {string} config.branch - 分支名称（可选，默认: main）\n   * @param {string} config.filePath - 文件路径（可选，默认: prompts_data.json）\n   */\n  async init(config) {\n    this.config = {\n      accessToken: config.accessToken,\n      owner: config.owner || \"\",\n      repo: config.repo || \"\",\n      branch: config.branch || \"main\",\n      filePath: config.filePath || \"prompts_data.json\",\n    };\n    \n    // 保存配置到 storage\n    // await chrome.storage.local.set({ githubConfig: this.config });\n    // 保存配置\n    if (typeof chrome !== 'undefined' && chrome.storage) {\n        await chrome.storage.local.set({ githubConfig: this.config });\n    }\n  }\n\n  /**\n   * 从 storage 加载配置\n   */\n  async loadConfig() {\n    return new Promise((resolve) => {\n      chrome.storage.local.get([\"githubConfig\"], (result) => {\n        if (result.githubConfig) {\n          this.config = result.githubConfig;\n          resolve(true);\n        } else {\n          resolve(false);\n        }\n      });\n    });\n  }\n\n  /**\n   * 获取请求头\n   */\n  getHeaders() {\n    return {\n      Authorization: `token ${this.config.accessToken}`,\n      Accept: \"application/vnd.github.v3+json\",\n      \"Content-Type\": \"application/json\",\n    };\n  }\n\n  /**\n   * 从 GitHub 获取文件内容\n   * @param {string} filePath - 文件路径（可选，使用配置中的filePath）\n   * @param {string} owner - 仓库所有者（可选）\n   * @param {string} repo - 仓库名称（可选）\n   * @param {string} branch - 分支名称（可选）\n   * @returns {Promise<Object>} 返回文件内容、SHA 和类型信息\n   */\n  async getFile(filePath = null, owner = null, repo = null, branch = null) {\n    try {\n      const _owner = owner || this.config.owner;\n      const _repo = repo || this.config.repo;\n      const _branch = branch || this.config.branch;\n      const _filePath = filePath || this.config.filePath;\n      \n      if (!_owner || !_repo) {\n        throw new Error(\"请指定仓库所有者和仓库名称\");\n      }\n      \n      if (!_filePath) {\n        throw new Error(\"请指定文件路径\");\n      }\n\n      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${_filePath}?ref=${_branch}`;\n      \n      const response = await fetch(url, {\n        method: \"GET\",\n        headers: this.getHeaders(),\n      });\n\n      if (!response.ok) {\n        if (response.status === 404) {\n          return { content: null, sha: null, isJson: false };\n        }\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      const data = await response.json();\n      // 先解码 base64 内容\n      const decodedContent = decodeURIComponent(escape(atob(data.content)));\n      \n      // 尝试解析为 JSON，如果失败则返回原始文本\n      let content;\n      let isJson = false;\n      try {\n        content = JSON.parse(decodedContent);\n        isJson = true;\n      } catch (e) {\n        // 不是 JSON 格式，返回原始文本\n        content = decodedContent;\n        isJson = false;\n      }\n      \n      return {\n        content: content,\n        sha: data.sha,\n        isJson: isJson,\n        rawContent: decodedContent\n      };\n    } catch (error) {\n      console.error(\"获取 GitHub 文件失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 创建或更新 GitHub 文件\n   * @param {Object} content - 文件内容\n   * @param {string} sha - 文件的 SHA (更新时必需)\n   * @param {string} message - 提交信息\n   * @param {string} filePath - 文件路径（可选）\n   * @param {string} owner - 仓库所有者（可选）\n   * @param {string} repo - 仓库名称（可选）\n   * @param {string} branch - 分支名称（可选）\n   * @returns {Promise<Object>} 返回更新后的文件信息\n   */\n  async updateFile(content, sha = null, message = \"Update file\", filePath = null, owner = null, repo = null, branch = null) {\n    try {\n      const _owner = owner || this.config.owner;\n      const _repo = repo || this.config.repo;\n      const _branch = branch || this.config.branch;\n      const _filePath = filePath || this.config.filePath;\n      \n      if (!_owner || !_repo) {\n        throw new Error(\"请指定仓库所有者和仓库名称\");\n      }\n      \n      if (!_filePath) {\n        throw new Error(\"请指定文件路径\");\n      }\n\n      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${_filePath}`;\n      \n      const body = {\n        message: message,\n        content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),\n        branch: _branch,\n      };\n\n      if (sha) {\n        body.sha = sha;\n      }\n\n      const response = await fetch(url, {\n        method: \"PUT\",\n        headers: this.getHeaders(),\n        body: JSON.stringify(body),\n      });\n\n      if (!response.ok) {\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      const data = await response.json();\n      return {\n        success: true,\n        sha: data.content.sha,\n        url: data.content.html_url,\n      };\n    } catch (error) {\n      console.error(\"更新 GitHub 文件失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 删除 GitHub 文件\n   * @param {string} sha - 文件的 SHA\n   * @param {string} message - 提交信息\n   * @param {string} filePath - 文件路径（可选）\n   * @param {string} owner - 仓库所有者（可选）\n   * @param {string} repo - 仓库名称（可选）\n   * @param {string} branch - 分支名称（可选）\n   * @returns {Promise<Object>}\n   */\n  async deleteFile(sha, message = \"Delete file\", filePath = null, owner = null, repo = null, branch = null) {\n    try {\n      const _owner = owner || this.config.owner;\n      const _repo = repo || this.config.repo;\n      const _branch = branch || this.config.branch;\n      const _filePath = filePath || this.config.filePath;\n      \n      if (!_owner || !_repo) {\n        throw new Error(\"请指定仓库所有者和仓库名称\");\n      }\n      \n      if (!_filePath) {\n        throw new Error(\"请指定文件路径\");\n      }\n\n      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${_filePath}`;\n      \n      const response = await fetch(url, {\n        method: \"DELETE\",\n        headers: this.getHeaders(),\n        body: JSON.stringify({\n          message: message,\n          sha: sha,\n          branch: _branch,\n        }),\n      });\n\n      if (!response.ok) {\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      return { success: true };\n    } catch (error) {\n      console.error(\"删除 GitHub 文件失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 同步本地数据到 GitHub\n   * @param {Array} prompts - 提示词数组\n   * @returns {Promise<Object>}\n   */\n  async syncToGitHub(prompts) {\n    try {\n      // 获取当前文件的 SHA\n      const { sha } = await this.getFile();\n      \n      const data = {\n        prompts: prompts,\n        version: \"1.0.0\",\n        lastSync: new Date().toISOString(),\n      };\n\n      const result = await this.updateFile(\n        data,\n        sha,\n        `Sync prompts data at ${new Date().toLocaleString()}`\n      );\n\n      return result;\n    } catch (error) {\n      console.error(\"同步到 GitHub 失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 从 GitHub 拉取数据到本地\n   * @returns {Promise<Array>} 返回提示词数组\n   */\n  async pullFromGitHub() {\n    try {\n      const { content } = await this.getFile();\n      \n      if (!content || !content.prompts) {\n        throw new Error(\"GitHub 文件格式不正确\");\n      }\n\n      // 保存到本地 storage\n      await chrome.storage.local.set({\n        myPrompts: content.prompts,\n        lastGitHubSync: new Date().toISOString(),\n      });\n\n      return content.prompts;\n    } catch (error) {\n      console.error(\"从 GitHub 拉取失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 测试 GitHub 连接\n   * @returns {Promise<boolean>}\n   */\n  async testConnection() {\n    try {\n      const url = `${this.baseURL}/user`;\n      \n      const response = await fetch(url, {\n        method: \"GET\",\n        headers: this.getHeaders(),\n      });\n\n      return response.ok;\n    } catch (error) {\n      console.error(\"测试 GitHub 连接失败:\", error);\n      return false;\n    }\n  }\n\n  /**\n   * 获取当前用户信息\n   * @returns {Promise<Object>} 返回用户信息\n   */\n  async getUserInfo() {\n    try {\n      const url = `${this.baseURL}/user`;\n      \n      const response = await fetch(url, {\n        method: \"GET\",\n        headers: this.getHeaders(),\n      });\n\n      if (!response.ok) {\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      return await response.json();\n    } catch (error) {\n      console.error(\"获取用户信息失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 获取用户可访问的仓库列表\n   * @param {number} per_page - 每页数量（默认30，最大100）\n   * @param {number} page - 页码（默认1）\n   * @returns {Promise<Array>} 返回仓库列表\n   */\n  async listRepositories(per_page = 30, page = 1) {\n    try {\n      const url = `${this.baseURL}/user/repos?per_page=${per_page}&page=${page}&sort=updated`;\n      \n      const response = await fetch(url, {\n        method: \"GET\",\n        headers: this.getHeaders(),\n      });\n\n      if (!response.ok) {\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      const repos = await response.json();\n      return repos.map(repo => ({\n        name: repo.name,\n        full_name: repo.full_name,\n        owner: repo.owner.login,\n        private: repo.private,\n        description: repo.description,\n        updated_at: repo.updated_at,\n        default_branch: repo.default_branch\n      }));\n    } catch (error) {\n      console.error(\"获取仓库列表失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 获取指定仓库的分支列表\n   * @param {string} owner - 仓库所有者（可选，使用配置中的owner）\n   * @param {string} repo - 仓库名称（可选，使用配置中的repo）\n   * @returns {Promise<Array>} 返回分支列表\n   */\n  async listBranches(owner = null, repo = null) {\n    try {\n      const _owner = owner || this.config.owner;\n      const _repo = repo || this.config.repo;\n      \n      if (!_owner || !_repo) {\n        throw new Error(\"请指定仓库所有者和仓库名称\");\n      }\n\n      const url = `${this.baseURL}/repos/${_owner}/${_repo}/branches`;\n      \n      const response = await fetch(url, {\n        method: \"GET\",\n        headers: this.getHeaders(),\n      });\n\n      if (!response.ok) {\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      const branches = await response.json();\n      return branches.map(branch => ({\n        name: branch.name,\n        protected: branch.protected,\n        commit_sha: branch.commit.sha\n      }));\n    } catch (error) {\n      console.error(\"获取分支列表失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 获取指定仓库的文件列表（指定路径下的内容）\n   * @param {string} path - 路径（默认为根目录\"\"）\n   * @param {string} owner - 仓库所有者（可选）\n   * @param {string} repo - 仓库名称（可选）\n   * @param {string} branch - 分支名称（可选）\n   * @returns {Promise<Array>} 返回文件/目录列表\n   */\n  async listFiles(path = \"\", owner = null, repo = null, branch = null) {\n    try {\n      const _owner = owner || this.config.owner;\n      const _repo = repo || this.config.repo;\n      const _branch = branch || this.config.branch;\n      \n      if (!_owner || !_repo) {\n        throw new Error(\"请指定仓库所有者和仓库名称\");\n      }\n\n      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${path}?ref=${_branch}`;\n      \n      const response = await fetch(url, {\n        method: \"GET\",\n        headers: this.getHeaders(),\n      });\n\n      if (!response.ok) {\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      const contents = await response.json();\n      \n      // 如果返回的是单个文件而不是数组，则包装成数组\n      const items = Array.isArray(contents) ? contents : [contents];\n      \n      return items.map(item => ({\n        name: item.name,\n        path: item.path,\n        type: item.type, // \"file\" or \"dir\"\n        size: item.size,\n        sha: item.sha,\n        download_url: item.download_url\n      }));\n    } catch (error) {\n      console.error(\"获取文件列表失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 从 GitHub URL 下载文件\n   * @param {string} url - GitHub 文件的完整 URL\n   * @param {boolean} useToken - 是否使用 Access Token 进行认证（私有仓库需要）\n   * @returns {Promise<Object>} 返回文件内容、元信息和是否为 JSON\n   */\n  async downloadFileFromUrl(url, useToken = false) {\n    try {\n      // 支持多种 GitHub URL 格式\n      // 1. https://github.com/owner/repo/blob/branch/path/to/file\n      // 2. https://raw.githubusercontent.com/owner/repo/branch/path/to/file\n      // 3. https://api.github.com/repos/owner/repo/contents/path/to/file\n      \n      let apiUrl = url;\n      let fileName = \"downloaded_file\";\n      \n      // 处理 github.com/blob URL\n      if (url.includes('github.com') && url.includes('/blob/')) {\n        const match = url.match(/github\\.com\\/([^\\/]+)\\/([^\\/]+)\\/blob\\/([^\\/]+)\\/(.+)/);\n        if (match) {\n          const [, owner, repo, branch, filePath] = match;\n          apiUrl = `${this.baseURL}/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`;\n          fileName = filePath.split('/').pop();\n        }\n      }\n      // 处理 raw.githubusercontent.com URL\n      else if (url.includes('raw.githubusercontent.com')) {\n        const match = url.match(/raw\\.githubusercontent\\.com\\/([^\\/]+)\\/([^\\/]+)\\/([^\\/]+)\\/(.+)/);\n        if (match) {\n          const [, owner, repo, branch, filePath] = match;\n          apiUrl = `${this.baseURL}/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`;\n          fileName = filePath.split('/').pop();\n        }\n      }\n      // API URL 直接使用\n      else if (url.includes('api.github.com/repos')) {\n        const match = url.match(/repos\\/[^\\/]+\\/[^\\/]+\\/contents\\/(.+?)(?:\\?|$)/);\n        if (match) {\n          fileName = match[1].split('/').pop();\n        }\n      }\n\n      // 构建请求头\n      const headers = {};\n      if (useToken && this.config && this.config.accessToken) {\n        headers.Authorization = `token ${this.config.accessToken}`;\n        headers.Accept = \"application/vnd.github.v3+json\";\n      }\n\n      const response = await fetch(apiUrl, {\n        method: \"GET\",\n        headers: headers,\n      });\n\n      if (!response.ok) {\n        if (response.status === 404) {\n          throw new Error(\"文件不存在或无访问权限，私有仓库请启用 Token 认证\");\n        }\n        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);\n      }\n\n      const data = await response.json();\n      \n      // 解码 base64 内容\n      const decodedContent = decodeURIComponent(escape(atob(data.content)));\n      \n      // 尝试解析为 JSON\n      let content;\n      let isJson = false;\n      try {\n        content = JSON.parse(decodedContent);\n        isJson = true;\n      } catch (e) {\n        content = decodedContent;\n        isJson = false;\n      }\n      \n      return {\n        content: content,\n        rawContent: decodedContent,\n        fileName: data.name || fileName,\n        size: data.size,\n        sha: data.sha,\n        isJson: isJson,\n        downloadUrl: data.download_url,\n        htmlUrl: data.html_url\n      };\n    } catch (error) {\n      console.error(\"下载 GitHub 文件失败:\", error);\n      throw error;\n    }\n  }\n\n  /**\n   * 将文件内容保存到本地\n   * @param {string} content - 文件内容\n   * @param {string} fileName - 文件名\n   * @param {boolean} isJson - 是否为 JSON 格式\n   */\n  saveFileToLocal(content, fileName, isJson = false) {\n    try {\n      // 创建 Blob 对象\n      const blob = new Blob(\n        [isJson ? JSON.stringify(content, null, 2) : content],\n        { type: isJson ? 'application/json' : 'text/plain' }\n      );\n      \n      // 创建下载链接\n      const url = URL.createObjectURL(blob);\n      const a = document.createElement('a');\n      a.href = url;\n      a.download = fileName;\n      \n      // 触发下载\n      document.body.appendChild(a);\n      a.click();\n      \n      // 清理\n      document.body.removeChild(a);\n      URL.revokeObjectURL(url);\n      \n      return true;\n    } catch (error) {\n      console.error(\"保存文件到本地失败:\", error);\n      throw error;\n    }\n  }\n}\n\n// 导出单例\nconst githubAPI = new GitHubAPI();"
+/**
+ * GitHub API 操作模块
+ * 提供与 GitHub 仓库交互的增删改查功能
+ */
+
+class GitHubAPI {
+  constructor() {
+    this.baseURL = "https://api.github.com";
+    this.config = null;
+  }
+
+  /**
+   * 初始化配置
+   * @param {Object} config - 配置对象
+   * @param {string} config.accessToken - GitHub Personal Access Token
+   * @param {string} config.owner - 仓库所有者（可选）
+   * @param {string} config.repo - 仓库名称（可选）
+   * @param {string} config.branch - 分支名称（可选，默认: main）
+   * @param {string} config.filePath - 文件路径（可选，默认: prompts_data.json）
+   */
+  async init(config) {
+    this.config = {
+      accessToken: config.accessToken,
+      owner: config.owner || "",
+      repo: config.repo || "",
+      branch: config.branch || "main",
+      filePath: config.filePath || "prompts_data.json",
+    };
+    
+    // 保存配置到 storage
+    // await chrome.storage.local.set({ githubConfig: this.config });
+    // 保存配置
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+        await chrome.storage.local.set({ githubConfig: this.config });
+    }
+  }
+
+  /**
+   * 从 storage 加载配置
+   */
+  async loadConfig() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(["githubConfig"], (result) => {
+        if (result.githubConfig) {
+          this.config = result.githubConfig;
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      });
+    });
+  }
+
+  /**
+   * 获取请求头
+   */
+  getHeaders() {
+    return {
+      Authorization: `token ${this.config.accessToken}`,
+      Accept: "application/vnd.github.v3+json",
+      "Content-Type": "application/json",
+    };
+  }
+
+  /**
+   * 从 GitHub 获取文件内容
+   * @param {string} filePath - 文件路径（可选，使用配置中的filePath）
+   * @param {string} owner - 仓库所有者（可选）
+   * @param {string} repo - 仓库名称（可选）
+   * @param {string} branch - 分支名称（可选）
+   * @returns {Promise<Object>} 返回文件内容、SHA 和类型信息
+   */
+  async getFile(filePath = null, owner = null, repo = null, branch = null) {
+    try {
+      const _owner = owner || this.config.owner;
+      const _repo = repo || this.config.repo;
+      const _branch = branch || this.config.branch;
+      const _filePath = filePath || this.config.filePath;
+      
+      if (!_owner || !_repo) {
+        throw new Error("请指定仓库所有者和仓库名称");
+      }
+      
+      if (!_filePath) {
+        throw new Error("请指定文件路径");
+      }
+
+      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${_filePath}?ref=${_branch}`;
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { content: null, sha: null, isJson: false };
+        }
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      // 先解码 base64 内容
+      const decodedContent = decodeURIComponent(escape(atob(data.content)));
+      
+      // 尝试解析为 JSON，如果失败则返回原始文本
+      let content;
+      let isJson = false;
+      try {
+        content = JSON.parse(decodedContent);
+        isJson = true;
+      } catch (e) {
+        // 不是 JSON 格式，返回原始文本
+        content = decodedContent;
+        isJson = false;
+      }
+      
+      return {
+        content: content,
+        sha: data.sha,
+        isJson: isJson,
+        rawContent: decodedContent
+      };
+    } catch (error) {
+      console.error("获取 GitHub 文件失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 创建或更新 GitHub 文件
+   * @param {Object} content - 文件内容
+   * @param {string} sha - 文件的 SHA (更新时必需)
+   * @param {string} message - 提交信息
+   * @param {string} filePath - 文件路径（可选）
+   * @param {string} owner - 仓库所有者（可选）
+   * @param {string} repo - 仓库名称（可选）
+   * @param {string} branch - 分支名称（可选）
+   * @returns {Promise<Object>} 返回更新后的文件信息
+   */
+  async updateFile(content, sha = null, message = "Update file", filePath = null, owner = null, repo = null, branch = null) {
+    try {
+      const _owner = owner || this.config.owner;
+      const _repo = repo || this.config.repo;
+      const _branch = branch || this.config.branch;
+      const _filePath = filePath || this.config.filePath;
+      
+      if (!_owner || !_repo) {
+        throw new Error("请指定仓库所有者和仓库名称");
+      }
+      
+      if (!_filePath) {
+        throw new Error("请指定文件路径");
+      }
+
+      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${_filePath}`;
+      
+      const body = {
+        message: message,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+        branch: _branch,
+      };
+
+      if (sha) {
+        body.sha = sha;
+      }
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: this.getHeaders(),
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        sha: data.content.sha,
+        url: data.content.html_url,
+      };
+    } catch (error) {
+      console.error("更新 GitHub 文件失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 删除 GitHub 文件
+   * @param {string} sha - 文件的 SHA
+   * @param {string} message - 提交信息
+   * @param {string} filePath - 文件路径（可选）
+   * @param {string} owner - 仓库所有者（可选）
+   * @param {string} repo - 仓库名称（可选）
+   * @param {string} branch - 分支名称（可选）
+   * @returns {Promise<Object>}
+   */
+  async deleteFile(sha, message = "Delete file", filePath = null, owner = null, repo = null, branch = null) {
+    try {
+      const _owner = owner || this.config.owner;
+      const _repo = repo || this.config.repo;
+      const _branch = branch || this.config.branch;
+      const _filePath = filePath || this.config.filePath;
+      
+      if (!_owner || !_repo) {
+        throw new Error("请指定仓库所有者和仓库名称");
+      }
+      
+      if (!_filePath) {
+        throw new Error("请指定文件路径");
+      }
+
+      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${_filePath}`;
+      
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          message: message,
+          sha: sha,
+          branch: _branch,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("删除 GitHub 文件失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 同步本地数据到 GitHub
+   * @param {Array} prompts - 提示词数组
+   * @returns {Promise<Object>}
+   */
+  async syncToGitHub(prompts) {
+    try {
+      // 获取当前文件的 SHA
+      const { sha } = await this.getFile();
+      
+      const data = {
+        prompts: prompts,
+        version: "1.0.0",
+        lastSync: new Date().toISOString(),
+      };
+
+      const result = await this.updateFile(
+        data,
+        sha,
+        `Sync prompts data at ${new Date().toLocaleString()}`
+      );
+
+      return result;
+    } catch (error) {
+      console.error("同步到 GitHub 失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 从 GitHub 拉取数据到本地
+   * @returns {Promise<Array>} 返回提示词数组
+   */
+  async pullFromGitHub() {
+    try {
+      const { content } = await this.getFile();
+      
+      if (!content || !content.prompts) {
+        throw new Error("GitHub 文件格式不正确");
+      }
+
+      // 保存到本地 storage
+      await chrome.storage.local.set({
+        myPrompts: content.prompts,
+        lastGitHubSync: new Date().toISOString(),
+      });
+
+      return content.prompts;
+    } catch (error) {
+      console.error("从 GitHub 拉取失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 测试 GitHub 连接
+   * @returns {Promise<boolean>}
+   */
+  async testConnection() {
+    try {
+      const url = `${this.baseURL}/user`;
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error("测试 GitHub 连接失败:", error);
+      return false;
+    }
+  }
+
+  /**
+   * 获取当前用户信息
+   * @returns {Promise<Object>} 返回用户信息
+   */
+  async getUserInfo() {
+    try {
+      const url = `${this.baseURL}/user`;
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("获取用户信息失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取用户可访问的仓库列表
+   * @param {number} per_page - 每页数量（默认30，最大100）
+   * @param {number} page - 页码（默认1）
+   * @returns {Promise<Array>} 返回仓库列表
+   */
+  async listRepositories(per_page = 30, page = 1) {
+    try {
+      const url = `${this.baseURL}/user/repos?per_page=${per_page}&page=${page}&sort=updated`;
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const repos = await response.json();
+      return repos.map(repo => ({
+        name: repo.name,
+        full_name: repo.full_name,
+        owner: repo.owner.login,
+        private: repo.private,
+        description: repo.description,
+        updated_at: repo.updated_at,
+        default_branch: repo.default_branch
+      }));
+    } catch (error) {
+      console.error("获取仓库列表失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取指定仓库的分支列表
+   * @param {string} owner - 仓库所有者（可选，使用配置中的owner）
+   * @param {string} repo - 仓库名称（可选，使用配置中的repo）
+   * @returns {Promise<Array>} 返回分支列表
+   */
+  async listBranches(owner = null, repo = null) {
+    try {
+      const _owner = owner || this.config.owner;
+      const _repo = repo || this.config.repo;
+      
+      if (!_owner || !_repo) {
+        throw new Error("请指定仓库所有者和仓库名称");
+      }
+
+      const url = `${this.baseURL}/repos/${_owner}/${_repo}/branches`;
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const branches = await response.json();
+      return branches.map(branch => ({
+        name: branch.name,
+        protected: branch.protected,
+        commit_sha: branch.commit.sha
+      }));
+    } catch (error) {
+      console.error("获取分支列表失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取指定仓库的文件列表（指定路径下的内容）
+   * @param {string} path - 路径（默认为根目录""）
+   * @param {string} owner - 仓库所有者（可选）
+   * @param {string} repo - 仓库名称（可选）
+   * @param {string} branch - 分支名称（可选）
+   * @returns {Promise<Array>} 返回文件/目录列表
+   */
+  async listFiles(path = "", owner = null, repo = null, branch = null) {
+    try {
+      const _owner = owner || this.config.owner;
+      const _repo = repo || this.config.repo;
+      const _branch = branch || this.config.branch;
+      
+      if (!_owner || !_repo) {
+        throw new Error("请指定仓库所有者和仓库名称");
+      }
+
+      const url = `${this.baseURL}/repos/${_owner}/${_repo}/contents/${path}?ref=${_branch}`;
+      
+      const response = await fetch(url, {
+        method: "GET",
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const contents = await response.json();
+      
+      // 如果返回的是单个文件而不是数组，则包装成数组
+      const items = Array.isArray(contents) ? contents : [contents];
+      
+      return items.map(item => ({
+        name: item.name,
+        path: item.path,
+        type: item.type, // "file" or "dir"
+        size: item.size,
+        sha: item.sha,
+        download_url: item.download_url
+      }));
+    } catch (error) {
+      console.error("获取文件列表失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 从 GitHub URL 下载文件
+   * @param {string} url - GitHub 文件的完整 URL
+   * @param {boolean} useToken - 是否使用 Access Token 进行认证（私有仓库需要）
+   * @returns {Promise<Object>} 返回文件内容、元信息和是否为 JSON
+   */
+  async downloadFileFromUrl(url, useToken = false) {
+    try {
+      // 支持多种 GitHub URL 格式
+      // 1. https://github.com/owner/repo/blob/branch/path/to/file
+      // 2. https://raw.githubusercontent.com/owner/repo/branch/path/to/file
+      // 3. https://api.github.com/repos/owner/repo/contents/path/to/file
+      
+      let apiUrl = url;
+      let fileName = "downloaded_file";
+      
+      // 处理 github.com/blob URL
+      if (url.includes('github.com') && url.includes('/blob/')) {
+        const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)/);
+        if (match) {
+          const [, owner, repo, branch, filePath] = match;
+          apiUrl = `${this.baseURL}/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`;
+          fileName = filePath.split('/').pop();
+        }
+      }
+      // 处理 raw.githubusercontent.com URL
+      else if (url.includes('raw.githubusercontent.com')) {
+        const match = url.match(/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)/);
+        if (match) {
+          const [, owner, repo, branch, filePath] = match;
+          apiUrl = `${this.baseURL}/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`;
+          fileName = filePath.split('/').pop();
+        }
+      }
+      // API URL 直接使用
+      else if (url.includes('api.github.com/repos')) {
+        const match = url.match(/repos\/[^\/]+\/[^\/]+\/contents\/(.+?)(?:\?|$)/);
+        if (match) {
+          fileName = match[1].split('/').pop();
+        }
+      }
+
+      // 构建请求头
+      const headers = {};
+      if (useToken && this.config && this.config.accessToken) {
+        headers.Authorization = `token ${this.config.accessToken}`;
+        headers.Accept = "application/vnd.github.v3+json";
+      }
+
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: headers,
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("文件不存在或无访问权限，私有仓库请启用 Token 认证");
+        }
+        throw new Error(`GitHub API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // 解码 base64 内容
+      const decodedContent = decodeURIComponent(escape(atob(data.content)));
+      
+      // 尝试解析为 JSON
+      let content;
+      let isJson = false;
+      try {
+        content = JSON.parse(decodedContent);
+        isJson = true;
+      } catch (e) {
+        content = decodedContent;
+        isJson = false;
+      }
+      
+      return {
+        content: content,
+        rawContent: decodedContent,
+        fileName: data.name || fileName,
+        size: data.size,
+        sha: data.sha,
+        isJson: isJson,
+        downloadUrl: data.download_url,
+        htmlUrl: data.html_url
+      };
+    } catch (error) {
+      console.error("下载 GitHub 文件失败:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * 将文件内容保存到本地
+   * @param {string} content - 文件内容
+   * @param {string} fileName - 文件名
+   * @param {boolean} isJson - 是否为 JSON 格式
+   */
+  saveFileToLocal(content, fileName, isJson = false) {
+    try {
+      // 创建 Blob 对象
+      const blob = new Blob(
+        [isJson ? JSON.stringify(content, null, 2) : content],
+        { type: isJson ? 'application/json' : 'text/plain' }
+      );
+      
+      // 创建下载链接
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      
+      // 触发下载
+      document.body.appendChild(a);
+      a.click();
+      
+      // 清理
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      return true;
+    } catch (error) {
+      console.error("保存文件到本地失败:", error);
+      throw error;
+    }
+  }
+}
+
+// 导出单例
+const githubAPI = new GitHubAPI();
