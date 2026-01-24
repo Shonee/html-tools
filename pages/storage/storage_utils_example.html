@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StorageUtils 使用示例</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #1e293b;
+      margin-bottom: 12px;
+      font-size: 32px;
+    }
+
+    .env-info {
+      background: #f1f5f9;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .env-info strong {
+      color: #3b82f6;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section h2 {
+      color: #475569;
+      margin-bottom: 16px;
+      font-size: 20px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-info {
+      background: #06b6d4;
+      color: white;
+    }
+
+    .output {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .output:empty::before {
+      content: '等待操作输出...';
+      color: #64748b;
+    }
+
+    input {
+      padding: 10px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+      max-width: 300px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .input-group label {
+      color: #475569;
+      font-weight: 500;
+      min-width: 80px;
+    }
+
+    .success {
+      color: #10b981;
+    }
+
+    .error {
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗄️ StorageUtils 使用示例</h1>
+    <div class="env-info" id="envInfo">
+      <strong>运行环境：</strong>加载中...
+    </div>
+
+    <!-- 基础操作 -->
+    <div class="section">
+      <h2>📝 基础操作 (增删改查)</h2>
+      
+      <div class="input-group">
+        <label>键名：</label>
+        <input type="text" id="keyInput" placeholder="例如：username" value="testKey">
+        <label>值：</label>
+        <input type="text" id="valueInput" placeholder="例如：张三" value="Hello World">
+      </div>
+
+      <div class="button-group">
+        <button class="btn-primary" onclick="testSet()">💾 设置数据 (set)</button>
+        <button class="btn-success" onclick="testGet()">🔍 获取数据 (get)</button>
+        <button class="btn-warning" onclick="testUpdate()">✏️ 更新数据 (update)</button>
+        <button class="btn-danger" onclick="testRemove()">🗑️ 删除数据 (remove)</button>
+      </div>
+
+      <div class="output" id="basicOutput"></div>
+    </div>
+
+    <!-- 批量操作 -->
+    <div class="section">
+      <h2>📦 批量操作</h2>
+      
+      <div class="button-group">
+        <button class="btn-primary" onclick="testBatchSet()">批量设置 (setBatch)</button>
+        <button class="btn-success" onclick="testBatchGet()">批量获取 (getBatch)</button>
+        <button class="btn-danger" onclick="testBatchRemove()">批量删除 (removeBatch)</button>
+      </div>
+
+      <div class="output" id="batchOutput"></div>
+    </div>
+
+    <!-- 查询操作 -->
+    <div class="section">
+      <h2>🔎 查询操作</h2>
+      
+      <div class="button-group">
+        <button class="btn-info" onclick="testGetAllKeys()">获取所有键 (getAllKeys)</button>
+        <button class="btn-info" onclick="testHas()">检查键是否存在 (has)</button>
+        <button class="btn-info" onclick="testGetBytesInUse()">获取存储大小 (getBytesInUse)</button>
+      </div>
+
+      <div class="output" id="queryOutput"></div>
+    </div>
+
+    <!-- 高级操作 -->
+    <div class="section">
+      <h2>⚙️ 高级操作</h2>
+      
+      <div class="button-group">
+        <button class="btn-warning" onclick="testOnChanged()">监听变化 (onChanged)</button>
+        <button class="btn-warning" onclick="stopListening()">停止监听</button>
+        <button class="btn-danger" onclick="testClear()">清空所有数据 (clear)</button>
+      </div>
+
+      <div class="output" id="advancedOutput"></div>
+    </div>
+
+    <!-- 环境信息 -->
+    <div class="section">
+      <h2>ℹ️ 环境信息</h2>
+      <div class="output" id="envOutput"></div>
+    </div>
+  </div>
+
+  <script src="storage_utils.js"></script>
+  <script>
+    let unsubscribe = null;
+
+    // 初始化显示环境信息
+    window.addEventListener('DOMContentLoaded', () => {
+      displayEnvInfo();
+      displayDetailedEnvInfo();
+    });
+
+    function log(elementId, message, type = 'info') {
+      const output = document.getElementById(elementId);
+      const timestamp = new Date().toLocaleTimeString();
+      const typeSymbol = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+      output.innerHTML += `[${timestamp}] ${typeSymbol} ${message}\n`;
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function clearLog(elementId) {
+      document.getElementById(elementId).innerHTML = '';
+    }
+
+    function displayEnvInfo() {
+      const info = StorageUtils.getEnvironmentInfo();
+      const envInfo = document.getElementById('envInfo');
+      envInfo.innerHTML = `
+        <strong>运行环境：</strong>${info.isExtension ? '🔌 Chrome 扩展' : '🌐 普通 HTML 页面'} (${info.type})
+      `;
+    }
+
+    function displayDetailedEnvInfo() {
+      const info = StorageUtils.getEnvironmentInfo();
+      const envOutput = document.getElementById('envOutput');
+      envOutput.textContent = JSON.stringify(info, null, 2);
+    }
+
+    // 基础操作
+    async function testSet() {
+      clearLog('basicOutput');
+      const key = document.getElementById('keyInput').value;
+      const value = document.getElementById('valueInput').value;
+      
+      try {
+        await StorageUtils.set(key, value);
+        log('basicOutput', `成功设置 ${key} = "${value}"`, 'success');
+      } catch (error) {
+        log('basicOutput', `设置失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testGet() {
+      clearLog('basicOutput');
+      const key = document.getElementById('keyInput').value;
+      
+      try {
+        const value = await StorageUtils.get(key);
+        log('basicOutput', `${key} = ${JSON.stringify(value)}`, 'success');
+      } catch (error) {
+        log('basicOutput', `获取失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testUpdate() {
+      clearLog('basicOutput');
+      const key = document.getElementById('keyInput').value;
+      
+      try {
+        // 先设置一个对象
+        await StorageUtils.set(key, { name: '张三', age: 25 });
+        log('basicOutput', `初始数据：{ name: '张三', age: 25 }`);
+        
+        // 更新部分字段
+        await StorageUtils.update(key, { age: 26, city: '北京' });
+        const updated = await StorageUtils.get(key);
+        log('basicOutput', `更新后：${JSON.stringify(updated)}`, 'success');
+      } catch (error) {
+        log('basicOutput', `更新失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testRemove() {
+      clearLog('basicOutput');
+      const key = document.getElementById('keyInput').value;
+      
+      try {
+        await StorageUtils.remove(key);
+        log('basicOutput', `成功删除 ${key}`, 'success');
+        
+        const value = await StorageUtils.get(key);
+        log('basicOutput', `验证删除：${key} = ${value}`);
+      } catch (error) {
+        log('basicOutput', `删除失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 批量操作
+    async function testBatchSet() {
+      clearLog('batchOutput');
+      
+      try {
+        const data = {
+          user1: { name: '张三', age: 25 },
+          user2: { name: '李四', age: 30 },
+          user3: { name: '王五', age: 35 }
+        };
+        
+        await StorageUtils.setBatch(data);
+        log('batchOutput', `成功批量设置 3 条数据：`, 'success');
+        log('batchOutput', JSON.stringify(data, null, 2));
+      } catch (error) {
+        log('batchOutput', `批量设置失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testBatchGet() {
+      clearLog('batchOutput');
+      
+      try {
+        const keys = ['user1', 'user2', 'user3'];
+        const result = await StorageUtils.getBatch(keys);
+        
+        log('batchOutput', `批量获取结果：`, 'success');
+        log('batchOutput', JSON.stringify(result, null, 2));
+      } catch (error) {
+        log('batchOutput', `批量获取失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testBatchRemove() {
+      clearLog('batchOutput');
+      
+      try {
+        const keys = ['user1', 'user2', 'user3'];
+        await StorageUtils.removeBatch(keys);
+        log('batchOutput', `成功批量删除: ${keys.join(', ')}`, 'success');
+      } catch (error) {
+        log('batchOutput', `批量删除失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 查询操作
+    async function testGetAllKeys() {
+      clearLog('queryOutput');
+      
+      try {
+        const keys = await StorageUtils.getAllKeys();
+        log('queryOutput', `共有 ${keys.length} 个键：`, 'success');
+        log('queryOutput', JSON.stringify(keys, null, 2));
+      } catch (error) {
+        log('queryOutput', `获取失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testHas() {
+      clearLog('queryOutput');
+      const key = document.getElementById('keyInput').value;
+      
+      try {
+        const exists = await StorageUtils.has(key);
+        log('queryOutput', `键 "${key}" ${exists ? '存在' : '不存在'}`, exists ? 'success' : 'error');
+      } catch (error) {
+        log('queryOutput', `检查失败: ${error.message}`, 'error');
+      }
+    }
+
+    async function testGetBytesInUse() {
+      clearLog('queryOutput');
+      
+      try {
+        const result = await StorageUtils.getBytesInUse();
+        if (result.error) {
+          log('queryOutput', result.error, 'error');
+        } else {
+          log('queryOutput', `存储使用量：${result.bytesInUse} 字节 (约 ${(result.bytesInUse / 1024).toFixed(2)} KB)`, 'success');
+        }
+      } catch (error) {
+        log('queryOutput', `获取失败: ${error.message}`, 'error');
+      }
+    }
+
+    // 高级操作
+    function testOnChanged() {
+      clearLog('advancedOutput');
+      
+      if (unsubscribe) {
+        log('advancedOutput', '监听器已在运行中', 'error');
+        return;
+      }
+
+      unsubscribe = StorageUtils.onChanged((changes, areaName) => {
+        log('advancedOutput', `检测到 ${areaName} 存储变化：`);
+        Object.keys(changes).forEach(key => {
+          const change = changes[key];
+          log('advancedOutput', `  ${key}:`);
+          log('advancedOutput', `    旧值: ${JSON.stringify(change.oldValue)}`);
+          log('advancedOutput', `    新值: ${JSON.stringify(change.newValue)}`);
+        });
+      });
+      
+      log('advancedOutput', '✅ 监听器已启动，现在修改数据可以看到变化', 'success');
+      log('advancedOutput', '提示：尝试点击上面的"设置数据"按钮');
+    }
+
+    function stopListening() {
+      clearLog('advancedOutput');
+      
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+        log('advancedOutput', '✅ 监听器已停止', 'success');
+      } else {
+        log('advancedOutput', '没有运行中的监听器', 'error');
+      }
+    }
+
+    async function testClear() {
+      clearLog('advancedOutput');
+      
+      if (!confirm('确定要清空所有存储数据吗？')) {
+        log('advancedOutput', '操作已取消');
+        return;
+      }
+      
+      try {
+        await StorageUtils.clear();
+        log('advancedOutput', '✅ 已清空所有数据', 'success');
+      } catch (error) {
+        log('advancedOutput', `清空失败: ${error.message}`, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
+
