@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub API 功能测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .left-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .right-sidebar {
+            width: 400px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .log-sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #2563eb;
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .log-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .log-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #2563eb;
+            background: #eff6ff;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #94a3b8;
+            margin-right: 8px;
+        }
+
+        .log-success {
+            color: #34d399;
+        }
+
+        .log-error {
+            color: #f87171;
+        }
+
+        .log-info {
+            color: #60a5fa;
+        }
+
+        .log-warning {
+            color: #fbbf24;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .result-box {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .token-input-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .token-input-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .token-input-group button {
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1200px) {
+            .right-sidebar {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .right-sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+                max-height: 500px;
+                order: 2;
+            }
+            
+            .left-content {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .right-sidebar {
+                max-height: 400px;
+            }
+            
+            .token-input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .token-input-group .form-group {
+                margin-bottom: 16px;
+            }
+            
+            .token-input-group button {
+                width: 100%;
+            }
+        }
+
+        .hint {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1e40af;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #2563eb;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-layout">
+        <!-- 左侧主内容区 -->
+        <div class="left-content">
+            <div class="container">
+                <h1>🧪 GitHub API 功能测试</h1>
+                <p class="subtitle">完整测试 github_api.js 的所有增删改查功能</p>
+
+                <!-- Tab 标签页 -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('config')">⚙️ 配置信息</button>
+                    <button class="tab" onclick="switchTab('files')">📁 目录文件</button>
+                    <button class="tab" onclick="switchTab('read')">📖 文件内容</button>
+                    <button class="tab" onclick="switchTab('download')">📦 下载文件</button>
+                    <button class="tab" onclick="switchTab('write')">✏️ 创建/更新</button>
+                    <button class="tab" onclick="switchTab('delete')">🗑️ 删除文件</button>
+                    <button class="tab" onclick="switchTab('sync')">🔄 同步功能</button> 
+                    <button class="tab" onclick="switchTab('test')">🎯 综合测试</button>
+                </div>
+
+                <!-- 配置 Tab -->
+                <div id="tab-config" class="tab-content active">
+                    <div class="section">
+                        <div class="hint">
+                            💡 首先填写 Access Token 并测试连接，连接成功后会自动弹出仓库配置。
+                        </div>
+                        <div class="token-input-group">
+                            <div class="form-group">
+                                <label>Access Token *</label>
+                                <input type="password" id="accessToken" placeholder="ghp_xxxxxxxxxxxx" />
+                            </div>
+                            <button class="btn-secondary" onclick="testConnection()" style="height: 42px;">
+                                🔗 测试连接
+                            </button>
+                        </div>
+                        <div class="button-group" style="margin-top: 16px;">
+                            <button class="btn-secondary" onclick="loadSavedConfig()">
+                                📥 加载已保存配置
+                            </button>
+                        </div>
+                        
+                        <div id="repoSection" style="display: none; margin-top: 24px;">
+                            <div class="section-title" style="margin-bottom: 16px;">📋 仓库配置</div>
+                            <div class="hint">
+                                🔗 可以输入仓库 URL （如：https://github.com/owner/repo）一键解析
+                            </div>
+                            <div class="form-group">
+                                <label>仓库 URL （可选）</label>
+                                <div style="display: flex; gap: 12px;">
+                                    <input type="text" id="repoUrl" placeholder="https://github.com/owner/repo" style="flex: 1;" />
+                                    <button class="btn-primary" onclick="parseRepoUrl()" style="white-space: nowrap;">
+                                        🧩 解析 URL
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>仓库所有者 *</label>
+                                    <input type="text" id="owner" placeholder="username" />
+                                </div>
+                                <div class="form-group">
+                                    <label>仓库名称 *</label>
+                                    <input type="text" id="repo" placeholder="my-repo" />
+                                </div>
+                                <div class="form-group">
+                                    <label>分支名称</label>
+                                    <input type="text" id="branch" placeholder="master" value="master" />
+                                </div>
+                                <div class="form-group">
+                                    <label>默认文件路径</label>
+                                    <input type="text" id="filePath" placeholder="README.md" value="README.md" />
+                                </div>
+                            </div>
+                            <div class="button-group" style="margin-top: 12px;">
+                                <button class="btn-success" onclick="saveCurrentConfig()">
+                                    🚀 保存配置
+                                </button>
+                                <button class="btn-primary" onclick="listUserRepos()">
+                                    📚 查看我的仓库
+                                </button>
+                                <button class="btn-primary" onclick="listRepoBranches()">
+                                    🌿 查看分支列表
+                                </button>
+                            </div>
+                            <div id="repoListResult" class="result-box" style="display: none; margin-top: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文件浏览 Tab -->
+                <div id="tab-files" class="tab-content">
+                    <div class="section">
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                            浏览当前配置仓库的文件和目录列表
+                        </p>
+                        <div class="hint">
+                            💡 提示：留空路径即查看根目录，输入目录路径可查看子目录内容（如：src/components）
+                        </div>
+                        <div class="form-group">
+                            <label>目录路径（可选）</label>
+                            <input type="text" id="filesPath" placeholder="留空查看根目录，如：src/components" />
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="browseRepoFiles()">
+                                📁 查看文件列表
+                            </button>
+                        </div>
+                        <div id="filesResult" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 查询 Tab -->
+                <div id="tab-read" class="tab-content">
+                    <div class="section">
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                            从 GitHub 仓库获取文件内容
+                        </p>
+                        <div class="form-group">
+                            <label>文件路径</label>
+                            <input type="text" id="getFilePath" placeholder="输入文件路径，如: prompts_data.json" />
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-success" onclick="testGetFile()">
+                                📥 获取文件
+                            </button>
+                        </div>
+                        <div id="getFileResult" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 下载文件 Tab -->
+                <div id="tab-download" class="tab-content">
+                    <div class="section">
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                            从 GitHub URL 下载文件，支持公开和私有仓库
+                        </p>
+                        <div class="hint">
+                            💡 支持的 URL 格式：<br/>
+                            1. https://github.com/owner/repo/blob/branch/path/file<br/>
+                            2. https://raw.githubusercontent.com/owner/repo/branch/path/file<br/>
+                            3. https://api.github.com/repos/owner/repo/contents/path/file
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub 文件 URL *</label>
+                            <input type="text" id="downloadFileUrl" placeholder="粘贴 GitHub 文件地址..." />
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="useTokenForDownload" style="width: auto; margin: 0;" />
+                                使用 Access Token （私有仓库必须勾选）
+                            </label>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="previewDownloadFile()">
+                                👁️ 预览文件
+                            </button>
+                            <button class="btn-success" onclick="downloadAndSaveFile()">
+                                📥 下载到本地
+                            </button>
+                        </div>
+                        <div id="downloadFileResult" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 创建/更新 Tab -->
+                <div id="tab-write" class="tab-content">
+                    <div class="section">
+                        <div class="form-group">
+                            <label>文件路径</label>
+                            <input type="text" id="updateFilePath" placeholder="输入文件路径，如: test_prompts.json" />
+                        </div>
+                        <div class="form-group">
+                            <label>提示词 JSON 数据</label>
+                            <textarea id="promptData" placeholder='输入 JSON 格式的提示词数据...'>{
+  "prompts": [
+    {
+      "id": "test-1",
+      "name": "测试提示词",
+      "tag": "test",
+      "content": "这是一个测试提示词",
+      "isPinned": false,
+      "createdAt": "2024-01-23T00:00:00.000Z",
+      "updatedAt": "2024-01-23T00:00:00.000Z"
+    }
+  ],
+  "version": "1.0.0",
+  "lastSync": "2024-01-23T00:00:00.000Z"
+}</textarea>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="testCreateFile()">
+                                ➕ 创建文件
+                            </button>
+                            <button class="btn-warning" onclick="testUpdateFile()">
+                                🔄 更新文件
+                            </button>
+                        </div>
+                        <div id="updateFileResult" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 同步 Tab -->
+                <div id="tab-sync" class="tab-content">
+                    <div class="section">
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                            测试双向同步：推送到 GitHub 和从 GitHub 拉取
+                        </p>
+                        <div class="button-group">
+                            <button class="btn-success" onclick="testPullFromGitHub()">
+                                🔽 从 GitHub 拉取
+                            </button>
+                            <button class="btn-primary" onclick="testPushToGitHub()">
+                                🔼 推送到 GitHub
+                            </button>
+                        </div>
+                        <div id="syncResult" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 删除 Tab -->
+                <div id="tab-delete" class="tab-content">
+                    <div class="section">
+                        <div class="hint" style="background: #fef2f2; border-left-color: #ef4444; color: #991b1b;">
+                            ⚠️ 警告：此操作将永久删除 GitHub 上的文件，请谨慎操作！
+                        </div>
+                        <div class="form-group">
+                            <label>文件路径</label>
+                            <input type="text" id="deleteFilePath" placeholder="输入要删除的文件路径" />
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-danger" onclick="testDeleteFile()">
+                                ❌ 删除文件
+                            </button>
+                        </div>
+                        <div id="deleteFileResult" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 综合测试 Tab -->
+                <div id="tab-test" class="tab-content">
+                    <div class="section">
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                            自动执行所有 CRUD 操作的完整测试流程
+                        </p>
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="runFullTest()">
+                                🚀 运行完整测试
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧日志边栏 -->
+        <div class="right-sidebar">
+            <div class="log-sidebar">
+                <div class="log-header">
+                    <div class="log-title">📋 操作日志</div>
+                    <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="clearLogs()">
+                        🗑️ 清空
+                    </button>
+                </div>
+                <div id="logContainer" class="log-container">
+                    <div class="log-entry log-info">
+                        <span class="log-time">[等待]</span>
+                        <span>请先配置 GitHub 信息并初始化...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 github_api.js 脚本 -->
+    <script src="github_api.js">
+        const githubAPI = new GitHubAPI();
+    </script>
+
+    <!-- 测试功能脚本 -->
+    <script>
+        let currentSha = null;
+
+        // Tab 切换功能
+        function switchTab(tabName) {
+            // 隐藏所有 tab 内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有 tab 按钮的激活状态
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示目标 tab 内容
+            const targetContent = document.getElementById(`tab-${tabName}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            // 激活点击的 tab 按钮
+            const clickedTab = Array.from(document.querySelectorAll('.tab')).find(tab => {
+                return tab.textContent.includes({
+                    'config': '配置信息',
+                    'files': '文件浏览',
+                    'read': '查询功能',
+                    'download': '下载文件',
+                    'write': '创建/更新',
+                    'sync': '同步功能',
+                    'delete': '删除功能',
+                    'test': '综合测试'
+                }[tabName]);
+            });
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+        }
+
+        // 页面加载时自动尝试加载已保存的配置
+        window.addEventListener('load', async () => {
+            const hasConfig = await githubAPI.loadConfig();
+            if (hasConfig && githubAPI.config && githubAPI.config.accessToken) {
+                document.getElementById('accessToken').value = githubAPI.config.accessToken;
+                if (githubAPI.config.owner) {
+                    document.getElementById('owner').value = githubAPI.config.owner;
+                    document.getElementById('repo').value = githubAPI.config.repo || '';
+                    document.getElementById('branch').value = githubAPI.config.branch || 'master';
+                    document.getElementById('filePath').value = githubAPI.config.filePath || 'README.md';
+                    document.getElementById('repoSection').style.display = 'block';
+                    logMessage('✅ 已自动加载保存的配置', 'success');
+                }
+            }
+        });
+
+        function logMessage(message, type = 'info') {
+            console.log(message);
+            const logContainer = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString('zh-CN');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `<span class="log-time">[${time}]</span><span>${message}</span>`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '<div class="log-entry log-info"><span class="log-time">[清空]</span><span>日志已清空</span></div>';
+        }
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.style.borderColor = isError ? '#ef4444' : '#10b981';
+            element.style.color = isError ? '#dc2626' : '#059669';
+            element.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+        }
+
+        async function initConfig() {
+            console.log('Initializing config...');
+            const accessToken = document.getElementById('accessToken').value.trim();
+            const owner = document.getElementById('owner').value.trim();
+            const repo = document.getElementById('repo').value.trim();
+            const branch = document.getElementById('branch').value.trim() || 'main';
+            const filePath = document.getElementById('filePath').value.trim() || 'test_prompts.json';
+
+            if (!accessToken || !owner || !repo) {
+                logMessage('❌ 请填写完整的配置信息！', 'error');
+                alert('请填写 Access Token、仓库所有者和仓库名称');
+                return;
+            }
+
+            try {
+                logMessage('🚀 正在初始化配置...', 'info');
+                await githubAPI.init({ accessToken, owner, repo, branch, filePath });
+                logMessage(`✅ 配置初始化成功！仓库: ${owner}/${repo}, 分支: ${branch}, 文件: ${filePath}`, 'success');
+            } catch (error) {
+                logMessage(`❌ 配置初始化失败: ${error.message}`, 'error');
+            }
+            console.log('Config initialization complete');
+        }
+
+        // 新增：保存当前配置
+        async function saveCurrentConfig() {
+            const token = document.getElementById('accessToken').value.trim();
+            const owner = document.getElementById('owner').value.trim();
+            const repo = document.getElementById('repo').value.trim();
+            const branch = document.getElementById('branch').value.trim() || 'master';
+            const filePath = document.getElementById('filePath').value.trim() || 'README.md';
+            
+            if (!token) {
+                logMessage('❌ Token 不能为空！', 'error');
+                return;
+            }
+            
+            if (!owner || !repo) {
+                logMessage('❌ 请填写仓库所有者和仓库名称！', 'error');
+                return;
+            }
+            
+            await githubAPI.init({ accessToken: token, owner, repo, branch, filePath });
+            logMessage(`✅ 配置已保存！仓库: ${owner}/${repo}, 分支: ${branch}, 文件: ${filePath}`, 'success');
+        }
+
+        // 新增：加载已保存的配置
+        async function loadSavedConfig() {
+            const hasConfig = await githubAPI.loadConfig();
+            if (hasConfig && githubAPI.config) {
+                document.getElementById('accessToken').value = githubAPI.config.accessToken || '';
+                document.getElementById('owner').value = githubAPI.config.owner || '';
+                document.getElementById('repo').value = githubAPI.config.repo || '';
+                document.getElementById('branch').value = githubAPI.config.branch || 'master';
+                document.getElementById('filePath').value = githubAPI.config.filePath || 'README.md';
+                if (githubAPI.config.accessToken) {
+                    document.getElementById('repoSection').style.display = 'block';
+                }
+                logMessage('✅ 已加载保存的配置', 'success');
+            } else {
+                logMessage('⚠️ 没有找到已保存的配置', 'warning');
+            }
+        }
+
+        // 新增：查看用户仓库列表
+        async function listUserRepos() {
+            if (!githubAPI.config || !githubAPI.config.accessToken) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+            
+            try {
+                logMessage('📚 正在获取仓库列表...', 'info');
+                const repos = await githubAPI.listRepositories(50);
+                logMessage(`✅ 找到 ${repos.length} 个仓库`, 'success');
+                showResult('repoListResult', repos);
+            } catch (error) {
+                logMessage(`❌ 获取失败: ${error.message}`, 'error');
+                showResult('repoListResult', error.message, true);
+            }
+        }
+
+        // 新增：查看仓库分支列表
+        async function listRepoBranches() {
+            const owner = document.getElementById('owner').value.trim();
+            const repo = document.getElementById('repo').value.trim();
+            
+            if (!owner || !repo) {
+                logMessage('❌ 请先填写仓库所有者和仓库名称！', 'error');
+                return;
+            }
+            
+            try {
+                logMessage('🌿 正在获取分支列表...', 'info');
+                const branches = await githubAPI.listBranches(owner, repo);
+                logMessage(`✅ 找到 ${branches.length} 个分支`, 'success');
+                showResult('repoListResult', branches);
+            } catch (error) {
+                logMessage(`❌ 获取失败: ${error.message}`, 'error');
+                showResult('repoListResult', error.message, true);
+            }
+        }
+
+        // 新增：浏览仓库文件列表
+        async function browseRepoFiles() {
+            // 直接使用配置Tab中的配置信息
+            if (!githubAPI.config || !githubAPI.config.owner || !githubAPI.config.repo) {
+                logMessage('❌ 请先在配置Tab中保存仓库配置！', 'error');
+                return;
+            }
+            
+            const owner = githubAPI.config.owner;
+            const repo = githubAPI.config.repo;
+            const branch = githubAPI.config.branch || 'master';
+            const path = document.getElementById('filesPath').value.trim();
+            
+            try {
+                const pathDisplay = path || '根目录';
+                logMessage(`📁 正在获取文件列表: ${owner}/${repo}/${branch}/${pathDisplay}...`, 'info');
+                const files = await githubAPI.listFiles(path, owner, repo, branch);
+                logMessage(`✅ 找到 ${files.length} 个文件/目录`, 'success');
+                showResult('filesResult', files);
+            } catch (error) {
+                logMessage(`❌ 获取失败: ${error.message}`, 'error');
+                showResult('filesResult', error.message, true);
+            }
+        }
+
+        async function testConnection() {
+            const token = document.getElementById('accessToken').value.trim();
+            
+            if (!token) {
+                logMessage('❌ 请先填写 Access Token！', 'error');
+                return;
+            }
+            
+            // 临时初始化配置用于测试
+            if (!githubAPI.config) {
+                await githubAPI.init({ accessToken: token });
+            }
+
+            try {
+                logMessage('🔗 正在测试连接...', 'info');
+                const isConnected = await githubAPI.testConnection();
+                if (isConnected) {
+                    logMessage('✅ GitHub 连接测试成功！', 'success');
+                    
+                    // 获取用户信息
+                    try {
+                        const userInfo = await githubAPI.getUserInfo();
+                        logMessage(`👤 用户: ${userInfo.login} (${userInfo.name || 'No name'})`, 'info');
+                        
+                        // 自动展开仓库配置区域
+                        document.getElementById('repoSection').style.display = 'block';
+                        
+                        // 自动填充仓库所有者
+                        if (userInfo.login && !document.getElementById('owner').value) {
+                            document.getElementById('owner').value = userInfo.login;
+                            logMessage(`✅ 已自动填充仓库所有者: ${userInfo.login}`, 'success');
+                        }
+                    } catch (e) {
+                        // 即使获取用户信息失败，也展开配置区域
+                        document.getElementById('repoSection').style.display = 'block';
+                    }
+                } else {
+                    logMessage('❌ GitHub 连接失败，请检查 Token', 'error');
+                }
+            } catch (error) {
+                logMessage(`❌ 连接测试异常: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * 解析仓库 URL
+         */
+        function parseRepoUrl() {
+            const url = document.getElementById('repoUrl').value.trim();
+            
+            if (!url) {
+                logMessage('❌ 请输入仓库 URL！', 'error');
+                return;
+            }
+            
+            try {
+                // 支持多种格式：
+                // https://github.com/owner/repo
+                // https://github.com/owner/repo.git
+                // git@github.com:owner/repo.git
+                let owner = '';
+                let repo = '';
+                
+                // HTTPS 格式
+                const httpsMatch = url.match(/github\.com\/([^\/]+)\/([^\/\.]+)/);
+                if (httpsMatch) {
+                    owner = httpsMatch[1];
+                    repo = httpsMatch[2];
+                }
+                // SSH 格式
+                else {
+                    const sshMatch = url.match(/git@github\.com:([^\/]+)\/([^\.]+)/);
+                    if (sshMatch) {
+                        owner = sshMatch[1];
+                        repo = sshMatch[2];
+                    }
+                }
+                
+                if (owner && repo) {
+                    document.getElementById('owner').value = owner;
+                    document.getElementById('repo').value = repo;
+                    logMessage(`✅ 解析成功！仓库: ${owner}/${repo}`, 'success');
+                } else {
+                    logMessage('❌ URL 格式不正确，请输入 GitHub 仓库地址', 'error');
+                }
+            } catch (error) {
+                logMessage(`❌ 解析失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetFile() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            // 获取文件路径
+            const filePath = document.getElementById('getFilePath').value.trim();
+            if (!filePath) {
+                logMessage('❌ 请输入文件路径！', 'error');
+                return;
+            }
+
+            try {
+                logMessage(`📥 正在获取文件: ${filePath}...`, 'info');
+                const result = await githubAPI.getFile(filePath);
+                
+                if (result.content) {
+                    currentSha = result.sha;
+                    const fileType = result.isJson ? 'JSON' : '文本';
+                    logMessage(`✅ 文件获取成功！SHA: ${result.sha.substring(0, 8)}..., 类型: ${fileType}`, 'success');
+                    
+                    // 根据文件类型显示内容
+                    if (result.isJson) {
+                        showResult('getFileResult', result.content);
+                    } else {
+                        // 非 JSON 文件，显示原始文本
+                        showResult('getFileResult', result.rawContent || result.content);
+                    }
+                } else {
+                    logMessage('⚠️ 文件不存在', 'warning');
+                    showResult('getFileResult', '文件不存在，可以创建新文件');
+                }
+            } catch (error) {
+                logMessage(`❌ 获取文件失败: ${error.message}`, 'error');
+                showResult('getFileResult', error.message, true);
+            }
+        }
+
+        async function testCreateFile() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            // 获取文件路径
+            const filePath = document.getElementById('updateFilePath').value.trim();
+            if (!filePath) {
+                logMessage('❌ 请输入文件路径！', 'error');
+                return;
+            }
+
+            try {
+                const dataText = document.getElementById('promptData').value;
+                const data = JSON.parse(dataText);
+                
+                logMessage(`➕ 正在创建文件: ${filePath}...`, 'info');
+                const result = await githubAPI.updateFile(data, null, `Create ${filePath}`, filePath);
+                currentSha = result.sha;
+                
+                logMessage(`✅ 文件创建成功！SHA: ${result.sha.substring(0, 8)}...`, 'success');
+                logMessage(`📍 文件地址: ${result.url}`, 'info');
+                showResult('updateFileResult', result);
+            } catch (error) {
+                logMessage(`❌ 创建文件失败: ${error.message}`, 'error');
+                showResult('updateFileResult', error.message, true);
+            }
+        }
+
+        async function testUpdateFile() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            // 获取文件路径
+            const filePath = document.getElementById('updateFilePath').value.trim();
+            if (!filePath) {
+                logMessage('❌ 请输入文件路径！', 'error');
+                return;
+            }
+
+            if (!currentSha) {
+                logMessage('⚠️ 没有 SHA，先获取文件...', 'warning');
+                // 使用同一文件路径获取 SHA
+                document.getElementById('getFilePath').value = filePath;
+                await testGetFile();
+                if (!currentSha) {
+                    logMessage('❌ 无法获取 SHA，请先创建文件', 'error');
+                    return;
+                }
+            }
+
+            try {
+                const dataText = document.getElementById('promptData').value;
+                // const data = JSON.parse(dataText);
+                const data = dataText;
+                data.lastSync = new Date().toISOString();
+                
+                logMessage(`🔄 正在更新文件: ${filePath}...`, 'info');
+                const result = await githubAPI.updateFile(data, currentSha, `Update ${filePath}`, filePath);
+                currentSha = result.sha;
+                
+                logMessage(`✅ 文件更新成功！新 SHA: ${result.sha.substring(0, 8)}...`, 'success');
+                showResult('updateFileResult', result);
+            } catch (error) {
+                logMessage(`❌ 更新文件失败: ${error.message}`, 'error');
+                showResult('updateFileResult', error.message, true);
+            }
+        }
+
+        async function testPullFromGitHub() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            try {
+                logMessage('🔽 正在从 GitHub 拉取...', 'info');
+                const prompts = await githubAPI.pullFromGitHub();
+                
+                logMessage(`✅ 拉取成功！共 ${prompts.length} 条提示词`, 'success');
+                showResult('syncResult', prompts);
+            } catch (error) {
+                logMessage(`❌ 拉取失败: ${error.message}`, 'error');
+                showResult('syncResult', error.message, true);
+            }
+        }
+
+        async function testPushToGitHub() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            try {
+                const dataText = document.getElementById('promptData').value;
+                const data = JSON.parse(dataText);
+                
+                logMessage('🔼 正在推送到 GitHub...', 'info');
+                const result = await githubAPI.syncToGitHub(data.prompts);
+                currentSha = result.sha;
+                
+                logMessage(`✅ 推送成功！SHA: ${result.sha.substring(0, 8)}...`, 'success');
+                showResult('syncResult', result);
+            } catch (error) {
+                logMessage(`❌ 推送失败: ${error.message}`, 'error');
+                showResult('syncResult', error.message, true);
+            }
+        }
+
+        async function testDeleteFile() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            // 获取文件路径
+            const filePath = document.getElementById('deleteFilePath').value.trim();
+            if (!filePath) {
+                logMessage('❌ 请输入要删除的文件路径！', 'error');
+                return;
+            }
+
+            if (!confirm(`⚠️ 确定要删除 GitHub 上的文件 "${filePath}" 吗？此操作不可恢复！`)) {
+                logMessage('❌ 用户取消删除操作', 'warning');
+                return;
+            }
+
+            if (!currentSha) {
+                logMessage('⚠️ 没有 SHA，先获取文件...', 'warning');
+                document.getElementById('getFilePath').value = filePath;
+                await testGetFile();
+                if (!currentSha) {
+                    logMessage('❌ 无法获取 SHA', 'error');
+                    return;
+                }
+            }
+
+            try {
+                logMessage(`🗑️ 正在删除文件: ${filePath}...`, 'info');
+                await githubAPI.deleteFile(currentSha, `Delete ${filePath}`, filePath);
+                currentSha = null;
+                
+                logMessage('✅ 文件删除成功！', 'success');
+                showResult('deleteFileResult', `文件 "${filePath}" 已从 GitHub 删除`);
+            } catch (error) {
+                logMessage(`❌ 删除文件失败: ${error.message}`, 'error');
+                showResult('deleteFileResult', error.message, true);
+            }
+        }
+
+        async function runFullTest() {
+            if (!githubAPI.config) {
+                logMessage('❌ 请先初始化配置！', 'error');
+                return;
+            }
+
+            logMessage('🎯 开始运行完整测试...', 'info');
+            logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // 1. 测试连接
+            logMessage('📌 步骤 1/5: 测试连接', 'info');
+            await testConnection();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 2. 获取文件
+            logMessage('📌 步骤 2/5: 获取文件', 'info');
+            await testGetFile();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 3. 创建或更新文件
+            if (currentSha) {
+                logMessage('📌 步骤 3/5: 更新文件', 'info');
+                await testUpdateFile();
+            } else {
+                logMessage('📌 步骤 3/5: 创建文件', 'info');
+                await testCreateFile();
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 4. 拉取测试
+            logMessage('📌 步骤 4/5: 拉取测试', 'info');
+            await testPullFromGitHub();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 5. 推送测试
+            logMessage('📌 步骤 5/5: 推送测试', 'info');
+            await testPushToGitHub();
+
+            logMessage('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+            logMessage('🎉 完整测试执行完毕！', 'success');
+        }
+
+        // ==================== 下载文件功能 ====================
+        
+        /**
+         * 预览下载文件
+         */
+        async function previewDownloadFile() {
+            const url = document.getElementById('downloadFileUrl').value.trim();
+            const useToken = document.getElementById('useTokenForDownload').checked;
+            
+            if (!url) {
+                logMessage('❌ 请输入 GitHub 文件 URL！', 'error');
+                return;
+            }
+            
+            // 如果需要使用 Token 但没有配置
+            if (useToken && (!githubAPI.config || !githubAPI.config.accessToken)) {
+                logMessage('❌ 请先配置 Access Token！', 'error');
+                return;
+            }
+            
+            try {
+                logMessage(`👁️ 正在预览文件: ${url}...`, 'info');
+                const result = await githubAPI.downloadFileFromUrl(url, useToken);
+                
+                logMessage(`✅ 文件预览成功！文件名: ${result.fileName}, 大小: ${result.size} bytes`, 'success');
+                logMessage(`📋 文件类型: ${result.isJson ? 'JSON' : '文本'}`, 'info');
+                
+                // 显示文件内容
+                if (result.isJson) {
+                    showResult('downloadFileResult', result.content);
+                } else {
+                    showResult('downloadFileResult', result.rawContent);
+                }
+            } catch (error) {
+                logMessage(`❌ 预览失败: ${error.message}`, 'error');
+                showResult('downloadFileResult', error.message, true);
+            }
+        }
+        
+        /**
+         * 下载并保存文件到本地
+         */
+        async function downloadAndSaveFile() {
+            const url = document.getElementById('downloadFileUrl').value.trim();
+            const useToken = document.getElementById('useTokenForDownload').checked;
+            
+            if (!url) {
+                logMessage('❌ 请输入 GitHub 文件 URL！', 'error');
+                return;
+            }
+            
+            // 如果需要使用 Token 但没有配置
+            if (useToken && (!githubAPI.config || !githubAPI.config.accessToken)) {
+                logMessage('❌ 请先配置 Access Token！', 'error');
+                return;
+            }
+            
+            try {
+                logMessage(`📥 正在下载文件: ${url}...`, 'info');
+                const result = await githubAPI.downloadFileFromUrl(url, useToken);
+                
+                logMessage(`✅ 文件获取成功！正在保存到本地...`, 'success');
+                
+                // 保存文件到本地
+                githubAPI.saveFileToLocal(result.content, result.fileName, result.isJson);
+                
+                logMessage(`💾 文件已保存: ${result.fileName} (${result.size} bytes)`, 'success');
+                showResult('downloadFileResult', `文件 "${result.fileName}" 已成功下载到本地！`);
+            } catch (error) {
+                logMessage(`❌ 下载失败: ${error.message}`, 'error');
+                showResult('downloadFileResult', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>
