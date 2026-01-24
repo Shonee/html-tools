@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StorageUtils 功能测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .left-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .right-sidebar {
+            width: 400px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .log-sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .env-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .env-extension {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .env-html {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #2563eb;
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-info {
+            background: #06b6d4;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #0891b2;
+        }
+
+        .log-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .log-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #2563eb;
+            background: #eff6ff;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #94a3b8;
+            margin-right: 8px;
+        }
+
+        .log-success {
+            color: #34d399;
+        }
+
+        .log-error {
+            color: #f87171;
+        }
+
+        .log-info {
+            color: #60a5fa;
+        }
+
+        .log-warning {
+            color: #fbbf24;
+        }
+
+        .result-box {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .hint {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #92400e;
+        }
+
+        .hint strong {
+            color: #78350f;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 1200px) {
+            .right-sidebar {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            
+            .right-sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+                max-height: 500px;
+                order: 2;
+            }
+            
+            .left-content {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .right-sidebar {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-layout">
+        <div class="left-content">
+            <div class="container">
+                <h1>🗄️ StorageUtils 功能测试</h1>
+                <div class="subtitle">完整测试浏览器缓存操作工具的所有功能</div>
+                
+                <div class="env-badge" id="envBadge">
+                    <span id="envIcon">🔌</span>
+                    <span id="envText">加载中...</span>
+                </div>
+
+                <!-- Tab 导航 -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('basic')">基础操作</button>
+                    <button class="tab" onclick="switchTab('batch')">批量操作</button>
+                    <button class="tab" onclick="switchTab('query')">查询功能</button>
+                    <button class="tab" onclick="switchTab('advanced')">高级功能</button>
+                    <button class="tab" onclick="switchTab('auto')">自动化测试</button>
+                </div>
+
+                <!-- Tab 内容 - 基础操作 -->
+                <div id="tab-basic" class="tab-content active">
+                    <div class="section">
+                        <div class="section-title">📝 基础增删改查</div>
+                        
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>键名 (Key)</label>
+                                <input type="text" id="basicKey" placeholder="例如: username" value="testKey">
+                            </div>
+                            <div class="form-group">
+                                <label>值 (Value)</label>
+                                <input type="text" id="basicValue" placeholder="例如: 张三" value="Hello World">
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="testSet()">💾 设置数据 (set)</button>
+                            <button class="btn-success" onclick="testGet()">🔍 获取数据 (get)</button>
+                            <button class="btn-warning" onclick="testUpdate()">✏️ 更新数据 (update)</button>
+                            <button class="btn-danger" onclick="testRemove()">🗑️ 删除数据 (remove)</button>
+                        </div>
+
+                        <div class="hint">
+                            <strong>💡 提示：</strong>先点击"设置数据"存储一条数据，然后尝试"获取数据"、"更新数据"或"删除数据"。
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">🔄 对象更新测试</div>
+                        
+                        <div class="form-group">
+                            <label>对象键名</label>
+                            <input type="text" id="objectKey" placeholder="例如: userInfo" value="userProfile">
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="testInitObject()">初始化对象</button>
+                            <button class="btn-warning" onclick="testUpdateObject()">更新部分字段</button>
+                            <button class="btn-success" onclick="testGetObject()">查看对象</button>
+                        </div>
+
+                        <div class="hint">
+                            <strong>💡 提示：</strong>update 方法可以合并更新对象，保留未修改的字段。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 内容 - 批量操作 -->
+                <div id="tab-batch" class="tab-content">
+                    <div class="section">
+                        <div class="section-title">📦 批量设置 (setBatch)</div>
+                        
+                        <div class="form-group">
+                            <label>批量数据 (JSON 格式)</label>
+                            <textarea id="batchData" placeholder='例如: {"key1": "value1", "key2": "value2"}'>{
+  "user1": {"name": "张三", "age": 25},
+  "user2": {"name": "李四", "age": 30},
+  "user3": {"name": "王五", "age": 35}
+}</textarea>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="testBatchSet()">批量设置</button>
+                            <button class="btn-success" onclick="testBatchGet()">批量获取</button>
+                            <button class="btn-danger" onclick="testBatchRemove()">批量删除</button>
+                        </div>
+
+                        <div class="hint">
+                            <strong>💡 提示：</strong>批量操作可以一次处理多个键值对，提高效率。
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">🔑 批量键名</div>
+                        
+                        <div class="form-group">
+                            <label>键名列表 (逗号分隔)</label>
+                            <input type="text" id="batchKeys" placeholder="例如: user1,user2,user3" value="user1,user2,user3">
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-success" onclick="testBatchGetByKeys()">按键名批量获取</button>
+                            <button class="btn-danger" onclick="testBatchRemoveByKeys()">按键名批量删除</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 内容 - 查询功能 -->
+                <div id="tab-query" class="tab-content">
+                    <div class="section">
+                        <div class="section-title">🔎 查询与检查</div>
+                        
+                        <div class="button-group">
+                            <button class="btn-info" onclick="testGetAllKeys()">📋 获取所有键 (getAllKeys)</button>
+                            <button class="btn-info" onclick="testHas()">✅ 检查键是否存在 (has)</button>
+                            <button class="btn-info" onclick="testGetBytesInUse()">📊 获取存储大小 (getBytesInUse)</button>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label>检查的键名</label>
+                            <input type="text" id="checkKey" placeholder="例如: testKey" value="testKey">
+                        </div>
+
+                        <div class="hint">
+                            <strong>💡 提示：</strong>getBytesInUse 仅在 Chrome 扩展环境中可用。
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📈 存储统计</div>
+                        
+                        <button class="btn-primary" onclick="showStorageStats()">刷新统计数据</button>
+                        
+                        <div class="stats-grid" id="statsGrid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="statKeyCount">-</div>
+                                <div class="stat-label">键数量</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="statBytes">-</div>
+                                <div class="stat-label">存储大小</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="statEnv">-</div>
+                                <div class="stat-label">运行环境</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 内容 - 高级功能 -->
+                <div id="tab-advanced" class="tab-content">
+                    <div class="section">
+                        <div class="section-title">👂 监听数据变化 (onChanged)</div>
+                        
+                        <div class="button-group">
+                            <button class="btn-warning" onclick="testOnChanged()">🎧 启动监听器</button>
+                            <button class="btn-secondary" onclick="stopListening()">⏹️ 停止监听</button>
+                            <button class="btn-primary" onclick="triggerChange()">🔄 触发测试变化</button>
+                        </div>
+
+                        <div class="hint">
+                            <strong>💡 提示：</strong>启动监听后，任何数据变化都会被捕获并显示在日志中。
+                            <br><strong>注意：</strong>在普通 HTML 页面中，localStorage 的监听仅对跨标签页的变化有效（当前页面的修改不会触发自身的监听事件）。
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">🧹 清空操作</div>
+                        
+                        <button class="btn-danger" onclick="testClear()">⚠️ 清空所有数据 (clear)</button>
+
+                        <div class="hint" style="background: #fee2e2; border-color: #fca5a5; color: #7f1d1d;">
+                            <strong>⚠️ 警告：</strong>此操作将删除所有存储的数据，无法恢复！
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">ℹ️ 环境信息</div>
+                        
+                        <button class="btn-info" onclick="showEnvInfo()">查看详细环境信息</button>
+                        
+                        <div class="result-box" id="envInfoBox" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Tab 内容 - 自动化测试 -->
+                <div id="tab-auto" class="tab-content">
+                    <div class="section">
+                        <div class="section-title">🤖 一键全面测试</div>
+                        
+                        <p style="color: #64748b; margin-bottom: 16px;">
+                            自动执行所有功能测试，验证 StorageUtils 的完整性。测试包括：基础操作、批量操作、查询功能、更新操作等。
+                        </p>
+
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="runFullTest()">▶️ 运行完整测试</button>
+                            <button class="btn-warning" onclick="runQuickTest()">⚡ 快速测试</button>
+                        </div>
+
+                        <div class="hint">
+                            <strong>💡 提示：</strong>完整测试会自动执行所有功能点，并在右侧日志中显示详细结果。
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">📊 测试结果</div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="testTotal">0</div>
+                                <div class="stat-label">总测试数</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="testPassed" style="color: #10b981;">0</div>
+                                <div class="stat-label">通过</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="testFailed" style="color: #ef4444;">0</div>
+                                <div class="stat-label">失败</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧日志面板 -->
+        <div class="right-sidebar">
+            <div class="log-sidebar">
+                <div class="log-header">
+                    <div class="log-title">📝 操作日志</div>
+                    <button class="btn-secondary" onclick="clearLog()" style="padding: 6px 12px; font-size: 12px;">清空</button>
+                </div>
+                <div class="log-container" id="logContainer">
+                    <div class="log-info">等待操作...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="storage_utils.js"></script>
+    <script>
+        let unsubscribe = null;
+        let testStats = { total: 0, passed: 0, failed: 0 };
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            displayEnvInfo();
+            log('系统初始化完成', 'info');
+        });
+
+        // 切换 Tab
+        function switchTab(tabName) {
+            // 更新 Tab 按钮状态
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 更新 Tab 内容显示
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            log(`切换到 ${getTabName(tabName)} 标签页`, 'info');
+        }
+
+        function getTabName(tabId) {
+            const names = {
+                'basic': '基础操作',
+                'batch': '批量操作',
+                'query': '查询功能',
+                'advanced': '高级功能',
+                'auto': '自动化测试'
+            };
+            return names[tabId] || tabId;
+        }
+
+        // 显示环境信息
+        function displayEnvInfo() {
+            const info = StorageUtils.getEnvironmentInfo();
+            const envBadge = document.getElementById('envBadge');
+            const envIcon = document.getElementById('envIcon');
+            const envText = document.getElementById('envText');
+
+            if (info.isExtension) {
+                envBadge.className = 'env-badge env-extension';
+                envIcon.textContent = '🔌';
+                envText.textContent = 'Chrome 扩展环境';
+            } else {
+                envBadge.className = 'env-badge env-html';
+                envIcon.textContent = '🌐';
+                envText.textContent = '普通 HTML 页面';
+            }
+
+            log(`运行环境: ${info.type} (${info.isExtension ? 'Chrome Extension' : 'HTML Page'})`, 'info');
+        }
+
+        // 日志函数
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const typeClass = `log-${type}`;
+            entry.innerHTML = `<span class="log-time">[${timestamp}]</span><span class="${typeClass}">${message}</span>`;
+            
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '<div class="log-info">日志已清空</div>';
+        }
+
+        // ==================== 基础操作 ====================
+        
+        async function testSet() {
+            const key = document.getElementById('basicKey').value;
+            const value = document.getElementById('basicValue').value;
+            
+            try {
+                await StorageUtils.set(key, value);
+                log(`✅ 设置成功: ${key} = "${value}"`, 'success');
+            } catch (error) {
+                log(`❌ 设置失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGet() {
+            const key = document.getElementById('basicKey').value;
+            
+            try {
+                const value = await StorageUtils.get(key);
+                log(`✅ 获取成功: ${key} = ${JSON.stringify(value)}`, 'success');
+            } catch (error) {
+                log(`❌ 获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUpdate() {
+            const key = document.getElementById('basicKey').value;
+            
+            try {
+                // 先设置一个对象
+                await StorageUtils.set(key, { name: '张三', age: 25, city: '北京' });
+                log(`初始化对象: ${key}`, 'info');
+                
+                // 更新部分字段
+                await StorageUtils.update(key, { age: 26, country: '中国' });
+                const updated = await StorageUtils.get(key);
+                log(`✅ 更新成功: ${JSON.stringify(updated)}`, 'success');
+            } catch (error) {
+                log(`❌ 更新失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testRemove() {
+            const key = document.getElementById('basicKey').value;
+            
+            try {
+                await StorageUtils.remove(key);
+                log(`✅ 删除成功: ${key}`, 'success');
+                
+                const value = await StorageUtils.get(key);
+                log(`验证删除: ${key} = ${value}`, 'info');
+            } catch (error) {
+                log(`❌ 删除失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testInitObject() {
+            const key = document.getElementById('objectKey').value;
+            const data = {
+                name: '张三',
+                age: 25,
+                email: 'zhangsan@example.com',
+                role: 'developer'
+            };
+            
+            try {
+                await StorageUtils.set(key, data);
+                log(`✅ 初始化对象: ${key}`, 'success');
+                log(`数据: ${JSON.stringify(data, null, 2)}`, 'info');
+            } catch (error) {
+                log(`❌ 初始化失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUpdateObject() {
+            const key = document.getElementById('objectKey').value;
+            
+            try {
+                await StorageUtils.update(key, { 
+                    age: 26, 
+                    department: '研发部',
+                    lastUpdated: new Date().toISOString()
+                });
+                log(`✅ 更新对象成功`, 'success');
+            } catch (error) {
+                log(`❌ 更新失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetObject() {
+            const key = document.getElementById('objectKey').value;
+            
+            try {
+                const data = await StorageUtils.get(key);
+                log(`✅ 获取对象成功:`, 'success');
+                log(JSON.stringify(data, null, 2), 'info');
+            } catch (error) {
+                log(`❌ 获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        // ==================== 批量操作 ====================
+        
+        async function testBatchSet() {
+            const dataText = document.getElementById('batchData').value;
+            
+            try {
+                const data = JSON.parse(dataText);
+                await StorageUtils.setBatch(data);
+                log(`✅ 批量设置成功，共 ${Object.keys(data).length} 条数据`, 'success');
+            } catch (error) {
+                log(`❌ 批量设置失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBatchGet() {
+            const keys = ['user1', 'user2', 'user3'];
+            
+            try {
+                const result = await StorageUtils.getBatch(keys);
+                log(`✅ 批量获取成功:`, 'success');
+                log(JSON.stringify(result, null, 2), 'info');
+            } catch (error) {
+                log(`❌ 批量获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBatchRemove() {
+            const keys = ['user1', 'user2', 'user3'];
+            
+            try {
+                await StorageUtils.removeBatch(keys);
+                log(`✅ 批量删除成功: ${keys.join(', ')}`, 'success');
+            } catch (error) {
+                log(`❌ 批量删除失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBatchGetByKeys() {
+            const keysText = document.getElementById('batchKeys').value;
+            const keys = keysText.split(',').map(k => k.trim()).filter(k => k);
+            
+            try {
+                const result = await StorageUtils.getBatch(keys);
+                log(`✅ 批量获取成功 (${keys.length} 个键):`, 'success');
+                log(JSON.stringify(result, null, 2), 'info');
+            } catch (error) {
+                log(`❌ 批量获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBatchRemoveByKeys() {
+            const keysText = document.getElementById('batchKeys').value;
+            const keys = keysText.split(',').map(k => k.trim()).filter(k => k);
+            
+            if (confirm(`确定要删除这 ${keys.length} 个键吗？\n${keys.join(', ')}`)) {
+                try {
+                    await StorageUtils.removeBatch(keys);
+                    log(`✅ 批量删除成功: ${keys.join(', ')}`, 'success');
+                } catch (error) {
+                    log(`❌ 批量删除失败: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // ==================== 查询功能 ====================
+        
+        async function testGetAllKeys() {
+            try {
+                const keys = await StorageUtils.getAllKeys();
+                log(`✅ 获取所有键成功，共 ${keys.length} 个:`, 'success');
+                log(JSON.stringify(keys, null, 2), 'info');
+            } catch (error) {
+                log(`❌ 获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHas() {
+            const key = document.getElementById('checkKey').value;
+            
+            try {
+                const exists = await StorageUtils.has(key);
+                if (exists) {
+                    log(`✅ 键 "${key}" 存在`, 'success');
+                } else {
+                    log(`⚠️ 键 "${key}" 不存在`, 'warning');
+                }
+            } catch (error) {
+                log(`❌ 检查失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetBytesInUse() {
+            try {
+                const result = await StorageUtils.getBytesInUse();
+                if (result.error) {
+                    log(`⚠️ ${result.error}`, 'warning');
+                } else {
+                    const kb = (result.bytesInUse / 1024).toFixed(2);
+                    log(`✅ 存储使用量: ${result.bytesInUse} 字节 (约 ${kb} KB)`, 'success');
+                }
+            } catch (error) {
+                log(`❌ 获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function showStorageStats() {
+            try {
+                const keys = await StorageUtils.getAllKeys();
+                const info = StorageUtils.getEnvironmentInfo();
+                
+                document.getElementById('statKeyCount').textContent = keys.length;
+                document.getElementById('statEnv').textContent = info.isExtension ? '扩展' : 'HTML';
+                
+                const bytesResult = await StorageUtils.getBytesInUse();
+                if (bytesResult.error) {
+                    document.getElementById('statBytes').textContent = 'N/A';
+                } else {
+                    const kb = (bytesResult.bytesInUse / 1024).toFixed(2);
+                    document.getElementById('statBytes').textContent = `${kb} KB`;
+                }
+                
+                log('✅ 统计数据已刷新', 'success');
+            } catch (error) {
+                log(`❌ 刷新统计失败: ${error.message}`, 'error');
+            }
+        }
+
+        // ==================== 高级功能 ====================
+        
+        function testOnChanged() {
+            if (unsubscribe) {
+                log('⚠️ 监听器已在运行中', 'warning');
+                return;
+            }
+
+            unsubscribe = StorageUtils.onChanged((changes, areaName) => {
+                log(`🎧 检测到 ${areaName} 存储变化`, 'info');
+                Object.keys(changes).forEach(key => {
+                    const change = changes[key];
+                    log(`  • ${key}:`, 'info');
+                    log(`    旧值: ${JSON.stringify(change.oldValue)}`, 'info');
+                    log(`    新值: ${JSON.stringify(change.newValue)}`, 'info');
+                });
+            });
+            
+            log('✅ 监听器已启动', 'success');
+            
+            const info = StorageUtils.getEnvironmentInfo();
+            if (!info.isExtension) {
+                log('⚠️ 注意: localStorage 监听仅对跨标签页变化有效', 'warning');
+            }
+        }
+
+        function stopListening() {
+            if (unsubscribe) {
+                unsubscribe();
+                unsubscribe = null;
+                log('✅ 监听器已停止', 'success');
+            } else {
+                log('⚠️ 没有运行中的监听器', 'warning');
+            }
+        }
+
+        async function triggerChange() {
+            try {
+                const testKey = 'listener_test_' + Date.now();
+                await StorageUtils.set(testKey, { timestamp: new Date().toISOString() });
+                log(`✅ 触发测试变化: ${testKey}`, 'success');
+                
+                // 在扩展环境中，立即就能看到变化
+                // 在普通 HTML 中，需要打开另一个标签页才能看到
+                const info = StorageUtils.getEnvironmentInfo();
+                if (!info.isExtension) {
+                    log('💡 提示: 请在另一个标签页中打开此页面查看监听效果', 'info');
+                }
+            } catch (error) {
+                log(`❌ 触发失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testClear() {
+            if (!confirm('⚠️ 确定要清空所有存储数据吗？此操作无法恢复！')) {
+                log('操作已取消', 'info');
+                return;
+            }
+            
+            try {
+                await StorageUtils.clear();
+                log('✅ 已清空所有数据', 'success');
+            } catch (error) {
+                log(`❌ 清空失败: ${error.message}`, 'error');
+            }
+        }
+
+        function showEnvInfo() {
+            const info = StorageUtils.getEnvironmentInfo();
+            const box = document.getElementById('envInfoBox');
+            box.style.display = 'block';
+            box.textContent = JSON.stringify(info, null, 2);
+            log('✅ 环境信息已显示', 'success');
+        }
+
+        // ==================== 自动化测试 ====================
+        
+        async function runFullTest() {
+            log('==================== 开始完整测试 ====================', 'info');
+            testStats = { total: 0, passed: 0, failed: 0 };
+            
+            await sleep(500);
+            
+            // 测试 1: 基础设置和获取
+            await runTest('基础设置和获取', async () => {
+                await StorageUtils.set('test_key_1', 'test_value_1');
+                const value = await StorageUtils.get('test_key_1');
+                if (value !== 'test_value_1') throw new Error('值不匹配');
+            });
+
+            // 测试 2: 对象存储
+            await runTest('对象存储', async () => {
+                const obj = { name: '测试', age: 30 };
+                await StorageUtils.set('test_obj', obj);
+                const retrieved = await StorageUtils.get('test_obj');
+                if (retrieved.name !== obj.name || retrieved.age !== obj.age) {
+                    throw new Error('对象数据不匹配');
+                }
+            });
+
+            // 测试 3: 数组存储
+            await runTest('数组存储', async () => {
+                const arr = [1, 2, 3, 4, 5];
+                await StorageUtils.set('test_arr', arr);
+                const retrieved = await StorageUtils.get('test_arr');
+                if (JSON.stringify(retrieved) !== JSON.stringify(arr)) {
+                    throw new Error('数组数据不匹配');
+                }
+            });
+
+            // 测试 4: 更新操作
+            await runTest('对象更新', async () => {
+                await StorageUtils.set('test_update', { a: 1, b: 2 });
+                await StorageUtils.update('test_update', { b: 3, c: 4 });
+                const result = await StorageUtils.get('test_update');
+                if (result.a !== 1 || result.b !== 3 || result.c !== 4) {
+                    throw new Error('更新后数据不正确');
+                }
+            });
+
+            // 测试 5: 删除操作
+            await runTest('删除操作', async () => {
+                await StorageUtils.set('test_delete', 'to_be_deleted');
+                await StorageUtils.remove('test_delete');
+                const value = await StorageUtils.get('test_delete');
+                if (value !== null) throw new Error('删除后仍存在');
+            });
+
+            // 测试 6: 批量设置
+            await runTest('批量设置', async () => {
+                const data = { batch1: 'v1', batch2: 'v2', batch3: 'v3' };
+                await StorageUtils.setBatch(data);
+                const v1 = await StorageUtils.get('batch1');
+                if (v1 !== 'v1') throw new Error('批量设置失败');
+            });
+
+            // 测试 7: 批量获取
+            await runTest('批量获取', async () => {
+                const result = await StorageUtils.getBatch(['batch1', 'batch2', 'batch3']);
+                if (!result.batch1 || !result.batch2 || !result.batch3) {
+                    throw new Error('批量获取失败');
+                }
+            });
+
+            // 测试 8: 批量删除
+            await runTest('批量删除', async () => {
+                await StorageUtils.removeBatch(['batch1', 'batch2', 'batch3']);
+                const v1 = await StorageUtils.get('batch1');
+                if (v1 !== null) throw new Error('批量删除失败');
+            });
+
+            // 测试 9: 获取所有键
+            await runTest('获取所有键', async () => {
+                await StorageUtils.set('key_a', 1);
+                await StorageUtils.set('key_b', 2);
+                const keys = await StorageUtils.getAllKeys();
+                if (!Array.isArray(keys)) throw new Error('返回的不是数组');
+            });
+
+            // 测试 10: 检查键是否存在
+            await runTest('检查键是否存在', async () => {
+                await StorageUtils.set('exists_key', 'value');
+                const exists = await StorageUtils.has('exists_key');
+                const notExists = await StorageUtils.has('not_exists_key');
+                if (!exists || notExists) throw new Error('has 方法结果错误');
+            });
+
+            updateTestStats();
+            log('==================== 测试完成 ====================', 'info');
+            log(`总计: ${testStats.total}, 通过: ${testStats.passed}, 失败: ${testStats.failed}`, 
+                testStats.failed === 0 ? 'success' : 'error');
+        }
+
+        async function runQuickTest() {
+            log('==================== 快速测试 ====================', 'info');
+            testStats = { total: 0, passed: 0, failed: 0 };
+            
+            await runTest('基础存取', async () => {
+                await StorageUtils.set('quick_test', 'hello');
+                const value = await StorageUtils.get('quick_test');
+                if (value !== 'hello') throw new Error('值不匹配');
+            });
+
+            await runTest('批量操作', async () => {
+                await StorageUtils.setBatch({ q1: 1, q2: 2 });
+                const result = await StorageUtils.getBatch(['q1', 'q2']);
+                if (result.q1 !== 1) throw new Error('批量操作失败');
+            });
+
+            await runTest('查询功能', async () => {
+                const keys = await StorageUtils.getAllKeys();
+                const has = await StorageUtils.has('quick_test');
+                if (!Array.isArray(keys) || !has) throw new Error('查询失败');
+            });
+
+            updateTestStats();
+            log('==================== 快速测试完成 ====================', 'info');
+        }
+
+        async function runTest(name, testFunc) {
+            testStats.total++;
+            try {
+                await testFunc();
+                testStats.passed++;
+                log(`✅ [${testStats.total}] ${name} - 通过`, 'success');
+            } catch (error) {
+                testStats.failed++;
+                log(`❌ [${testStats.total}] ${name} - 失败: ${error.message}`, 'error');
+            }
+            await sleep(100);
+        }
+
+        function updateTestStats() {
+            document.getElementById('testTotal').textContent = testStats.total;
+            document.getElementById('testPassed').textContent = testStats.passed;
+            document.getElementById('testFailed').textContent = testStats.failed;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
+
