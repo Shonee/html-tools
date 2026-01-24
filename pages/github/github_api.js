@@ -29,9 +29,12 @@ class GitHubAPI {
     
     // 保存配置到 storage
     // await chrome.storage.local.set({ githubConfig: this.config });
-    // 保存配置
+    // 保存配置 chrome 插件
     if (typeof chrome !== 'undefined' && chrome.storage) {
         await chrome.storage.local.set({ githubConfig: this.config });
+    }else {
+      // 保存配置 localStorage
+      localStorage.setItem("githubConfig", JSON.stringify(this.config));
     }
   }
 
@@ -40,14 +43,24 @@ class GitHubAPI {
    */
   async loadConfig() {
     return new Promise((resolve) => {
-      chrome.storage.local.get(["githubConfig"], (result) => {
-        if (result.githubConfig) {
-          this.config = result.githubConfig;
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+          chrome.storage.local.get(["githubConfig"], (result) => {
+            if (result.githubConfig) {
+              this.config = result.githubConfig;
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          });
+      }else {
+        const value = JSON.parse(localStorage.getItem("githubConfig"));
+        if (value) {
+          this.config = value;
           resolve(true);
         } else {
           resolve(false);
         }
-      });
+      }
     });
   }
 
@@ -157,7 +170,7 @@ class GitHubAPI {
       
       const body = {
         message: message,
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+        content: btoa(unescape(encodeURIComponent(content, null, 2))),
         branch: _branch,
       };
 
