@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="category" content="news">
+    <meta name="keywords" content="real-news">
+    <meta name="description" content="实时新闻">
+    <meta name="features" content="real、news">
+    <meta name="rank" content="997"/>
+    <meta name="show" content="true"/>
+    <title>Sina News</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <link rel="alternate" type="application/rss+xml" title="Recent Entries" href="https://sina-news.vercel.app/rss.xml">
+    <style>
+      p {
+        max-width: 50rem;
+      }
+      li {
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        全球实时财经新闻
+        <span id="countdown" class="tag is-info is-light" style="margin-left: 1rem; font-size: 1rem; vertical-align: middle;"></span>
+      </h1>
+      <ol class="list"></ol>
+    </div>
+  </section>
+  </body>
+  <script>
+    const list = document.querySelector('.list');
+    
+    // 显示加载状态
+    function showLoading() {
+      list.innerHTML = '<li><p class="has-text-grey">正在加载新闻数据...</p></li>';
+    }
+    
+    // 显示错误信息
+    function showError(message) {
+      list.innerHTML = `<li><p class="has-text-danger">加载失败: ${message}</p></li>`;
+    }
+    
+    // 渲染新闻列表
+    function renderNews(items) {
+      if (!items || items.length === 0) {
+        list.innerHTML = '<li><p class="has-text-warning">暂无新闻数据</p></li>';
+        return;
+      }
+      
+      const fragment = document.createDocumentFragment();
+      items.forEach(i => {
+        const li = document.createElement('li');
+        const p = document.createElement('p');
+        const timeObj = new Date(i.date_modified || i.pubDate || i.published);
+        const title = i.title || i.content_text || '无标题';
+        const url = i.url || i.link || '#';
+        const timeStr = timeObj.toLocaleTimeString('zh-CN', {hour12: false, hour: '2-digit', minute: '2-digit'});
+        
+        p.innerHTML = `${title} （<a href="${url}" target="_blank">${timeStr}</a>）`;
+        li.appendChild(p);
+        fragment.appendChild(li);
+      });
+      
+      list.innerHTML = '';
+      list.appendChild(fragment);
+    }
+    
+    // 尝试多个数据源
+    async function loadNews() {
+      showLoading();
+      
+      // 数据源列表（按优先级排序）
+      const dataSources = [
+        // 尝试本地 JSON 文件
+        { url: './rss.json', type: 'local' },
+        // 尝试原始的 Vercel 部署地址
+        { url: 'https://sina-news.vercel.app/rss.json', type: 'remote' },
+        // 备用：新浪财经 RSS（通过 RSS2JSON 服务转换）
+        { url: 'https://api.rss2json.com/v1/api.json?rss_url=https://feed.sina.com.cn/api/roll/get?pageid=372&lid=2516&k=&num=50&page=1&format=rss', type: 'rss2json' }
+      ];
+      
+      for (const source of dataSources) {
+        try {
+          console.log(`尝试从 ${source.type} 加载: ${source.url}`);
+          const response = await fetch(source.url);
+          
+          if (!response.ok) {
+            console.warn(`${source.type} 加载失败: ${response.status}`);
+            continue;
+          }
+          
+          const data = await response.json();
+          console.log(data)
+          const items = data.items || data.item || data.entry || [];
+          
+          if (items.length > 0) {
+            console.log(`成功从 ${source.type} 加载 ${items.length} 条新闻`);
+            renderNews(items);
+            return;
+          }
+        } catch (error) {
+          console.warn(`${source.type} 加载异常:`, error);
+          continue;
+        }
+      }
+      
+      // 所有数据源都失败，显示错误和示例数据
+      showError('所有数据源均无法访问，请检查网络连接或创建本地 rss.json 文件');
+      
+      // 显示示例数据格式说明
+      setTimeout(() => {
+        list.innerHTML += `
+          <li>
+            <p class="has-text-info">提示：您可以在同目录下创建 rss.json 文件，格式如下：</p>
+            <pre class="box" style="margin-top: 0.5rem; background: #f5f5f5;">{
+  "items": [
+    {
+      "title": "新闻标题",
+      "url": "https://example.com/news/1",
+      "date_modified": "2026-02-11T10:00:00Z"
+    }
+  ]
+}</pre>
+          </li>
+        `;
+      }, 100);
+    }
+    
+    // 倒计时功能
+    let countdownSeconds = 60;
+    let countdownInterval = null;
+    const countdownElement = document.getElementById('countdown');
+    
+    function updateCountdown() {
+      const minutes = Math.floor(countdownSeconds / 60);
+      const seconds = countdownSeconds % 60;
+      countdownElement.textContent = `下次刷新: ${seconds.toString().padStart(2, '0')}秒`;
+      
+      if (countdownSeconds <= 0) {
+        countdownElement.textContent = '正在刷新...';
+        loadNews();
+        countdownSeconds = 60;
+      } else {
+        countdownSeconds--;
+      }
+    }
+    
+    function startCountdown() {
+      countdownSeconds = 60;
+      updateCountdown();
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+    
+    // 页面加载完成后开始加载新闻
+    loadNews();
+    
+    // 启动倒计时（首次加载后2秒开始倒计时）
+    setTimeout(startCountdown, 2000);
+  </script>
+</html>
+
