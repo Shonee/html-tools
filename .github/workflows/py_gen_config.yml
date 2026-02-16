@@ -4,6 +4,8 @@ on:
   # schedule:
   #   # IMPORTANT: Set cron job in UTC timezone
   #   - cron:  '0 18 * * *'
+  push:
+    branches: [ master ]
 
 jobs:
   run-python-script:
