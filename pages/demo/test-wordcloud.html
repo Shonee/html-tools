@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>词云测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.1.0/dist/echarts-wordcloud.min.js"></script>
+</head>
+<body>
+    <div id="wordcloud" style="width: 800px; height: 400px; border: 1px solid red;"></div>
+    
+    <script>
+        console.log('ECharts加载状态:', typeof echarts);
+        
+        const chartDom = document.getElementById('wordcloud');
+        const myChart = echarts.init(chartDom);
+        
+        const option = {
+            series: [{
+                type: 'wordCloud',
+                data: [
+                    {name: '测试1', value: 10},
+                    {name: '测试2', value: 8},
+                    {name: '测试3', value: 6}
+                ]
+            }]
+        };
+        
+        myChart.setOption(option);
+        console.log('词云已设置');
+    </script>
+</body>
+</html>
