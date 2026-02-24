@@ -1,28 +1,6 @@
 {
     "tools": [
         {
-            "icon": "",
-            "title": "爪哇程序人生 | 个人主页!",
-            "keywords": "home页面",
-            "features": [
-                "home"
-            ],
-            "description": "home页面",
-            "url": "pages/home/personal-home.html",
-            "rank": 997
-        },
-        {
-            "icon": "",
-            "title": "GitHub API 功能测试页面",
-            "keywords": "Github API",
-            "features": [
-                "Github API"
-            ],
-            "description": "Github API 测试",
-            "url": "pages/github/github_api_demo.html",
-            "rank": 1001
-        },
-        {
             "icon": "🚀",
             "title": "Github Pages 推荐",
             "keywords": "github pages,项目",
@@ -46,25 +24,14 @@
         },
         {
             "icon": "",
-            "title": "Sina News",
-            "keywords": "real-news",
+            "title": "GitHub API 功能测试页面",
+            "keywords": "Github API",
             "features": [
-                "real、news"
+                "Github API"
             ],
-            "description": "实时新闻",
-            "url": "pages/news/real-time-news.html",
-            "rank": 997
-        },
-        {
-            "icon": "📰",
-            "title": "每日日报 - 今日信息一览",
-            "keywords": "每日日报,新闻,天气,历史上的今天,诗词,节气,节假日",
-            "features": [
-                "新闻资讯、天气信息、历史上的今天、每日诗词、节气节假日、时间进度"
-            ],
-            "description": "每日日报 - 一站式获取今日新闻、天气、历史、诗词等信息",
-            "url": "pages/news/daily-simple-report.html",
-            "rank": 0
+            "description": "Github API 测试",
+            "url": "pages/github/github_api_demo.html",
+            "rank": 1001
         },
         {
             "icon": "",
@@ -97,6 +64,39 @@
             ],
             "description": "JSON 格式化、压缩、转义工具",
             "url": "pages/tools/json-formatter.html",
+            "rank": 997
+        },
+        {
+            "icon": "",
+            "title": "Sina News",
+            "keywords": "real-news",
+            "features": [
+                "real、news"
+            ],
+            "description": "实时新闻",
+            "url": "pages/news/real-time-news.html",
+            "rank": 997
+        },
+        {
+            "icon": "📰",
+            "title": "每日日报 - 今日信息一览",
+            "keywords": "每日日报,新闻,天气,历史上的今天,诗词,节气,节假日",
+            "features": [
+                "新闻资讯、天气信息、历史上的今天、每日诗词、节气节假日、时间进度"
+            ],
+            "description": "每日日报 - 一站式获取今日新闻、天气、历史、诗词等信息",
+            "url": "pages/news/daily-simple-report.html",
+            "rank": 0
+        },
+        {
+            "icon": "",
+            "title": "爪哇程序人生 | 个人主页!",
+            "keywords": "home页面",
+            "features": [
+                "home"
+            ],
+            "description": "home页面",
+            "url": "pages/home/personal-home.html",
             "rank": 997
         }
     ]
