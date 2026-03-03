@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diff Output Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/diff2html/3.4.47/bundles/css/diff2html.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .image-section {
+            flex: 0 0 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .image-section img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .json-section {
+            flex: 1;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .json-panel {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .json-header {
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+        
+        .online-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .pre-header {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+        }
+        
+        .json-content {
+            padding: 0;
+            max-height: 1000px;
+            overflow-y: auto;
+        }
+        
+        .json-viewer {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            margin: 0;
+            padding: 15px;
+        }
+        
+        .navigation {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .timing-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .timing-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .timing-label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        
+        .timing-value {
+            font-size: 1.1em;
+            color: #007bff;
+            margin-top: 5px;
+        }
+        
+        .btn-nav {
+            min-width: 120px;
+        }
+        
+        .diff-summary {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .diff-count {
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        .json-line {
+            display: flex;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .line-number {
+            background: #f8f9fa;
+            color: #6c757d;
+            padding: 2px 8px;
+            min-width: 40px;
+            text-align: right;
+            border-right: 1px solid #dee2e6;
+            font-size: 11px;
+            user-select: none;
+        }
+        
+        .line-content {
+            padding: 2px 8px;
+            flex: 1;
+        }
+        
+        .diff-added {
+            background-color: #d4edda;
+            border-left: 3px solid #28a745;
+        }
+        
+        .diff-removed {
+            background-color: #f8d7da;
+            border-left: 3px solid #dc3545;
+        }
+        
+        .diff-modified {
+            background-color: #fff3cd;
+            border-left: 3px solid #ffc107;
+        }
+        
+        @media (max-width: 768px) {
+            .content-row {
+                flex-direction: column;
+            }
+            
+            .image-section {
+                flex: none;
+            }
+            
+            .json-section {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <!-- <h1 class="mb-0">Diff Output Viewer</h1> -->
+            <p class="mb-0 mt-2">JSON结果对比分析工具</p>
+        </div>
+        
+        <div class="navigation">
+            <button id="prevBtn" class="btn btn-outline-primary btn-nav" disabled>
+                <i class="fas fa-chevron-left"></i> 上一个
+            </button>
+            
+            <div class="text-center">
+                <span id="currentIndex" class="badge bg-primary fs-6">1</span>
+                <span class="mx-2">of</span>
+                <span id="totalCount" class="badge bg-secondary fs-6">0</span>
+            </div>
+            
+            <button id="nextBtn" class="btn btn-outline-primary btn-nav" disabled>
+                下一个 <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="content-row">
+            <div class="image-section">
+                <h6 class="mb-3 text-center">图片预览</h6>
+                <img id="previewImage" src="" alt="预览图片" style="display: none;">
+                <div id="imageError" class="text-center text-muted" style="display: none;">
+                    <i class="fas fa-image fa-3x mb-3"></i>
+                    <p>图片加载失败</p>
+                </div>
+                <div id="imageLoading" class="text-center text-muted">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">加载中...</p>
+                </div>
+            </div>
+            
+            <div class="json-section">
+                <div class="json-panel">
+                    <div class="json-header online-header">
+                        Online Output(qwen2.5-vl-7b-instruct)
+                    </div>
+                    <div class="json-content">
+                        <div id="onlineJson" class="json-viewer"></div>
+                    </div>
+                </div>
+                
+                <div class="json-panel">
+                    <div class="json-header pre-header">
+                        Pre Output(qwen3-vl-plus)
+                    </div>
+                    <div class="json-content">
+                        <div id="preJson" class="json-viewer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="diffSummary" class="diff-summary" style="display: none;">
+            <h6 class="mb-2">对比摘要</h6>
+            <div id="diffStats"></div>
+        </div>
+
+        <div class="timing-info">
+            <h6 class="mb-3">时间信息</h6>
+            <div class="timing-grid">
+                <div class="timing-item">
+                    <div class="timing-label">Online Duration</div>
+                    <div class="timing-value" id="onlineDuration">-</div>
+                </div>
+                <div class="timing-item">
+                    <div class="timing-label">Pre Duration</div>
+                    <div class="timing-value" id="preDuration">-</div>
+                </div>
+                <div class="timing-item">
+                    <div class="timing-label">Total Duration</div>
+                    <div class="timing-value" id="totalDuration">-</div>
+                </div>
+                <div class="timing-item">
+                    <div class="timing-label">Max Parallel Duration</div>
+                    <div class="timing-value" id="maxParallelDuration">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/diff/5.1.0/diff.min.js"></script>
+    
+    <script>
+        class DiffViewer {
+            constructor() {
+                this.data = [];
+                this.currentIndex = 0;
+                this.init();
+            }
+            
+            async init() {
+                try {
+                    await this.loadData();
+                    this.setupEventListeners();
+                    this.renderCurrentItem();
+                } catch (error) {
+                    console.error('初始化失败:', error);
+                    this.showError('数据加载失败: ' + error.message);
+                }
+            }
+            
+            async loadData() {
+                try {
+                    // 首先尝试从fetch加载
+                    try {
+                        const response = await fetch('./shenji_llm/diff_output.json');
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        this.data = await response.json();
+                    } catch (fetchError) {
+                        // 如果fetch失败，尝试使用内嵌数据或提示用户
+                        console.warn('Fetch失败，尝试使用备用方案:', fetchError.message);
+                        
+                        // 检查是否有内嵌的数据
+                        if (window.EMBEDDED_DATA) {
+                            this.data = window.EMBEDDED_DATA;
+                        } else {
+                            // 显示文件选择器让用户手动选择文件
+                            this.data = await this.loadDataFromFileInput();
+                        }
+                    }
+                    
+                    if (!Array.isArray(this.data) || this.data.length === 0) {
+                        throw new Error('数据格式错误或为空');
+                    }
+                    
+                    document.getElementById('totalCount').textContent = this.data.length;
+                } catch (error) {
+                    throw new Error('无法加载数据文件: ' + error.message);
+                }
+            }
+            
+            async loadDataFromFileInput() {
+                return new Promise((resolve, reject) => {
+                    // 创建文件选择器
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.json';
+                    fileInput.style.display = 'none';
+                    
+                    fileInput.onchange = (event) => {
+                        const file = event.target.files[0];
+                        if (!file) {
+                            reject(new Error('未选择文件'));
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const data = JSON.parse(e.target.result);
+                                resolve(data);
+                            } catch (parseError) {
+                                reject(new Error('JSON解析失败: ' + parseError.message));
+                            }
+                        };
+                        reader.onerror = () => reject(new Error('文件读取失败'));
+                        reader.readAsText(file);
+                    };
+                    
+                    // 显示文件选择对话框
+                    document.body.appendChild(fileInput);
+                    fileInput.click();
+                    document.body.removeChild(fileInput);
+                    
+                    // 如果用户取消选择，5秒后超时
+                    setTimeout(() => {
+                        reject(new Error('文件选择超时或被取消'));
+                    }, 30000);
+                });
+            }
+            
+            setupEventListeners() {
+                document.getElementById('prevBtn').addEventListener('click', () => {
+                    if (this.currentIndex > 0) {
+                        this.currentIndex--;
+                        this.renderCurrentItem();
+                    }
+                });
+                
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    if (this.currentIndex < this.data.length - 1) {
+                        this.currentIndex++;
+                        this.renderCurrentItem();
+                    }
+                });
+                
+                // 键盘导航
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft' && this.currentIndex > 0) {
+                        this.currentIndex--;
+                        this.renderCurrentItem();
+                    } else if (e.key === 'ArrowRight' && this.currentIndex < this.data.length - 1) {
+                        this.currentIndex++;
+                        this.renderCurrentItem();
+                    }
+                });
+            }
+            
+            renderCurrentItem() {
+                const item = this.data[this.currentIndex];
+                if (!item) return;
+                
+                // 更新导航状态
+                this.updateNavigation();
+                
+                // 渲染图片
+                this.renderImage(item.img_url);
+                
+                // 渲染JSON对比
+                this.renderJsonComparison(item);
+                
+                // 渲染时间信息
+                this.renderTiming(item.timing);
+            }
+            
+            updateNavigation() {
+                document.getElementById('currentIndex').textContent = this.currentIndex + 1;
+                document.getElementById('prevBtn').disabled = this.currentIndex === 0;
+                document.getElementById('nextBtn').disabled = this.currentIndex === this.data.length - 1;
+            }
+            
+            renderImage(imgUrl) {
+                const img = document.getElementById('previewImage');
+                const loading = document.getElementById('imageLoading');
+                const error = document.getElementById('imageError');
+                
+                // 重置状态
+                img.style.display = 'none';
+                error.style.display = 'none';
+                loading.style.display = 'block';
+                
+                if (!imgUrl) {
+                    loading.style.display = 'none';
+                    error.style.display = 'block';
+                    return;
+                }
+                
+                img.onload = () => {
+                    loading.style.display = 'none';
+                    img.style.display = 'block';
+                };
+                
+                img.onerror = () => {
+                    loading.style.display = 'none';
+                    error.style.display = 'block';
+                };
+                
+                img.src = imgUrl;
+            }
+            
+            renderJsonComparison(item) {
+                try {
+                    const onlineOutput = JSON.parse(item.online_output.output);
+                    const preOutput = JSON.parse(item.pre_output.output);
+                    
+                    const onlineFormatted = JSON.stringify(onlineOutput, null, 2);
+                    const preFormatted = JSON.stringify(preOutput, null, 2);
+                    
+                    // 生成带行号的JSON显示
+                    document.getElementById('onlineJson').innerHTML = this.formatJsonWithLineNumbers(onlineFormatted);
+                    document.getElementById('preJson').innerHTML = this.formatJsonWithLineNumbers(preFormatted);
+                    
+                    // 生成差异摘要
+                    this.generateDiffSummary(onlineOutput, preOutput);
+                    
+                } catch (error) {
+                    console.error('JSON解析失败:', error);
+                    document.getElementById('onlineJson').textContent = 'JSON解析失败: ' + error.message;
+                    document.getElementById('preJson').textContent = 'JSON解析失败: ' + error.message;
+                }
+            }
+            
+            formatJsonWithLineNumbers(jsonString) {
+                const lines = jsonString.split('\n');
+                return lines.map((line, index) => {
+                    return `<div class="json-line">
+                        <div class="line-number">${index + 1}</div>
+                        <div class="line-content">${this.escapeHtml(line)}</div>
+                    </div>`;
+                }).join('');
+            }
+            
+            generateDiffSummary(online, pre) {
+                const differences = this.findDifferences(online, pre);
+                const diffSummary = document.getElementById('diffSummary');
+                const diffStats = document.getElementById('diffStats');
+                
+                if (differences.length > 0) {
+                    diffSummary.style.display = 'block';
+                    diffStats.innerHTML = `
+                        <div class="diff-count">发现 ${differences.length} 处差异:</div>
+                        <ul class="mt-2 mb-0">
+                            ${differences.map(diff => `<li>${diff}</li>`).join('')}
+                        </ul>
+                    `;
+                } else {
+                    diffSummary.style.display = 'block';
+                    diffStats.innerHTML = '<div class="diff-count text-success">✓ 两个输出完全一致</div>';
+                }
+            }
+            
+            findDifferences(obj1, obj2, path = '') {
+                const differences = [];
+                
+                const keys1 = Object.keys(obj1 || {});
+                const keys2 = Object.keys(obj2 || {});
+                const allKeys = new Set([...keys1, ...keys2]);
+                
+                for (const key of allKeys) {
+                    const currentPath = path ? `${path}.${key}` : key;
+                    
+                    if (!(key in obj1)) {
+                        differences.push(`${currentPath}: 仅存在于Pre输出中`);
+                    } else if (!(key in obj2)) {
+                        differences.push(`${currentPath}: 仅存在于Online输出中`);
+                    } else if (typeof obj1[key] !== typeof obj2[key]) {
+                        differences.push(`${currentPath}: 类型不同 (${typeof obj1[key]} vs ${typeof obj2[key]})`);
+                    } else if (typeof obj1[key] === 'object' && obj1[key] !== null) {
+                        if (Array.isArray(obj1[key]) !== Array.isArray(obj2[key])) {
+                            differences.push(`${currentPath}: 一个是数组，一个是对象`);
+                        } else {
+                            differences.push(...this.findDifferences(obj1[key], obj2[key], currentPath));
+                        }
+                    } else if (obj1[key] !== obj2[key]) {
+                        differences.push(`${currentPath}: "${obj1[key]}" → "${obj2[key]}"`);
+                    }
+                }
+                
+                return differences;
+            }
+            
+            renderTiming(timing) {
+                if (!timing) return;
+                
+                document.getElementById('onlineDuration').textContent = 
+                    timing.online_duration ? `${timing.online_duration.toFixed(2)}ms` : '-';
+                document.getElementById('preDuration').textContent = 
+                    timing.pre_duration ? `${timing.pre_duration.toFixed(2)}ms` : '-';
+                document.getElementById('totalDuration').textContent = 
+                    timing.total_duration ? `${timing.total_duration.toFixed(2)}ms` : '-';
+                document.getElementById('maxParallelDuration').textContent = 
+                    timing.max_parallel_duration ? `${timing.max_parallel_duration.toFixed(2)}ms` : '-';
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
+            showError(message) {
+                const container = document.querySelector('.main-container');
+                container.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">数据加载失败</h4>
+                        <p>${message}</p>
+                        <hr>
+                        <div class="mb-3">
+                            <h6>解决方案：</h6>
+                            <ol>
+                                <li><strong>启动本地服务器</strong>（推荐）：
+                                    <div class="mt-2">
+                                        <code>cd /Users/a416727/VsCode</code><br>
+                                        <code>python3 -m http.server 8000</code><br>
+                                        然后访问：<a href="http://localhost:8000/diff_viewer.html" target="_blank">http://localhost:8000/diff_viewer.html</a>
+                                    </div>
+                                </li>
+                                <li class="mt-2"><strong>手动选择文件</strong>：
+                                    <button id="selectFileBtn" class="btn btn-primary btn-sm mt-1">选择 diff_output.json 文件</button>
+                                </li>
+                                <li class="mt-2"><strong>使用内嵌数据</strong>：
+                                    <button id="useEmbeddedBtn" class="btn btn-secondary btn-sm mt-1">使用示例数据</button>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加事件监听器
+                document.getElementById('selectFileBtn')?.addEventListener('click', async () => {
+                    try {
+                        this.data = await this.loadDataFromFileInput();
+                        this.setupEventListeners();
+                        this.renderCurrentItem();
+                        // 重新渲染页面
+                        location.reload();
+                    } catch (error) {
+                        alert('文件加载失败: ' + error.message);
+                    }
+                });
+                
+                document.getElementById('useEmbeddedBtn')?.addEventListener('click', () => {
+                    // 使用示例数据
+                    window.EMBEDDED_DATA = [
+                        {
+                            "img_url": "https://via.placeholder.com/300x200?text=Sample+Image",
+                            "online_output": {
+                                "output": JSON.stringify({
+                                    "title": "示例在线输出",
+                                    "price": "100",
+                                    "description": "这是在线输出的示例数据"
+                                }),
+                                "trace_id": "sample_online_trace"
+                            },
+                            "pre_output": {
+                                "output": JSON.stringify({
+                                    "title": "示例预处理输出", 
+                                    "price": "99",
+                                    "description": "这是预处理输出的示例数据"
+                                }),
+                                "trace_id": "sample_pre_trace"
+                            },
+                            "timing": {
+                                "online_duration": 45.67,
+                                "pre_duration": 43.21,
+                                "total_duration": 45.67,
+                                "max_parallel_duration": 45.67
+                            }
+                        }
+                    ];
+                    location.reload();
+                });
+            }
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new DiffViewer();
+        });
+    </script>
+</body>
+</html>
