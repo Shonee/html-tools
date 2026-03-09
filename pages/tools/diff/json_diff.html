@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="category" content="JSON">
+  <meta name="keywords" content="JSON Diff工具">
+  <meta name="description" content="JSON Diff工具">
+  <meta name="features" content="JSON Diff">
+  <meta name="rank" content="997"/>
+  <meta name="show" content="true"/>
+  <title>JSON 对比工具</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Menlo', 'Monaco', 'Consolas', monospace; background: #1e1e2e; color: #cdd6f4; min-height: 100vh; }
+
+    header {
+      background: #181825;
+      border-bottom: 1px solid #313244;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 18px; font-weight: 700; color: #cba6f7; letter-spacing: 1px; }
+    header span { font-size: 12px; color: #6c7086; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: #181825;
+      border-bottom: 1px solid #313244;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 7px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: #cba6f7; color: #1e1e2e; }
+    .btn-primary:hover { background: #d5b8ff; }
+    .btn-secondary { background: #313244; color: #cdd6f4; }
+    .btn-secondary:hover { background: #45475a; }
+    .btn-danger { background: #f38ba8; color: #1e1e2e; }
+    .btn-danger:hover { background: #ff9ab2; }
+
+    .options {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #a6adc8;
+      cursor: pointer;
+    }
+    .option-item input[type=checkbox] { accent-color: #cba6f7; width: 15px; height: 15px; cursor: pointer; }
+
+    /* divider between buttons and options */
+    .opt-divider { width: 1px; height: 20px; background: #313244; }
+
+    .editor-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      height: calc(100vh - 160px);
+      min-height: 400px;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #313244;
+    }
+    .panel:last-child { border-right: none; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #181825;
+      border-bottom: 1px solid #313244;
+      font-size: 12px;
+      color: #6c7086;
+      gap: 8px;
+    }
+    .panel-title { font-weight: 700; color: #a6adc8; font-size: 13px; }
+
+    .upload-btn {
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px dashed #45475a;
+      background: transparent;
+      color: #a6adc8;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .upload-btn:hover { border-color: #cba6f7; color: #cba6f7; }
+
+    textarea {
+      flex: 1;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border: none;
+      outline: none;
+      resize: none;
+      padding: 14px;
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.6;
+      tab-size: 2;
+    }
+    textarea::placeholder { color: #45475a; }
+    textarea:focus { background: #1a1a2a; }
+
+    /* ── Result area (inline mode) ───────────────────────────────── */
+    .result-section {
+      border-top: 2px solid #313244;
+      background: #181825;
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 24px;
+      border-bottom: 1px solid #313244;
+    }
+    .result-title { font-size: 14px; font-weight: 700; color: #a6adc8; }
+    .badge {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-same { background: #a6e3a1; color: #1e1e2e; }
+    .badge-diff { background: #f38ba8; color: #1e1e2e; }
+    .badge-warn { background: #fab387; color: #1e1e2e; }
+
+    .result-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      height: 340px;
+      overflow: hidden;
+    }
+
+    /* Each pane = minimap + scroll content */
+    .result-pane-wrap {
+      display: flex;
+      border-right: 1px solid #313244;
+      overflow: hidden;
+    }
+    .result-pane-wrap:last-child { border-right: none; }
+
+    /* ── Minimap (diff indicator on scrollbar side) ───────────────── */
+    .minimap {
+      width: 14px;
+      flex-shrink: 0;
+      background: #13131f;
+      position: relative;
+      cursor: pointer;
+      border-right: 1px solid #252535;
+      user-select: none;
+    }
+    .minimap:hover { background: #16162a; }
+    /* viewport indicator — draggable */
+    .minimap-viewport {
+      position: absolute;
+      left: 0; right: 0;
+      background: rgba(205,214,244,0.07);
+      border: 1px solid rgba(205,214,244,0.18);
+      border-radius: 2px;
+      cursor: ns-resize;
+      z-index: 2;
+    }
+    /* colored diff markers — rendered on canvas */
+    .minimap canvas {
+      position: absolute;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .result-pane {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.7;
+      /* hide native scrollbar, replaced by minimap */
+      scrollbar-width: none;
+    }
+    .result-pane::-webkit-scrollbar { display: none; }
+
+    .result-pane-title {
+      font-size: 11px;
+      color: #6c7086;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .json-line { white-space: pre; display: block; border-radius: 2px; padding: 0 2px; }
+    .line-same   { color: #cdd6f4; }
+    .line-add    { background: #1c3a2a; color: #a6e3a1; }
+    .line-remove { background: #3a1c2a; color: #f38ba8; }
+    .line-change { background: #2a2a1c; color: #f9e2af; }
+
+    /* inline diff tokens */
+    .token-add    { background: #2a5a3a; color: #a6e3a1; border-radius: 2px; }
+    .token-remove { background: #5a2a3a; color: #f38ba8; border-radius: 2px; text-decoration: line-through; }
+
+    .summary-bar {
+      display: flex;
+      gap: 16px;
+      padding: 6px 24px;
+      border-bottom: 1px solid #313244;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+    .summary-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-same   { background: #a6e3a1; }
+    .dot-add    { background: #a6e3a1; }
+    .dot-remove { background: #f38ba8; }
+    .dot-change { background: #f9e2af; }
+
+    .error-msg { color: #f38ba8; font-size: 13px; padding: 10px 24px; }
+    .empty-msg { color: #45475a; font-size: 13px; padding: 20px 24px; text-align: center; }
+
+    .sync-scroll-hint { font-size: 11px; color: #45475a; padding: 4px 14px; border-top: 1px solid #313244; text-align: right; }
+
+    /* ── Diff Report Button ── */
+    .btn-report {
+      padding: 4px 12px;
+      border: 1px solid #cba6f7;
+      border-radius: 6px;
+      background: transparent;
+      color: #cba6f7;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-left: auto;
+    }
+    .btn-report:hover { background: rgba(203,166,247,0.12); }
+    .btn-report:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #1e1e2e;
+      border: 1px solid #313244;
+      border-radius: 12px;
+      width: min(760px, 94vw);
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid #313244;
+      flex-shrink: 0;
+    }
+    .modal-title { font-size: 15px; font-weight: 700; color: #cba6f7; flex: 1; }
+    .modal-close {
+      width: 28px; height: 28px;
+      border: none; background: #313244; color: #cdd6f4;
+      border-radius: 6px; cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: #45475a; }
+    .modal-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-bottom: 1px solid #313244;
+      flex-shrink: 0;
+      font-size: 12px;
+      color: #6c7086;
+    }
+    .modal-toolbar .btn-copy {
+      padding: 4px 14px;
+      background: #313244;
+      color: #cdd6f4;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .modal-toolbar .btn-copy:hover { background: #45475a; }
+    .modal-toolbar .btn-copy.copied { background: #1c3a2a; color: #a6e3a1; }
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 20px;
+    }
+    /* report table */
+    .report-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .report-table th {
+      text-align: left;
+      padding: 6px 10px;
+      color: #6c7086;
+      border-bottom: 1px solid #313244;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .report-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #1e1e2e;
+      vertical-align: top;
+      word-break: break-all;
+    }
+    .report-table tr:hover td { background: #252535; }
+    .rt-path { color: #89dceb; font-weight: 600; }
+    .rt-added   { color: #a6e3a1; }
+    .rt-removed { color: #f38ba8; }
+    .rt-changed { color: #f9e2af; }
+    .rt-badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .rt-badge.added   { background: #1c3a2a; color: #a6e3a1; }
+    .rt-badge.removed { background: #3a1c2a; color: #f38ba8; }
+    .rt-badge.changed { background: #2a2a1c; color: #f9e2af; }
+    .rt-val { font-family: inherit; white-space: pre-wrap; word-break: break-all; }
+    .rt-arrow { color: #6c7086; margin: 0 4px; }
+    .report-empty { color: #6c7086; padding: 24px; text-align: center; font-size: 13px; }
+
+    /* ── New-tab result page styles (injected into new window) ──── */
+    /* (defined inline in buildNewTabHTML) */
+
+    /* scrollbar for non-result areas */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1e1e2e; }
+    ::-webkit-scrollbar-thumb { background: #45475a; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #585b70; }
+
+    @media (max-width: 800px) {
+      .editor-area, .result-body { grid-template-columns: 1fr; }
+      .panel { border-right: none; border-bottom: 1px solid #313244; height: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ JSON Diff</h1>
+  <span>JSON 文本对比工具 · 忽略空格/注释 · 键名严格排序</span>
+</header>
+
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="runDiff()">▶ 开始对比</button>
+  <button class="btn btn-secondary" onclick="formatBoth()">⟳ 格式化</button>
+  <button class="btn btn-danger" onclick="clearAll()">✕ 清空</button>
+  <div class="opt-divider"></div>
+  <div class="options">
+    <label class="option-item">
+      <input type="checkbox" id="opt-sort" checked />
+      键名排序
+    </label>
+    <label class="option-item">
+      <input type="checkbox" id="opt-ignore-space" checked />
+      忽略空白
+    </label>
+    <label class="option-item">
+      <input type="checkbox" id="opt-strip-comment" checked />
+      去除注释
+    </label>
+    <label class="option-item">
+      <input type="checkbox" id="opt-sync-scroll" checked />
+      同步滚动
+    </label>
+  </div>
+</div>
+
+<div class="editor-area">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">左侧 JSON（基准）</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="left-status"></span>
+        <label class="upload-btn">
+          📂 上传文件
+          <input type="file" accept=".json,.txt" style="display:none" onchange="loadFile(event,'left')" />
+        </label>
+      </div>
+    </div>
+    <textarea id="left-input" placeholder='粘贴 JSON 文本，或点击右上角上传文件...&#10;&#10;支持：&#10;  · 标准 JSON&#10;  · 带注释的 JSON (// 和 /* */)'
+      oninput="liveValidate('left')" onscroll="syncScroll(this,'left')"></textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">右侧 JSON（对比）</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="right-status"></span>
+        <label class="upload-btn">
+          📂 上传文件
+          <input type="file" accept=".json,.txt" style="display:none" onchange="loadFile(event,'right')" />
+        </label>
+      </div>
+    </div>
+    <textarea id="right-input" placeholder='粘贴 JSON 文本，或点击右上角上传文件...'
+      oninput="liveValidate('right')" onscroll="syncScroll(this,'right')"></textarea>
+  </div>
+</div>
+
+<div class="result-section" id="inline-result-section">
+  <div class="result-header">
+    <span class="result-title">对比结果</span>
+    <span id="result-badge"></span>
+    <span id="result-msg" style="font-size:12px;color:#6c7086;"></span>
+    <button class="btn-report" id="btn-report" onclick="openReport()" disabled>📋 差异报告</button>
+  </div>
+
+  <!-- Diff Report Modal -->
+  <div class="modal-overlay" id="report-modal" onclick="closeReportOnOverlay(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">📋 差异报告</span>
+        <span id="report-count" style="font-size:12px;color:#6c7086;"></span>
+        <button class="modal-close" onclick="closeReport()">✕</button>
+      </div>
+      <div class="modal-toolbar">
+        <span id="report-legend" style="flex:1"></span>
+        <button class="btn-copy" id="btn-copy-report" onclick="copyReport()">⎘ 复制报告</button>
+      </div>
+      <div class="modal-body" id="report-body"></div>
+    </div>
+  </div>
+  <div class="summary-bar" id="summary-bar"></div>
+  <div class="result-body">
+    <div class="result-pane-wrap">
+      <div class="minimap" id="left-minimap" onclick="minimapClick(event,'left')">
+        <div class="minimap-viewport" id="left-vp"></div>
+      </div>
+      <div class="result-pane" id="left-result" onscroll="onResultScroll(this,'left')">
+        <div class="empty-msg">请输入内容后点击「开始对比」</div>
+      </div>
+    </div>
+    <div class="result-pane-wrap">
+      <div class="minimap" id="right-minimap" onclick="minimapClick(event,'right')">
+        <div class="minimap-viewport" id="right-vp"></div>
+      </div>
+      <div class="result-pane" id="right-result" onscroll="onResultScroll(this,'right')">
+        <div class="empty-msg">请输入内容后点击「开始对比」</div>
+      </div>
+    </div>
+  </div>
+  <div class="sync-scroll-hint">◀ 侧边彩条显示差异位置 · 点击可快速跳转 · 结果面板支持同步滚动</div>
+</div>
+
+<script>
+// ─── Utilities ───────────────────────────────────────────────────────────────
+
+function stripComments(str) {
+  let result = '', i = 0;
+  while (i < str.length) {
+    if (str[i] === '"') {
+      let j = i + 1;
+      while (j < str.length) {
+        if (str[j] === '\\') { j += 2; continue; }
+        if (str[j] === '"') break;
+        j++;
+      }
+      result += str.slice(i, j + 1);
+      i = j + 1;
+    } else if (str[i] === '/' && str[i+1] === '/') {
+      while (i < str.length && str[i] !== '\n') i++;
+    } else if (str[i] === '/' && str[i+1] === '*') {
+      i += 2;
+      while (i < str.length && !(str[i] === '*' && str[i+1] === '/')) i++;
+      i += 2;
+    } else {
+      result += str[i++];
+    }
+  }
+  return result;
+}
+
+function sortObjectKeys(obj) {
+  if (Array.isArray(obj)) return obj.map(sortObjectKeys);
+  if (obj !== null && typeof obj === 'object') {
+    const sorted = {};
+    Object.keys(obj).sort().forEach(k => { sorted[k] = sortObjectKeys(obj[k]); });
+    return sorted;
+  }
+  return obj;
+}
+
+function parseJSON(text) {
+  const stripComment = document.getElementById('opt-strip-comment').checked;
+  const sortKeys    = document.getElementById('opt-sort').checked;
+  let s = text.trim();
+  if (stripComment) s = stripComments(s);
+  const obj = JSON.parse(s);
+  return sortKeys ? sortObjectKeys(obj) : obj;
+}
+
+function prettyJSON(obj) { return JSON.stringify(obj, null, 2); }
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── Validation ──────────────────────────────────────────────────────────────
+
+function liveValidate(side) {
+  const el     = document.getElementById(side + '-input');
+  const status = document.getElementById(side + '-status');
+  const val    = el.value.trim();
+  if (!val) { status.textContent = ''; return; }
+  try {
+    parseJSON(val);
+    status.innerHTML = '<span style="color:#a6e3a1;font-size:11px;">✓ 有效</span>';
+  } catch(e) {
+    status.innerHTML = '<span style="color:#f38ba8;font-size:11px;">✗ 格式错误</span>';
+  }
+}
+
+// ─── File Upload ─────────────────────────────────────────────────────────────
+
+function loadFile(event, side) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById(side + '-input').value = e.target.result;
+    liveValidate(side);
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ─── Format ──────────────────────────────────────────────────────────────────
+
+function formatBoth() {
+  ['left','right'].forEach(side => {
+    const el = document.getElementById(side + '-input');
+    if (!el.value.trim()) return;
+    try { el.value = prettyJSON(parseJSON(el.value)); liveValidate(side); } catch(e) {}
+  });
+}
+
+function clearAll() {
+  ['left','right'].forEach(s => {
+    document.getElementById(s+'-input').value = '';
+    document.getElementById(s+'-status').textContent = '';
+    document.getElementById(s+'-result').innerHTML = '<div class="empty-msg">请输入内容后点击「开始对比」</div>';
+    clearMinimap(s);
+  });
+  document.getElementById('result-badge').textContent = '';
+  document.getElementById('result-msg').textContent   = '';
+  document.getElementById('summary-bar').innerHTML    = '';
+  _reportData = null;
+  document.getElementById('btn-report').disabled = true;
+}
+
+// ─── Diff Engine ─────────────────────────────────────────────────────────────
+
+function lcsLines(a, b) {
+  const m = a.length, n = b.length;
+  const dp = [];
+  for (let i = 0; i <= m; i++) dp[i] = new Array(n+1).fill(0);
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
+      ops.unshift({ type:'same', left:a[i-1], right:b[j-1] }); i--; j--;
+    } else if (j > 0 && (i===0 || dp[i][j-1] >= dp[i-1][j])) {
+      ops.unshift({ type:'add', right:b[j-1] }); j--;
+    } else {
+      ops.unshift({ type:'remove', left:a[i-1] }); i--;
+    }
+  }
+  return ops;
+}
+
+function pairChanges(ops) {
+  const result = [];
+  let i = 0;
+  while (i < ops.length) {
+    if (ops[i].type === 'remove' && i+1 < ops.length && ops[i+1].type === 'add') {
+      result.push({ type:'change', left:ops[i].left, right:ops[i+1].right });
+      i += 2;
+    } else {
+      result.push(ops[i++]);
+    }
+  }
+  return result;
+}
+
+function inlineDiff(a, b) {
+  const ac = [...a], bc = [...b];
+  const m = ac.length, n = bc.length;
+  if (m + n > 2000) return { left: escHtml(a), right: escHtml(b) };
+  const dp = [];
+  for (let i = 0; i <= m; i++) dp[i] = new Array(n+1).fill(0);
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = ac[i-1]===bc[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  const ops = [];
+  let i = m, j = n;
+  while (i > 0 || j > 0) {
+    if (i>0&&j>0&&ac[i-1]===bc[j-1]) { ops.unshift({t:'s',c:ac[i-1]}); i--; j--; }
+    else if (j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])) { ops.unshift({t:'a',c:bc[j-1]}); j--; }
+    else { ops.unshift({t:'r',c:ac[i-1]}); i--; }
+  }
+  let left='', right='';
+  for (const op of ops) {
+    if (op.t==='s') { left+=escHtml(op.c); right+=escHtml(op.c); }
+    else if (op.t==='r') left+=`<span class="token-remove">${escHtml(op.c)}</span>`;
+    else right+=`<span class="token-add">${escHtml(op.c)}</span>`;
+  }
+  return { left, right };
+}
+
+// ─── Semantic JSON Diff (path-based) ────────────────────────────────────────
+// Produces a flat list of { path, type:'added'|'removed'|'changed', oldVal, newVal }
+
+function semanticDiff(left, right, path, result) {
+  if (path === undefined) path = '';
+  if (result === undefined) result = [];
+
+  const lt = typeOf(left), rt = typeOf(right);
+
+  // both objects
+  if (lt === 'object' && rt === 'object') {
+    const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
+    for (const k of [...keys].sort()) {
+      const p = path ? path + '.' + k : k;
+      if (!(k in left)) {
+        // added in right
+        collectAll(right[k], p, 'added', result);
+      } else if (!(k in right)) {
+        // removed from left
+        collectAll(left[k], p, 'removed', result);
+      } else {
+        semanticDiff(left[k], right[k], p, result);
+      }
+    }
+    return result;
+  }
+
+  // both arrays
+  if (lt === 'array' && rt === 'array') {
+    const len = Math.max(left.length, right.length);
+    for (let i = 0; i < len; i++) {
+      const p = path + '[' + i + ']';
+      if (i >= left.length) {
+        collectAll(right[i], p, 'added', result);
+      } else if (i >= right.length) {
+        collectAll(left[i], p, 'removed', result);
+      } else {
+        semanticDiff(left[i], right[i], p, result);
+      }
+    }
+    return result;
+  }
+
+  // type changed or primitive changed
+  const lv = JSON.stringify(left), rv = JSON.stringify(right);
+  if (lv !== rv) {
+    result.push({ path: path || '(root)', type: 'changed', oldVal: left, newVal: right });
+  }
+  return result;
+}
+
+// Recursively collect all leaf paths under a value as added/removed
+function collectAll(val, path, type, result) {
+  const t = typeOf(val);
+  if (t === 'object') {
+    for (const k of Object.keys(val).sort()) {
+      collectAll(val[k], path + '.' + k, type, result);
+    }
+  } else if (t === 'array') {
+    for (let i = 0; i < val.length; i++) {
+      collectAll(val[i], path + '[' + i + ']', type, result);
+    }
+  } else {
+    result.push({ path, type, oldVal: type === 'removed' ? val : undefined, newVal: type === 'added' ? val : undefined });
+  }
+}
+
+function typeOf(v) {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return 'array';
+  return typeof v; // 'object', 'string', 'number', 'boolean', 'undefined'
+}
+
+// ─── Diff Report ─────────────────────────────────────────────────────────────
+
+let _reportData = null; // stores last diff entries
+
+function buildReportText(entries) {
+  if (!entries || entries.length === 0) return '无差异';
+  const lines = ['=== JSON 差异报告 ===', ''];
+  for (const e of entries) {
+    if (e.type === 'added') {
+      lines.push(`[新增] ${e.path}`);
+      lines.push(`  值: ${JSON.stringify(e.newVal)}`);
+    } else if (e.type === 'removed') {
+      lines.push(`[缺失] ${e.path}`);
+      lines.push(`  值: ${JSON.stringify(e.oldVal)}`);
+    } else {
+      lines.push(`[修改] ${e.path}`);
+      lines.push(`  旧值: ${JSON.stringify(e.oldVal)}`);
+      lines.push(`  新值: ${JSON.stringify(e.newVal)}`);
+    }
+    lines.push('');
+  }
+  lines.push(`共 ${entries.length} 处差异`);
+  return lines.join('\n');
+}
+
+function openReport() {
+  const modal = document.getElementById('report-modal');
+  const body  = document.getElementById('report-body');
+  const count = document.getElementById('report-count');
+  const legend = document.getElementById('report-legend');
+  modal.classList.add('open');
+
+  if (!_reportData || _reportData.length === 0) {
+    body.innerHTML = '<div class="report-empty">✓ 无差异</div>';
+    count.textContent = '';
+    legend.textContent = '';
+    return;
+  }
+
+  const entries = _reportData;
+  const nAdd  = entries.filter(e => e.type === 'added').length;
+  const nRem  = entries.filter(e => e.type === 'removed').length;
+  const nMod  = entries.filter(e => e.type === 'changed').length;
+  count.textContent = `共 ${entries.length} 处差异`;
+  legend.innerHTML = [
+    nAdd  ? `<span style="color:#a6e3a1">▲ 新增 ${nAdd}</span>` : '',
+    nRem  ? `<span style="color:#f38ba8">▼ 缺失 ${nRem}</span>` : '',
+    nMod  ? `<span style="color:#f9e2af">● 修改 ${nMod}</span>` : ''
+  ].filter(Boolean).join('<span style="color:#313244"> · </span>');
+
+  const rows = entries.map(e => {
+    let badge, valHtml;
+    if (e.type === 'added') {
+      badge = '<span class="rt-badge added">新增</span>';
+      valHtml = `<span class="rt-val rt-added">${escHtml(JSON.stringify(e.newVal))}</span>`;
+    } else if (e.type === 'removed') {
+      badge = '<span class="rt-badge removed">缺失</span>';
+      valHtml = `<span class="rt-val rt-removed">${escHtml(JSON.stringify(e.oldVal))}</span>`;
+    } else {
+      badge = '<span class="rt-badge changed">修改</span>';
+      valHtml = `<span class="rt-val rt-removed">${escHtml(JSON.stringify(e.oldVal))}</span>`
+              + `<span class="rt-arrow">→</span>`
+              + `<span class="rt-val rt-added">${escHtml(JSON.stringify(e.newVal))}</span>`;
+    }
+    return `<tr>
+      <td class="rt-path">${escHtml(e.path)}</td>
+      <td>${badge}</td>
+      <td>${valHtml}</td>
+    </tr>`;
+  }).join('');
+
+  body.innerHTML = `<table class="report-table">
+    <thead><tr><th>路径</th><th>变更类型</th><th>值</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function closeReport() {
+  document.getElementById('report-modal').classList.remove('open');
+}
+
+function closeReportOnOverlay(e) {
+  if (e.target === document.getElementById('report-modal')) closeReport();
+}
+
+function copyReport() {
+  const btn = document.getElementById('btn-copy-report');
+  const text = buildReportText(_reportData);
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ 复制报告'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓ 已复制'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ 复制报告'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ─── Build diff result ───────────────────────────────────────────────────────
+
+// Returns { leftHTML, rightHTML, counts, ops }
+function buildDiffResult(leftText, rightText) {
+  const leftObj  = parseJSON(leftText);
+  const rightObj = parseJSON(rightText);
+  // semantic diff for report
+  const _semanticEntries = semanticDiff(leftObj, rightObj);
+  const leftPretty  = prettyJSON(leftObj);
+  const rightPretty = prettyJSON(rightObj);
+  const leftLines   = leftPretty.split('\n');
+  const rightLines  = rightPretty.split('\n');
+
+  const MAX = 20000;       // 行级 LCS 上限
+  const INLINE_MAX = 5000;  // 超过此行数跳过字符级 inlineDiff（避免卡顿）
+  if (leftLines.length > MAX || rightLines.length > MAX) {
+    const same = leftPretty === rightPretty;
+    return { simple: true, leftPretty, rightPretty, same, semanticEntries: _semanticEntries };
+  }
+
+  const skipInline = leftLines.length > INLINE_MAX || rightLines.length > INLINE_MAX;
+
+  let ops = pairChanges(lcsLines(leftLines, rightLines));
+  let countSame=0, countAdd=0, countRemove=0, countChange=0;
+  const leftHTML=[], rightHTML=[];
+  // marks[side] = [{ratio, typeClass}]
+  const marks = { left:[], right:[] };
+
+  const totalOps = ops.length;
+
+  for (let idx=0; idx < ops.length; idx++) {
+    const op = ops[idx];
+    if (op.type === 'same') {
+      leftHTML.push(`<span class="json-line line-same">${escHtml(op.left)}</span>`);
+      rightHTML.push(`<span class="json-line line-same">${escHtml(op.right)}</span>`);
+      countSame++;
+    } else if (op.type === 'add') {
+      // data-line / data-cls used by minimap to find real offsetTop
+      leftHTML.push(`<span class="json-line line-remove" style="opacity:0.25" data-line="${idx}" data-cls="mark-add">　</span>`);
+      rightHTML.push(`<span class="json-line line-add" data-line="${idx}" data-cls="mark-add">${escHtml(op.right)}</span>`);
+      marks.left.push({ lineIdx: idx, cls: 'mark-add' });
+      marks.right.push({ lineIdx: idx, cls: 'mark-add' });
+      countAdd++;
+    } else if (op.type === 'remove') {
+      leftHTML.push(`<span class="json-line line-remove" data-line="${idx}" data-cls="mark-remove">${escHtml(op.left)}</span>`);
+      rightHTML.push(`<span class="json-line line-add" style="opacity:0.25" data-line="${idx}" data-cls="mark-remove">　</span>`);
+      marks.left.push({ lineIdx: idx, cls: 'mark-remove' });
+      marks.right.push({ lineIdx: idx, cls: 'mark-remove' });
+      countRemove++;
+    } else if (op.type === 'change') {
+      const { left: lh, right: rh } = skipInline
+        ? { left: escHtml(op.left), right: escHtml(op.right) }
+        : inlineDiff(op.left, op.right);
+      leftHTML.push(`<span class="json-line line-change" data-line="${idx}" data-cls="mark-change">${lh}</span>`);
+      rightHTML.push(`<span class="json-line line-change" data-line="${idx}" data-cls="mark-change">${rh}</span>`);
+      marks.left.push({ lineIdx: idx, cls: 'mark-change' });
+      marks.right.push({ lineIdx: idx, cls: 'mark-change' });
+      countChange++;
+    }
+  }
+
+  return {
+    simple: false,
+    leftHTML, rightHTML, marks,
+    counts: { same:countSame, add:countAdd, remove:countRemove, change:countChange },
+    leftObj, rightObj,
+    semanticEntries: _semanticEntries
+  };
+}
+
+// ─── Minimap ─────────────────────────────────────────────────────────────────
+// Architecture:
+//  • A <canvas> inside .minimap renders colored diff markers at their TRUE
+//    pixel positions relative to the pane's scrollHeight.
+//  • A .minimap-viewport div shows the current visible window and is draggable.
+//  • Clicking anywhere on the minimap scrolls the pane to that position.
+
+// Per-side state: { marks: [{lineIdx, cls}], canvas, vpEl, paneEl }
+const _mm = {};
+
+function clearMinimap(side) {
+  const mm = document.getElementById(side+'-minimap');
+  const cv = mm.querySelector('canvas');
+  if (cv) { const ctx = cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height); }
+  if (_mm[side]) _mm[side].marks = [];
+}
+
+// Call after DOM is rendered: reads actual offsetTop of each diff line span.
+function renderMinimap(side, lineMarks) {
+  const mm   = document.getElementById(side+'-minimap');
+  const pane = document.getElementById(side+'-result');
+  const vp   = document.getElementById(side+'-vp');
+
+  // ensure canvas exists and matches size
+  let cv = mm.querySelector('canvas');
+  if (!cv) { cv = document.createElement('canvas'); mm.insertBefore(cv, vp); }
+  const mmH = mm.clientHeight || 340;
+  const mmW = mm.clientWidth  || 14;
+  cv.width  = mmW;
+  cv.height = mmH;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, mmW, mmH);
+
+  // store state
+  _mm[side] = { marks: lineMarks, canvas: cv, vpEl: vp, paneEl: pane };
+
+  _drawMarks(side);
+  updateViewport(side);
+  _ensureDragBound(side);
+}
+
+const COLOR_MAP = {
+  'mark-add':    '#a6e3a1',
+  'mark-remove': '#f38ba8',
+  'mark-change': '#f9e2af'
+};
+
+// Draw marks using real offsetTop of each line span in the pane.
+function _drawMarks(side) {
+  const st = _mm[side];
+  if (!st) return;
+  const { marks, canvas: cv, paneEl: pane } = st;
+  const mmH = cv.height, mmW = cv.width;
+  const scrollH = pane.scrollHeight || 1;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, mmW, mmH);
+
+  // get all diff line spans (those with data-line attribute set during render)
+  const spans = pane.querySelectorAll('span[data-line]');
+  const lineH = Math.max(2, Math.ceil((mmH / scrollH) * 20)); // min visible height
+
+  for (const span of spans) {
+    const lineIdx = parseInt(span.dataset.line, 10);
+    const cls     = span.dataset.cls;
+    if (!cls) continue;
+    const color = COLOR_MAP[cls];
+    if (!color) continue;
+    // real scroll position of this line
+    const y = (span.offsetTop / scrollH) * mmH;
+    ctx.fillStyle = color;
+    ctx.fillRect(2, Math.round(y), mmW - 4, Math.max(2, lineH));
+  }
+}
+
+function updateViewport(side) {
+  const st = _mm[side];
+  if (!st) return;
+  const { vpEl: vp, paneEl: pane, canvas: cv } = st;
+  const mmH     = cv ? cv.height : (document.getElementById(side+'-minimap').clientHeight || 340);
+  const scrollH = pane.scrollHeight || 1;
+  const scale   = mmH / scrollH;
+  const top     = pane.scrollTop * scale;
+  const height  = pane.clientHeight * scale;
+  vp.style.top    = Math.round(top) + 'px';
+  vp.style.height = Math.max(6, Math.round(height)) + 'px';
+}
+
+// ── Minimap click & drag ──────────────────────────────────────────────────────
+function minimapClick(event, side) {
+  // ignore if clicking on the viewport handle itself (handled by drag)
+  if (event.target.classList.contains('minimap-viewport')) return;
+  const mm   = document.getElementById(side+'-minimap');
+  const pane = document.getElementById(side+'-result');
+  const mmH  = mm.clientHeight || 1;
+  const rect = mm.getBoundingClientRect();
+  const y    = event.clientY - rect.top;
+  _scrollPaneTo(side, y / mmH);
+}
+
+function _scrollPaneTo(side, ratio) {
+  const pane = document.getElementById(side+'-result');
+  pane.scrollTop = ratio * pane.scrollHeight;
+}
+
+// Viewport drag — called once after renderMinimap
+function _ensureDragBound(side) {
+  _bindMinimapDrag(side);
+}
+
+function _bindMinimapDrag(side) {
+  const vp = document.getElementById(side+'-vp');
+  if (!vp || vp._dragBound) return;
+  vp._dragBound = true;
+  let startY, startScroll;
+  vp.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const mm   = document.getElementById(side+'-minimap');
+    const pane = document.getElementById(side+'-result');
+    startY = e.clientY;
+    startScroll = pane.scrollTop;
+    const mmH = mm.clientHeight || 1;
+    const onMove = ev => {
+      const dy    = ev.clientY - startY;
+      const scale = pane.scrollHeight / mmH;
+      pane.scrollTop = startScroll + dy * scale;
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  });
+}
+
+// ─── Render inline ────────────────────────────────────────────────────────────
+
+function renderInline(result) {
+  const badge   = document.getElementById('result-badge');
+  const msg     = document.getElementById('result-msg');
+  const sb      = document.getElementById('summary-bar');
+
+  if (result.simple) {
+    const entries = result.semanticEntries || [];
+    const nAdd    = entries.filter(e => e.type === 'added').length;
+    const nRemove = entries.filter(e => e.type === 'removed').length;
+    const nChange = entries.filter(e => e.type === 'changed').length;
+    const total   = nAdd + nRemove + nChange;
+    const isSame  = total === 0;
+    badge.innerHTML = isSame
+      ? '<span class="badge badge-same">✓ 完全一致</span>'
+      : `<span class="badge badge-diff">✗ 存在差异（内容过长，仅文本展示）</span>`;
+    msg.textContent = isSame ? '内容完全相同' : `新增 ${nAdd} 项 · 缺失 ${nRemove} 项 · 修改 ${nChange} 项`;
+    sb.innerHTML = isSame ? '' : `
+      <div class="summary-item"><span class="dot dot-add"></span>新增 ${nAdd} 项</div>
+      <div class="summary-item"><span class="dot dot-remove"></span>缺失 ${nRemove} 项</div>
+      <div class="summary-item"><span class="dot dot-change"></span>修改 ${nChange} 项</div>
+    `;
+    document.getElementById('left-result').innerHTML =
+      `<span class="json-line ${isSame?'line-same':'line-remove'}">${escHtml(result.leftPretty)}</span>`;
+    document.getElementById('right-result').innerHTML =
+      `<span class="json-line ${isSame?'line-same':'line-add'}">${escHtml(result.rightPretty)}</span>`;
+    clearMinimap('left'); clearMinimap('right');
+    return;
+  }
+
+  const { leftHTML, rightHTML, marks } = result;
+
+  // 统计口径与差异报告保持一致：按语义 diff 的叶子路径计数
+  const entries = result.semanticEntries || [];
+  const nAdd    = entries.filter(e => e.type === 'added').length;
+  const nRemove = entries.filter(e => e.type === 'removed').length;
+  const nChange = entries.filter(e => e.type === 'changed').length;
+  const total   = nAdd + nRemove + nChange;
+  const isSame  = total === 0;
+
+  badge.innerHTML = isSame
+    ? '<span class="badge badge-same">✓ 完全一致</span>'
+    : '<span class="badge badge-diff">✗ 存在差异</span>';
+  msg.textContent = isSame
+    ? '内容完全相同'
+    : `新增 ${nAdd} 项 · 缺失 ${nRemove} 项 · 修改 ${nChange} 项`;
+
+  sb.innerHTML = `
+    <div class="summary-item"><span class="dot dot-add"></span>新增 ${nAdd} 项</div>
+    <div class="summary-item"><span class="dot dot-remove"></span>缺失 ${nRemove} 项</div>
+    <div class="summary-item"><span class="dot dot-change"></span>修改 ${nChange} 项</div>
+  `;
+
+  document.getElementById('left-result').innerHTML  =
+    `<div class="result-pane-title">左侧（基准）</div>` + leftHTML.join('');
+  document.getElementById('right-result').innerHTML =
+    `<div class="result-pane-title">右侧（对比）</div>` + rightHTML.join('');
+
+  // render minimap after DOM is painted (two frames to be safe)
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    renderMinimap('left',  marks.left);
+    renderMinimap('right', marks.right);
+  }));
+}
+
+// ─── Main entry ──────────────────────────────────────────────────────────────
+
+function runDiff() {
+  const leftText  = document.getElementById('left-input').value.trim();
+  const rightText = document.getElementById('right-input').value.trim();
+  if (!leftText && !rightText) { showError('请先输入内容'); return; }
+
+  let result;
+  try {
+    result = buildDiffResult(leftText, rightText);
+  } catch(e) {
+    showError('JSON 解析失败：' + e.message); return;
+  }
+
+  // store semantic report
+  _reportData = result.semanticEntries || null;
+  const reportBtn = document.getElementById('btn-report');
+  reportBtn.disabled = !_reportData;
+
+  renderInline(result);
+}
+
+function showError(msg) {
+  document.getElementById('result-badge').innerHTML = '<span class="badge badge-warn">⚠ 错误</span>';
+  document.getElementById('result-msg').textContent  = '';
+  document.getElementById('summary-bar').innerHTML   = '';
+  document.getElementById('left-result').innerHTML   = `<div class="error-msg">${escHtml(msg)}</div>`;
+  document.getElementById('right-result').innerHTML  = '';
+  clearMinimap('left'); clearMinimap('right');
+}
+
+// ─── Scroll sync ─────────────────────────────────────────────────────────────
+
+let scrolling = null;
+function syncScroll(el, side) {
+  if (!document.getElementById('opt-sync-scroll').checked) return;
+  const other = document.getElementById(side==='left' ? 'right-input' : 'left-input');
+  if (scrolling && scrolling !== side) return;
+  scrolling = side;
+  const ratio = el.scrollTop / (el.scrollHeight - el.clientHeight || 1);
+  other.scrollTop = ratio * (other.scrollHeight - other.clientHeight);
+  requestAnimationFrame(() => { scrolling = null; });
+}
+
+let rScrolling = null;
+function onResultScroll(el, side) {
+  updateViewport(side);
+  if (!document.getElementById('opt-sync-scroll').checked) return;
+  const otherSide = side==='left' ? 'right' : 'left';
+  const other = document.getElementById(otherSide+'-result');
+  if (rScrolling && rScrolling !== side) return;
+  rScrolling = side;
+  other.scrollTop = el.scrollTop;
+  requestAnimationFrame(() => {
+    updateViewport(otherSide);
+    rScrolling = null;
+  });
+}
+
+// ─── Keyboard shortcuts ───────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); runDiff(); }
+  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='F') { e.preventDefault(); formatBoth(); }
+  if (e.key === 'Escape') closeReport();
+});
+</script>
+</body>
+</html>
