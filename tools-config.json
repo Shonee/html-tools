@@ -98,6 +98,17 @@
             "description": "JSON 格式化、压缩、转义工具",
             "url": "pages/tools/json-formatter.html",
             "rank": 997
+        },
+        {
+            "icon": "",
+            "title": "JSON 对比工具",
+            "keywords": "JSON Diff工具",
+            "features": [
+                "JSON Diff"
+            ],
+            "description": "JSON Diff工具",
+            "url": "pages/tools/diff/json_diff.html",
+            "rank": 997
         }
     ]
 }
