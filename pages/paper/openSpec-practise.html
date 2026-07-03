@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSpec-practise - 项目总览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-page: #F5F7FB;
+            --bg-card: #ffffff;
+            --bg-code: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --text-code: #0f172a;
+            --text-comment: #64748b;
+            --border-code: #e2e8f0;
+            --border-card: transparent;
+            --accent: #6366F1;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #0f172a;
+                --bg-card: #1e293b;
+                --bg-code: #0f172a;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-muted: #64748b;
+                --text-code: #e2e8f0;
+                --text-comment: #94a3b8;
+                --border-code: #334155;
+                --border-card: #334155;
+                --accent: #818cf8;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+        body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; background: var(--bg-page); color: var(--text-primary); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+        .cmd-block { background: var(--bg-code); border: 1px solid var(--border-code); border-radius: 8px; padding: 8px 12px; font-family: "JetBrains Mono", "Fira Code", "SF Mono", monospace; font-size: 11px; line-height: 1.5; overflow-x: auto; color: var(--text-code); }
+        .cmd-block .comment { color: var(--text-comment); font-style: italic; display: block; }
+        .cmd-block .cmd-line { color: var(--accent); font-weight: 500; display: block; }
+        .step-badge { min-width: 22px; height: 22px; background: var(--accent); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+        .sub-title { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+        .desc { font-size: 0.7rem; color: var(--text-secondary); }
+        .hint { font-size: 0.65rem; color: var(--text-muted); }
+    </style>
+</head>
+<body class="p-5">
+
+<div id="capture-area" class="max-w-4xl mx-auto space-y-4">
+
+    <!-- Banner -->
+    <div class="card text-center" style="padding: 16px 20px;">
+        <h1 class="text-2xl font-bold mb-1" style="color: var(--text-primary);">OpenSpec-practise</h1>
+        <p class="desc mb-2" style="font-size: 0.85rem;">Spec 驱动开发（SDD）实践指南 — 从意图到规范到代码</p>
+        <div class="flex justify-center gap-2 flex-wrap">
+            <span class="badge bg-indigo-100 text-indigo-700">⭐ 489 Stars</span>
+            <span class="badge bg-green-100 text-green-700">Node.js + Python</span>
+            <span class="badge bg-purple-100 text-purple-700">OpenSpec SDD</span>
+            <span class="badge bg-orange-100 text-orange-700">DDD 映射</span>
+            <span class="badge bg-pink-100 text-pink-700">AI 原力注入</span>
+        </div>
+    </div>
+
+    <!-- What + Features 双列 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <h2 class="section-title">解决什么问题</h2>
+            <p class="desc">用 AI 写代码时需求传达模糊、产出质量不稳定。本项目通过完整电商案例演示 OpenSpec 框架的 SDD 工作流——先定义结构化规范，再让 AI 按规范编码+验证，确保人机对需求达成一致。</p>
+            <div class="mt-3 grid grid-cols-2 gap-2 text-center">
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">489</p><p class="hint">GitHub Stars</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">2</p><p class="hint">语言实现</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">20+</p><p class="hint">AI 工具兼容</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">6</p><p class="hint">领域规范模块</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="section-title">核心特性</h2>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">规范驱动开发</span><span class="desc ml-1">— 先 Spec 后代码，AI 与人对需求达成一致</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">多语言示例</span><span class="desc ml-1">— 同一套规范驱动 Node.js + Python 双实现</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">完整测试覆盖</span><span class="desc ml-1">— 单元、集成、性能三级测试体系</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">DDD 映射体系</span><span class="desc ml-1">— 限界上下文 → specs 目录，聚合行为 → GWT 场景</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">AI 深度协作</span><span class="desc ml-1">— /opsx 斜杠命令，支持 Cursor/Claude Code 等 20+ 工具</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">配套文档</span><span class="desc ml-1">— 使用手册 + 实战指南 + AI 工作流复盘 + PPT</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 完整使用指南 -->
+    <div class="card">
+        <h2 class="section-title">完整使用指南</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-3">
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">1</span> 安装 OpenSpec CLI</p>
+                    <div class="cmd-block"><span class="comment"># 全局安装 OpenSpec</span><span class="cmd-line">npm install -g @fission-ai/openspec</span><span class="comment"># 验证安装</span><span class="cmd-line">openspec --version</span></div>
+                    <p class="hint mt-1">需 Node.js 18+</p>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">2</span> 克隆实践仓库</p>
+                    <div class="cmd-block"><span class="cmd-line">git clone https://github.com/ForceInjection/OpenSpec-practise.git</span><span class="cmd-line">cd OpenSpec-practise</span></div>
+                    <p class="hint mt-1">含文档 + 示例代码 + 规范文件</p>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">3</span> 运行 Node.js 示例</p>
+                    <div class="cmd-block"><span class="cmd-line">cd examples/ecommerce-mini</span><span class="cmd-line">npm install && npm test</span><span class="comment"># 启动开发服务（端口 3000）</span><span class="cmd-line">npm start</span></div>
+                    <p class="hint mt-1">零外部依赖，Node.js 内置测试运行器</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">4</span> 运行 Python 示例</p>
+                    <div class="cmd-block"><span class="cmd-line">cd examples/ecommerce-mini-python</span><span class="cmd-line">pip install -r requirements.txt</span><span class="comment"># 运行测试 + 启动服务</span><span class="cmd-line">pytest</span><span class="cmd-line">python -m uvicorn src.api.server:app --reload</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">5</span> 在自己项目中使用</p>
+                    <div class="cmd-block"><span class="comment"># 在项目根目录初始化 OpenSpec</span><span class="cmd-line">openspec init</span><span class="comment"># 使用 AI 助手的 /opsx 命令</span><span class="cmd-line">/opsx:propose  # 生成变更提案</span><span class="cmd-line">/opsx:apply    # AI 按规范编码</span><span class="cmd-line">openspec archive  # 归档规范</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span style="color: var(--accent); font-weight: bold;">⚙</span> 学习路径</p>
+                    <div class="cmd-block"><span class="comment"># 推荐阅读顺序</span><span class="cmd-line">1. docs/openspec-user-manual.md</span><span class="cmd-line">2. docs/openspec-practical-guide.md</span><span class="cmd-line">3. docs/openspec-ai-workflow-analysis.md</span><span class="cmd-line">4. examples/openspec/changes/v1-mvp/</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 pt-3" style="border-top: 1px solid var(--border-code);">
+            <p class="sub-title mb-1">🔧 常见问题</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5 hint">
+                <p><strong>模板链接 404</strong> → 已修复，使用最新 main 分支</p>
+                <p><strong>spec 如何自动生成</strong> → 使用 /opsx:propose 命令</p>
+                <p><strong>支持哪些 AI 工具</strong> → Cursor、Claude Code、Junie、Lingma 等 20+</p>
+                <p><strong>生产模式如何启动</strong> → <code>npm run start:prod</code>（端口 3002）</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Highlights + Pros/Cons 双列 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <h2 class="section-title">技术亮点</h2>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">01</span><div><p class="sub-title">SDD 完整工作流</p><p class="hint">从 proposal → design → specs → tasks → code → archive，全链路可追溯</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">02</span><div><p class="sub-title">DDD 战术映射</p><p class="hint">限界上下文对应 specs 目录，聚合行为对应 Given/When/Then 场景</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">03</span><div><p class="sub-title">多语言同源</p><p class="hint">同一套规范驱动 Node.js (Express) 和 Python (FastAPI) 双实现</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">04</span><div><p class="sub-title">AI 工具无关性</p><p class="hint">通过 /opsx 斜杠命令标准化，兼容 20+ AI 编程助手</p></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="section-title">优势与局限</h2>
+            <div class="space-y-1 mb-2">
+                <p class="desc">✅ 完整电商案例，可直接 Fork 学习</p>
+                <p class="desc">✅ 中文文档详尽，含配套 PPT</p>
+                <p class="desc">✅ DDD→OpenSpec 映射体系独创</p>
+                <p class="desc">✅ 双语言实现验证"规范与语言无关"</p>
+                <p class="desc">✅ GitHub Blog + 6大工具榜单背书</p>
+            </div>
+            <div class="space-y-1">
+                <p class="desc">⚠️ 仅 MVP 级示例，未覆盖复杂分布式场景</p>
+                <p class="desc">⚠️ 社区规模尚小（489 Stars）</p>
+                <p class="desc">⚠️ 缺少 Go/Rust 等语言示例</p>
+                <p class="desc">⚠️ 依赖 OpenSpec CLI 版本更新</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 保存按钮 -->
+<div id="save-section" class="max-w-4xl mx-auto mt-5 text-center">
+    <button onclick="saveAsImage()" class="px-5 py-2.5 rounded-lg font-medium transition shadow-md" style="background: var(--accent); color: white;">
+        📸 保存为图片
+    </button>
+    <p class="hint mt-1">点击保存上方内容为 PNG</p>
+</div>
+
+<script>
+function saveAsImage() {
+    const element = document.getElementById('capture-area');
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: isDark ? '#0f172a' : '#F5F7FB',
+        logging: false
+    }).then(function(canvas) {
+        const link = document.createElement('a');
+        link.download = 'OpenSpec-practise-overview.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+</script>
+
+</body>
+</html>
