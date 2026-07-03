@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphify - 项目总览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-page: #F5F7FB;
+            --bg-card: #ffffff;
+            --bg-code: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --text-code: #0f172a;
+            --text-comment: #64748b;
+            --border-code: #e2e8f0;
+            --border-card: transparent;
+            --accent: #3366CC;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #0f172a;
+                --bg-card: #1e293b;
+                --bg-code: #0f172a;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-muted: #64748b;
+                --text-code: #e2e8f0;
+                --text-comment: #94a3b8;
+                --border-code: #334155;
+                --border-card: #334155;
+                --accent: #60a5fa;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+        body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; background: var(--bg-page); color: var(--text-primary); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+        .cmd-block { background: var(--bg-code); border: 1px solid var(--border-code); border-radius: 8px; padding: 8px 12px; font-family: "JetBrains Mono", "Fira Code", "SF Mono", monospace; font-size: 11px; line-height: 1.5; overflow-x: auto; color: var(--text-code); }
+        .cmd-block .comment { color: var(--text-comment); font-style: italic; display: block; }
+        .cmd-block .cmd-line { color: var(--accent); font-weight: 500; display: block; }
+        .step-badge { min-width: 22px; height: 22px; background: var(--accent); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+        .sub-title { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+        .desc { font-size: 0.7rem; color: var(--text-secondary); }
+        .hint { font-size: 0.65rem; color: var(--text-muted); }
+    </style>
+</head>
+<body class="p-5">
+
+<div id="capture-area" class="max-w-4xl mx-auto space-y-4">
+
+    <!-- Banner -->
+    <div class="card text-center" style="padding: 16px 20px;">
+        <h1 class="text-2xl font-bold mb-1" style="color: var(--text-primary);">Graphify</h1>
+        <p class="desc mb-2" style="font-size: 0.85rem;">面向 AI 编码助手的多模态知识图谱构建器 — 一条命令让 AI 读懂你的整个项目</p>
+        <div class="flex justify-center gap-2 flex-wrap">
+            <span class="badge bg-blue-100 text-blue-700">MIT License</span>
+            <span class="badge bg-green-100 text-green-700">Python</span>
+            <span class="badge bg-purple-100 text-purple-700">⭐ 76.4k Stars</span>
+            <span class="badge bg-orange-100 text-orange-700">v0.9.5</span>
+            <span class="badge bg-pink-100 text-pink-700">20+ AI Tools</span>
+        </div>
+    </div>
+
+    <!-- What + Features 双列 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <h2 class="section-title">解决什么问题</h2>
+            <p class="desc">AI 编码助手理解项目时逐文件阅读，token 消耗巨大且容易遗漏关系。Graphify 把项目预构建为知识图谱（代码 AST 本地处理 + 文档 LLM 提取），AI 通过查询图谱获取精准上下文——token 消耗降低 71 倍，幻觉显著减少。</p>
+            <div class="mt-3 grid grid-cols-2 gap-2 text-center">
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">76.4k</p><p class="hint">GitHub Stars</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">2.2M+</p><p class="hint">PyPI 下载</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">36</p><p class="hint">语言 AST 支持</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">20+</p><p class="hint">AI 工具集成</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="section-title">核心特性</h2>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">多模态提取</span><span class="desc ml-1">— 代码/文档/PDF/图片/视频/数据库 schema 统一构图</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">本地优先</span><span class="desc ml-1">— 代码 tree-sitter 本地解析，零 API 调用</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">71x Token 节省</span><span class="desc ml-1">— AI 查图谱替代逐文件阅读</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">置信度标注</span><span class="desc ml-1">— 每条关系标注 EXTRACTED/INFERRED/AMBIGUOUS</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">MCP Server</span><span class="desc ml-1">— stdio/HTTP 双模式，团队共享一份图谱</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">Git Hooks</span><span class="desc ml-1">— post-commit 自动重建 + merge driver 防冲突</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 完整使用指南 -->
+    <div class="card">
+        <h2 class="section-title">完整使用指南</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-3">
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">1</span> 安装</p>
+                    <div class="cmd-block"><span class="comment"># macOS（推荐 uv 隔离环境）</span><span class="cmd-line">brew install uv</span><span class="cmd-line">uv tool install graphifyy</span><span class="comment"># Windows</span><span class="cmd-line">winget install astral-sh.uv</span><span class="cmd-line">uv tool install graphifyy</span></div>
+                    <p class="hint mt-1">PyPI 包名 graphifyy（双 y），CLI 命令为 graphify</p>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">2</span> 注册到 AI 助手</p>
+                    <div class="cmd-block"><span class="comment"># Claude Code（默认）</span><span class="cmd-line">graphify install</span><span class="comment"># 其他工具</span><span class="cmd-line">graphify install --platform codex</span><span class="cmd-line">graphify cursor install</span><span class="cmd-line">graphify install --platform gemini</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">3</span> 构建知识图谱</p>
+                    <div class="cmd-block"><span class="comment"># 在 AI 助手中输入</span><span class="cmd-line">/graphify .</span><span class="comment"># 或指定目录</span><span class="cmd-line">/graphify ./src --mode deep</span></div>
+                    <p class="hint mt-1">生成 graphify-out/（graph.html + GRAPH_REPORT.md + graph.json）</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">4</span> 查询与使用</p>
+                    <div class="cmd-block"><span class="comment"># 查询关系</span><span class="cmd-line">graphify query "auth 如何连接到数据库？"</span><span class="comment"># 查找路径</span><span class="cmd-line">graphify path "UserService" "DatabasePool"</span><span class="comment"># 解释概念</span><span class="cmd-line">graphify explain "RateLimiter"</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">5</span> 团队协作与自动化</p>
+                    <div class="cmd-block"><span class="comment"># 设置自动重建（Git hook）</span><span class="cmd-line">graphify hook install</span><span class="comment"># 提交图谱供团队使用</span><span class="cmd-line">git add graphify-out/ && git commit</span><span class="comment"># 增量更新（仅变更文件）</span><span class="cmd-line">/graphify . --update</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">6</span> 更新与卸载</p>
+                    <div class="cmd-block"><span class="comment"># 更新</span><span class="cmd-line">uv tool upgrade graphifyy</span><span class="cmd-line">graphify install</span><span class="comment"># 卸载（所有平台）</span><span class="cmd-line">graphify uninstall --purge</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 pt-3" style="border-top: 1px solid var(--border-code);">
+            <p class="sub-title mb-1">🔧 常见问题</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5 hint">
+                <p><strong>command not found</strong> → 运行 uv tool update-shell，重启终端</p>
+                <p><strong>uvx 找不到包</strong> → 用 uvx --from graphifyy graphify install</p>
+                <p><strong>HTML 太大无法打开</strong> → 加 --no-viz，用 graphify query 查询</p>
+                <p><strong>可选扩展</strong> → uv tool install "graphifyy[pdf,video,ollama]"</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Highlights + Pros/Cons 双列 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <h2 class="section-title">技术亮点</h2>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">01</span><div><p class="sub-title">tree-sitter 本地 AST</p><p class="hint">36 语言零 API 提取，代码不出本地</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">02</span><div><p class="sub-title">Leiden 社区聚类</p><p class="hint">自动发现代码模块边界，标注 god node 和意外连接</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">03</span><div><p class="sub-title">MCP Server 双模式</p><p class="hint">stdio 单人用 / HTTP 团队共享，支持负载均衡</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">04</span><div><p class="sub-title">Git Merge Driver</p><p class="hint">两人同时提交 graph.json 自动 union-merge，零冲突</p></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="section-title">优势与局限</h2>
+            <div class="space-y-1 mb-2">
+                <p class="desc">✅ 多模态覆盖最广（代码+文档+PDF+图片+视频+DB）</p>
+                <p class="desc">✅ 代码本地处理，隐私有保障，无遥测</p>
+                <p class="desc">✅ 20+ AI 工具一键集成，生态最广</p>
+                <p class="desc">✅ 团队协作原生支持（git commit + merge driver）</p>
+                <p class="desc">✅ 增量更新（--update），AST 重建零 API 成本</p>
+            </div>
+            <div class="space-y-1">
+                <p class="desc">⚠️ 小项目（<10 文件）构图 overhead 大于收益</p>
+                <p class="desc">⚠️ 文档/PDF 提取依赖 LLM，有 API 成本</p>
+                <p class="desc">⚠️ >5000 节点时 HTML 可视化性能受限</p>
+                <p class="desc">⚠️ PyPI 包名 graphifyy（双 y）易混淆</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 保存按钮 -->
+<div id="save-section" class="max-w-4xl mx-auto mt-5 text-center">
+    <button onclick="saveAsImage()" class="px-5 py-2.5 rounded-lg font-medium transition shadow-md" style="background: var(--accent); color: white;">
+        📸 保存为图片
+    </button>
+    <p class="hint mt-1">点击保存上方内容为 PNG</p>
+</div>
+
+<script>
+function saveAsImage() {
+    const element = document.getElementById('capture-area');
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: isDark ? '#0f172a' : '#F5F7FB',
+        logging: false
+    }).then(function(canvas) {
+        const link = document.createElement('a');
+        link.download = 'graphify-overview.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+</script>
+
+</body>
+</html>
