@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSearch - 项目总览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-page: #F5F7FB;
+            --bg-card: #ffffff;
+            --bg-code: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --text-code: #0f172a;
+            --text-comment: #64748b;
+            --border-code: #e2e8f0;
+            --border-card: transparent;
+            --accent: #005EB8;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #0f172a;
+                --bg-card: #1e293b;
+                --bg-code: #0f172a;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-muted: #64748b;
+                --text-code: #e2e8f0;
+                --text-comment: #94a3b8;
+                --border-code: #334155;
+                --border-card: #334155;
+                --accent: #60a5fa;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+        body { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; background: var(--bg-page); color: var(--text-primary); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+        .cmd-block { background: var(--bg-code); border: 1px solid var(--border-code); border-radius: 8px; padding: 8px 12px; font-family: "JetBrains Mono", "Fira Code", "SF Mono", monospace; font-size: 11px; line-height: 1.5; overflow-x: auto; color: var(--text-code); }
+        .cmd-block .comment { color: var(--text-comment); font-style: italic; display: block; }
+        .cmd-block .cmd-line { color: var(--accent); font-weight: 500; display: block; }
+        .step-badge { min-width: 22px; height: 22px; background: var(--accent); color: white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; flex-shrink: 0; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
+        .sub-title { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+        .desc { font-size: 0.7rem; color: var(--text-secondary); }
+        .hint { font-size: 0.65rem; color: var(--text-muted); }
+    </style>
+</head>
+<body class="p-5">
+
+<div id="capture-area" class="max-w-4xl mx-auto space-y-4">
+
+    <!-- Banner -->
+    <div class="card text-center" style="padding: 16px 20px;">
+        <h1 class="text-2xl font-bold mb-1" style="color: var(--text-primary);">OpenSearch</h1>
+        <p class="desc mb-2" style="font-size: 0.85rem;">开源企业级分布式搜索与可观测套件</p>
+        <div class="flex justify-center gap-2 flex-wrap">
+            <span class="badge bg-blue-100 text-blue-700">Apache 2.0</span>
+            <span class="badge bg-green-100 text-green-700">Java</span>
+            <span class="badge bg-purple-100 text-purple-700">⭐ 13.3k Stars</span>
+            <span class="badge bg-orange-100 text-orange-700">v3.7.0</span>
+            <span class="badge bg-pink-100 text-pink-700">Linux Foundation</span>
+        </div>
+    </div>
+
+    <!-- What + Features 双列 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <h2 class="section-title">解决什么问题</h2>
+            <p class="desc">企业需要在 PB 级非结构化数据中实现毫秒级搜索、日志分析、安全监控和向量检索，且不受商业许可证限制。OpenSearch 提供完全开源的 Elasticsearch 替代方案，内置安全、ML 推理和可视化能力。</p>
+            <div class="mt-3 grid grid-cols-2 gap-2 text-center">
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">13.3k</p><p class="hint">GitHub Stars</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">400+</p><p class="hint">贡献者</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">3.7.0</p><p class="hint">最新版本</p></div>
+                <div class="p-2 rounded-lg" style="background: var(--bg-code);"><p class="text-lg font-bold" style="color: var(--accent);">50+</p><p class="hint">插件生态</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="section-title">核心特性</h2>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">全文检索</span><span class="desc ml-1">— Lucene 10 引擎，支持 DSL/SQL/PPL 多查询语言</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">向量搜索</span><span class="desc ml-1">— k-NN 插件，集成 FAISS/Lucene/Nmslib 引擎</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">内置安全</span><span class="desc ml-1">— 免费 RBAC、字段级加密、审计日志、SAML/OIDC</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">ML Commons</span><span class="desc ml-1">— 本地部署 ML 模型推理，支持异常检测和语义搜索</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">分层存储</span><span class="desc ml-1">— WritableWarm 直写对象存储，成本降低 60%+</span></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent);">●</span><div><span class="sub-title">可观测平台</span><span class="desc ml-1">— Dashboards + Data Prepper 全栈日志/指标/链路追踪</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 完整使用指南 -->
+    <div class="card">
+        <h2 class="section-title">完整使用指南</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-3">
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">1</span> Docker 快速启动</p>
+                    <div class="cmd-block"><span class="comment"># 单节点开发模式</span><span class="cmd-line">docker run -d -p 9200:9200 -p 9600:9600 \</span><span class="cmd-line">  -e "discovery.type=single-node" \</span><span class="cmd-line">  -e "OPENSEARCH_INITIAL_ADMIN_PASSWORD=MyStr0ng!Pass" \</span><span class="cmd-line">  opensearchproject/opensearch:3.7.0</span></div>
+                    <p class="hint mt-1">需 Docker 20.10+，镜像约 1.2GB</p>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">2</span> 验证集群健康</p>
+                    <div class="cmd-block"><span class="cmd-line">curl -ku admin:MyStr0ng!Pass \</span><span class="cmd-line">  https://localhost:9200/_cluster/health?pretty</span><span class="comment"># 返回 status: "green" 即正常</span></div>
+                    <p class="hint mt-1">默认 HTTPS，-k 跳过证书验证（开发环境）</p>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">3</span> 索引文档</p>
+                    <div class="cmd-block"><span class="cmd-line">curl -ku admin:MyStr0ng!Pass -XPOST \</span><span class="cmd-line">  'https://localhost:9200/my-index/_doc' \</span><span class="cmd-line">  -H 'Content-Type: application/json' \</span><span class="cmd-line">  -d '{"title":"Hello","content":"OpenSearch"}'</span></div>
+                    <p class="hint mt-1">索引自动创建，兼容 ES 7.10 写入 API</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">4</span> Docker Compose 全栈</p>
+                    <div class="cmd-block"><span class="comment"># 含 Dashboards + Data Prepper</span><span class="cmd-line">git clone https://github.com/opensearch-project/docker-compose.git</span><span class="comment"># 启动完整栈</span><span class="cmd-line">cd docker-compose/opensearch</span><span class="cmd-line">docker compose up -d</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span class="step-badge mr-1">5</span> Kubernetes 部署</p>
+                    <div class="cmd-block"><span class="comment"># 添加 Helm 仓库</span><span class="cmd-line">helm repo add opensearch https://opensearch-project.github.io/helm-charts/</span><span class="cmd-line">helm repo update</span><span class="comment"># 安装集群 + Dashboards</span><span class="cmd-line">helm install opensearch opensearch/opensearch</span><span class="cmd-line">helm install dashboards opensearch/opensearch-dashboards</span></div>
+                </div>
+                <div>
+                    <p class="sub-title mb-1"><span style="color: var(--accent); font-weight: bold;">⚙</span> 升级与卸载</p>
+                    <div class="cmd-block"><span class="comment"># 升级镜像版本</span><span class="cmd-line">docker pull opensearchproject/opensearch:latest</span><span class="comment"># 停止并删除容器</span><span class="cmd-line">docker compose down -v</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 pt-3" style="border-top: 1px solid var(--border-code);">
+            <p class="sub-title mb-1">🔧 常见问题</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-0.5 hint">
+                <p><strong>max virtual memory too low</strong> → <code>sysctl -w vm.max_map_count=262144</code></p>
+                <p><strong>密码不满足策略</strong> → 密码需含大小写+数字+特殊字符（≥12位）</p>
+                <p><strong>HTTPS 证书错误</strong> → 开发用 -k 跳过 / 生产配置真实证书</p>
+                <p><strong>磁盘水位告警</strong> → <code>cluster.routing.allocation.disk.watermark.*</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Highlights + Pros/Cons 双列 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+            <h2 class="section-title">技术亮点</h2>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">01</span><div><p class="sub-title">WritableWarm 分层存储</p><p class="hint">数据直写对象存储（S3/OSS/MinIO），结合本地缓存实现低延迟查询，存储成本降低 60%+</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">02</span><div><p class="sub-title">Segment Replication</p><p class="hint">替代 Document Replication，副本直接复制 Segment 文件，CPU 消耗降低 40%</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">03</span><div><p class="sub-title">Analytics Engine (DataFusion)</p><p class="hint">基于 Apache Arrow + DataFusion 的分布式分析引擎，支持流式 Reduce 和分布式 Join</p></div></div>
+                <div class="flex items-start gap-2"><span style="color: var(--accent); font-weight: bold;">04</span><div><p class="sub-title">可插拔数据格式</p><p class="hint">DataFormatAwareEngine 抽象层，支持 Lucene + Parquet 双格式，可扩展列式存储</p></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="section-title">优势与局限</h2>
+            <div class="space-y-1 mb-2">
+                <p class="desc">✅ Apache 2.0 真开源，任何云可自由托管</p>
+                <p class="desc">✅ 安全功能免费内置（RBAC/加密/审计）</p>
+                <p class="desc">✅ 兼容 ES 7.10 API，迁移成本可控</p>
+                <p class="desc">✅ AWS 全托管服务（Amazon OpenSearch Service）</p>
+                <p class="desc">✅ Linux Foundation 治理，厂商中立</p>
+            </div>
+            <div class="space-y-1">
+                <p class="desc">⚠️ Dashboards 功能迭代慢于 Kibana</p>
+                <p class="desc">⚠️ 2.x→3.x 升级需重建索引（Lucene 不兼容）</p>
+                <p class="desc">⚠️ 社区规模和第三方教程少于 Elasticsearch</p>
+                <p class="desc">⚠️ 部分 ES 8.x+ 新特性（ESQL/Serverless）无对应</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 保存按钮 -->
+<div id="save-section" class="max-w-4xl mx-auto mt-5 text-center">
+    <button onclick="saveAsImage()" class="px-5 py-2.5 rounded-lg font-medium transition shadow-md" style="background: var(--accent); color: white;">
+        📸 保存为图片
+    </button>
+    <p class="hint mt-1">点击保存上方内容为 PNG</p>
+</div>
+
+<script>
+function saveAsImage() {
+    const element = document.getElementById('capture-area');
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: isDark ? '#0f172a' : '#F5F7FB',
+        logging: false
+    }).then(function(canvas) {
+        const link = document.createElement('a');
+        link.download = 'OpenSearch-overview.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+</script>
+
+</body>
+</html>
