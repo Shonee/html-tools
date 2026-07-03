@@ -2,17 +2,6 @@
     "tools": [
         {
             "icon": "",
-            "title": "爪哇程序人生 | 个人主页!",
-            "keywords": "home页面",
-            "features": [
-                "home"
-            ],
-            "description": "home页面",
-            "url": "pages/home/personal-home.html",
-            "rank": 997
-        },
-        {
-            "icon": "",
             "title": "GitHub API 功能测试页面",
             "keywords": "Github API",
             "features": [
@@ -21,6 +10,17 @@
             "description": "Github API 测试",
             "url": "pages/github/github_api_demo.html",
             "rank": 1001
+        },
+        {
+            "icon": "",
+            "title": "爪哇程序人生 | 个人主页!",
+            "keywords": "home页面",
+            "features": [
+                "home"
+            ],
+            "description": "home页面",
+            "url": "pages/home/personal-home.html",
+            "rank": 997
         },
         {
             "icon": "🚀",
@@ -67,17 +67,6 @@
             "rank": 0
         },
         {
-            "icon": "",
-            "title": "HTML/CSS/JS 代码压缩混淆工具",
-            "keywords": "HTML混淆工具",
-            "features": [
-                "HTML/CSS/JS 代码压缩混淆工具"
-            ],
-            "description": "HTML/CSS/JS 代码压缩混淆工具",
-            "url": "pages/tools/obfuscation-html-utils.html",
-            "rank": 997
-        },
-        {
             "icon": "🔐",
             "title": "编码解码工具集",
             "keywords": "编码,解码",
@@ -97,6 +86,17 @@
             ],
             "description": "JSON 格式化、压缩、转义工具",
             "url": "pages/tools/json-formatter.html",
+            "rank": 997
+        },
+        {
+            "icon": "",
+            "title": "HTML/CSS/JS 代码压缩混淆工具",
+            "keywords": "HTML混淆工具",
+            "features": [
+                "HTML/CSS/JS 代码压缩混淆工具"
+            ],
+            "description": "HTML/CSS/JS 代码压缩混淆工具",
+            "url": "pages/tools/obfuscation-html-utils.html",
             "rank": 997
         },
         {
