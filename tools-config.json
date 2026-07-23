@@ -13,13 +13,46 @@
         },
         {
             "icon": "",
-            "title": "爪哇程序人生 | 个人主页!",
-            "keywords": "home页面",
+            "title": "HTML/CSS/JS 代码压缩混淆工具",
+            "keywords": "HTML混淆工具",
             "features": [
-                "home"
+                "HTML/CSS/JS 代码压缩混淆工具"
             ],
-            "description": "home页面",
-            "url": "pages/home/personal-home.html",
+            "description": "HTML/CSS/JS 代码压缩混淆工具",
+            "url": "pages/tools/obfuscation-html-utils.html",
+            "rank": 997
+        },
+        {
+            "icon": "🔐",
+            "title": "编码解码工具集",
+            "keywords": "编码,解码",
+            "features": [
+                ""
+            ],
+            "description": "实用编码解码工具集",
+            "url": "pages/tools/codec_tools.html",
+            "rank": 999
+        },
+        {
+            "icon": "🔖",
+            "title": "JSON 格式化工具",
+            "keywords": "JSON 格式化工具",
+            "features": [
+                "JSON格式化、JSON转义、JSON压缩"
+            ],
+            "description": "JSON 格式化、压缩、转义工具",
+            "url": "pages/tools/json-formatter.html",
+            "rank": 997
+        },
+        {
+            "icon": "",
+            "title": "JSON 对比工具",
+            "keywords": "JSON Diff工具",
+            "features": [
+                "JSON Diff"
+            ],
+            "description": "JSON Diff工具",
+            "url": "pages/tools/diff/json_diff.html",
             "rank": 997
         },
         {
@@ -32,6 +65,17 @@
             "description": "精选优质 Github Pages 项目，快速访问和部署，助力开发者发现更多开源工具与灵感,",
             "url": "pages/nav/nav_github_pages.html",
             "rank": 998
+        },
+        {
+            "icon": "",
+            "title": "爪哇程序人生 | 个人主页!",
+            "keywords": "home页面",
+            "features": [
+                "home"
+            ],
+            "description": "home页面",
+            "url": "pages/home/personal-home.html",
+            "rank": 997
         },
         {
             "icon": "",
@@ -65,50 +109,6 @@
             "description": "每日日报 - 一站式获取今日新闻、天气、历史、诗词等信息",
             "url": "pages/news/daily-simple-report.html",
             "rank": 0
-        },
-        {
-            "icon": "🔐",
-            "title": "编码解码工具集",
-            "keywords": "编码,解码",
-            "features": [
-                ""
-            ],
-            "description": "实用编码解码工具集",
-            "url": "pages/tools/codec_tools.html",
-            "rank": 999
-        },
-        {
-            "icon": "🔖",
-            "title": "JSON 格式化工具",
-            "keywords": "JSON 格式化工具",
-            "features": [
-                "JSON格式化、JSON转义、JSON压缩"
-            ],
-            "description": "JSON 格式化、压缩、转义工具",
-            "url": "pages/tools/json-formatter.html",
-            "rank": 997
-        },
-        {
-            "icon": "",
-            "title": "HTML/CSS/JS 代码压缩混淆工具",
-            "keywords": "HTML混淆工具",
-            "features": [
-                "HTML/CSS/JS 代码压缩混淆工具"
-            ],
-            "description": "HTML/CSS/JS 代码压缩混淆工具",
-            "url": "pages/tools/obfuscation-html-utils.html",
-            "rank": 997
-        },
-        {
-            "icon": "",
-            "title": "JSON 对比工具",
-            "keywords": "JSON Diff工具",
-            "features": [
-                "JSON Diff"
-            ],
-            "description": "JSON Diff工具",
-            "url": "pages/tools/diff/json_diff.html",
-            "rank": 997
         }
     ]
 }
