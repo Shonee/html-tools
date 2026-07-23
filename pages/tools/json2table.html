@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON 可视化（简化版）</title>
+  <!-- CodeMirror 样式 -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css"
+  />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box }
+    body {
+      display:flex;
+      height:100vh;
+      font-family: sans-serif;
+      background:#2d2d2d;
+      color:#eee;
+    }
+    /* 左侧编辑区 */
+    #editorContainer { width:40%; border-right:1px solid #444; }
+    .CodeMirror { height:100%; }
+    /* 右侧预览区 */
+    #previewContainer {
+      flex:1; display:flex; flex-direction:column; padding:20px;
+      background:#f7f7f7;
+    }
+    #errorMsg { height:24px; color:#d00; font-size:14px }
+    #diagram {
+      flex:1; margin-top:8px; overflow:auto; background:#fff;
+      border:1px solid #ccc; border-radius:4px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #diagram img { max-width:100%; height:auto }
+    #download {
+      display:none; margin-top:8px; text-decoration:none;
+      background:#4a90e2; color:#fff; padding:6px 12px; border-radius:4px;
+    }
+    #download:hover { background:#357ab8 }
+  </style>
+</head>
+<body>
+  <!-- 左：JSON 编辑器 -->
+  <div id="editorContainer">
+    <textarea id="jsonInput" placeholder="粘贴或输入 JSON…"></textarea>
+  </div>
+  <!-- 右：报错／渲染／下载 -->
+  <div id="previewContainer">
+    <div id="errorMsg">等待 JSON 输入…</div>
+    <div id="diagram">暂无内容</div>
+    <a id="download" download="diagram.svg">下载 SVG</a>
+  </div>
+
+  <!-- 引入依赖：CodeMirror + PlantUML 编码器 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+  <script src="https://unpkg.com/plantuml-encoder/dist/plantuml-encoder.min.js"></script>
+  <script>
+    const SERVER = 'https://www.plantuml.com/plantuml/svg/';
+
+    // 预先设置 textarea 的值
+    const myTextarea = document.getElementById('jsonInput');
+    myTextarea.value = "{\"firstName\":\"John\",\"lastName\":\"Smith\",\"isAlive\":true,\"age\":27,\"address\":{\"streetAddress\":\"21 2nd Street\",\"city\":\"New York\",\"state\":\"NY\",\"postalCode\":\"10021-3100\"},\"phoneNumbers\":[{\"type\":\"home\",\"number\":\"212 555-1234\"},{\"type\":\"office\",\"number\":\"646 555-4567\"}],\"children\":[],\"spouse\":null}";
+
+    // 初始化 CodeMirror
+    const editor = CodeMirror.fromTextArea(
+      document.getElementById('jsonInput'), {
+        mode: { name:'javascript', json:true },
+        theme:'dracula',
+        lineNumbers:true,
+        tabSize:2
+      }
+    );
+
+    
+    const errorEl  = document.getElementById('errorMsg');
+    const diagramEl= document.getElementById('diagram');
+    const dl       = document.getElementById('download');
+
+    function render() {
+      const raw = editor.getValue();
+      console.log('raw', raw);
+      try {
+        // 解析 & 美化
+        const obj = JSON.parse(raw);
+        const pretty = JSON.stringify(obj, null, 2);
+        if (pretty !== raw) editor.setValue(pretty);
+        errorEl.textContent = '';
+
+        // 最简 PlantUML 脚本
+        const puml = ['@startjson', pretty, '@endjson'].join('\n');
+        const code = plantumlEncoder.encode(puml);
+        const imgUrl = SERVER + code;
+
+        // 渲染图片
+        const img = new Image();
+        img.onload = () => {
+          diagramEl.innerHTML = '';
+          diagramEl.appendChild(img);
+          // 生成下载链接
+          fetch(imgUrl)
+            .then(r=>r.blob())
+            .then(b=>{
+              dl.href = URL.createObjectURL(b);
+              dl.style.display = 'inline-block';
+            });
+        };
+        img.onerror = () => {
+          errorEl.textContent = '⚠️ 渲染失败，请检查网络或服务';
+        };
+        img.src = imgUrl;
+      } catch (e) {
+        // 定位错误行号
+        let pos = (e.message.match(/position\s*(\d+)/) || [])[1];
+        let lineInfo = '';
+        if (pos !== undefined) {
+          const l = editor.getValue().slice(0, +pos).split('\n').length;
+          lineInfo = `（第 ${l} 行）`;
+        }
+        errorEl.textContent = `❌ 解析错误：${e.message}${lineInfo}`;
+        diagramEl.innerHTML = '修正 JSON 后自动更新';
+        dl.style.display = 'none';
+      }
+    }
+
+    // 初始化渲染
+    render();
+    // 延迟1s初始化
+    // setTimeout(render, 1000);
+
+    // 500ms 防抖更新
+    let tid;
+    editor.on('change', ()=>{
+      clearTimeout(tid);
+      tid = setTimeout(render, 500);
+    });
+    editor.on('paste', ()=>{
+      clearTimeout(tid);
+      tid = setTimeout(render, 200);
+    });
+  </script>
+</body>
+</html>
